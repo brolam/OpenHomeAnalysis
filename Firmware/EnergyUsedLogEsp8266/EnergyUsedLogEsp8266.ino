@@ -9,7 +9,8 @@
    Variáveis globais usam 32232 bytes (39%) de memória dinâmica, deixando 49688 bytes para variáveis locais. O máximo são 81920 bytes.
 */
 
-//ATENÇÃO: Favor configurar os parâmetros no Config.h antes de instalar esse programa no módulo ESP8266. 
+//ATENÇÃO: Favor copiar o arquivo Config_model.h para Config.h e também configurar os parâmetros
+//antes de instalar esse código no módulo ESP8266. 
 #include "Config.h"
 #include <ESP8266WiFi.h>
 
