@@ -378,7 +378,7 @@ void sendStatus(String strDate, String strHour) {
          RUNNING - Novas logs estão sendo geradas para a data e hora informada;
          STOPPED - Geração de logs finalizada para a data e hora informada. 
     */
-    esp8266.print((currentDatePath.equals( strDate + '/' + strHour) ? String("RUNNING") : String("STOPPED")));
+    esp8266.print((currentDatePath.equals( strDate + '/' + strHour) ? String("OHA_STATUS_RUNNING") : String("OHA_STATUS_FINISHED")));
     esp8266.print(":");
     esp8266.print(millis()); // Informar o tempo que o dispositivo está funcionando desde a ultima inicialização.
     esp8266.println(F_END);
