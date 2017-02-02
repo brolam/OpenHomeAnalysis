@@ -2,10 +2,12 @@ package br.com.brolam.ohaenergyuselog.apiV1.models;
 
 import android.content.Context;
 
+import br.com.brolam.ohaenergyuselog.R;
 
-/** OhaEnergyUseLog - Ler o conteúdo do Log consumo de Energía "1:<181900|220.00|0.00|0.33|2.36|1525422>",
- *  para faciliar o acesso ao valor de cada coluna através de atributos dessa class.
- *  E também aplicar verificaçõs para garantir a integridade das informações.
+
+/** OhaEnergyUseLog - Ler o conteúdo do Log de consumo de Energía, exemplo "1:<181900|220.00|0.00|0.33|2.36|1525422>",
+ *  e assim faciliar o acesso ao valor de cada coluna através de atributos.
+ *  E também aplicar verificações e garantir a integridade das informações.
  * @author Breno Marques
  * @version 1.00
  * @since Release 01
@@ -13,32 +15,31 @@ import android.content.Context;
 public class OhaEnergyUseLog {
 
     /*****************************************************************************************
-     * Constantes dos atributos e separadores para facilitar o acesso aos indices
-     * do conteúdo do log.
+     * Constantes para facilitar o acesso ao conteúdo do log.
      ****************************************************************************************/
-    private static final byte FIELD_STR_TIME = 0;
-    private static final byte FIELD_VOLTS = 1;
-    private static final byte FIELD_AMPERES_PHASE_1 = 2;
-    private static final byte FIELD_AMPERES_PHASE_2 = 3;
-    private static final byte FIELD_AMPERES_PHASE_3 = 4;
-    private static final byte FIELD_DURATION = 5;
+    private static final byte   FIELD_STR_TIME = 0;
+    private static final byte   FIELD_VOLTS = 1;
+    private static final byte   FIELD_AMPS_PER_PHASE_1 = 2;
+    private static final byte   FIELD_AMPS_PER_PHASE_2 = 3;
+    private static final byte   FIELD_AMPS_PER_PHASE_3 = 4;
+    private static final byte   FIELD_DURATION = 5;
     private static final String FLAG_LOG_COLUMN = ":";
-    private static final byte   FLAG_LOG_AMOUNT = 2;
-    private static final byte   FLAG_LOG_COLUMNS = 6;
+    private static final byte   FLAG_LOG_COLUMN_AMOUNT = 2;
     private static final String FLAG_LOG_BEGIN = "<";
     private static final String FLAG_LOG_END = ">";
     private static final String FLAG_LOG_COLUMN_VALUES = "\\|";
-    private static final byte FLAG_AMOUNT_PHASES = 3;
+    private static final byte   FLAG_LOG_COLUMN_VALUES_COLUMNS = 6;
+    private static final byte   FLAG_AMOUNT_PHASES = 3;
     /***************************************************************************************/
 
     /**
-     * Sequência do repositório do log, corresponde a data & hora que o logo foi gerado. EX: 2016010123.
-     * Esse campo deve ser utilizar para gerar a base do ID único do log.
+     * Repositório do log, corresponde a data/hora onde o log foi gravado, exemplo 2016010123.
+     * Esse campo é utilizado na geração de um ID único para o log.
      */
-    private long sequenceRoot;
+    private long repository;
 
     /**
-     * Sequência do log maior ou igual a 1 para log válido ou -1 para logs inválidos.
+     * Sequência do log que deve ser maior ou igual a 1 para log válido ou -1 para logs inválidos.
      */
     private int sequence;
 
@@ -53,7 +54,7 @@ public class OhaEnergyUseLog {
     private String strTime;
 
     /**
-     * Média deVolts registrada via sensor ou Zero quando o sensor está desativado.
+     * Média de Volts registrada via sensor ou zero quando o sensor está desativado.
      */
     private double avgVolts;
 
@@ -63,26 +64,25 @@ public class OhaEnergyUseLog {
     private double[] avgAmpsPerPhase;
 
     /**
-     * Duração da leitura do log em milisegundo.
+     * Duração em milisegundo da leitura do log .
      */
     private long duration;
 
     /**
-     * Texto com o conteúdo do log que foi processado com erro.
+     * Texto com o conteúdo do log que foi analisado com erro.
      */
     private String strLogContentWithError;
 
     /**
-     * Exception gerado na leitura do conteúdo do log.
-     * @see build
+     * Erro gerado na leitura do conteúdo do log.
      */
     private Exception exceptionLogContentWithError;
 
     /**
      * Construtor padrão e deve ser acionado em todos os construtores.
      */
-    private OhaEnergyUseLog(long sequenceRoot) {
-        this.sequenceRoot = sequenceRoot;
+    private OhaEnergyUseLog(long repository) {
+        this.repository = repository;
         this.sequence = -1;
         this.strDate = "00000000";
         this.strTime = "000000";
@@ -98,99 +98,135 @@ public class OhaEnergyUseLog {
 
 
     /**
-     * Facilitar a construção de uma instância de OhaEnergyUseLog com a situação(ohaStatusLog) invalida.
+     * Facilitar a construção de uma instância de {@see OhaEnergyUseLog} invalida.
+     * @param repository informar o repositório válido.
      * @param sequence informar -1 se não for possível recuperar a sequência no conteúdo do log.
      * @param strDate informar um texto no formado yyyyMMdd, exemplo: "20160131".
      * @param strLogContentWithError informar o conteúdo do log que gerou o erro.
      * @param exceptionLogContentWithError informar o erro gerado na leitura do conteúdo do log.
      */
-    public OhaEnergyUseLog(long sequenceRoot, int sequence, String strDate, String strLogContentWithError, Exception exceptionLogContentWithError) {
-        this(sequenceRoot);
-        this.sequence = sequence;
-        this.strDate = strDate;
+    public OhaEnergyUseLog(long repository, int sequence, String strDate, String strLogContentWithError, Exception exceptionLogContentWithError) {
+        this(repository);
+        this.setSequence(sequence);
+        this.setStrDate(strDate);
         this.strLogContentWithError = strLogContentWithError;
         this.exceptionLogContentWithError = exceptionLogContentWithError;
     }
 
-
     /**
-     * Construi uma instância da class OhaEnergyUseLog lendo o conteúdo do Log.
+     * Analisar o conteúdo do log para construir um {@see OhaEnergyUseLog}
      * @param context informar o contexto da tela ou serviço.
      * @param strDate informar texto com a data no formado yyyyMMdd, exemplo: "20160131".
      * @param strLogContent informar texto com o conteúdo do log, exemplo: 1:<235959|220.00|0.56|0.56|0.56|5559>
-     * @return retornar com uma instância de OhaEnergyUseLog válido e atributos preenchido ou uma instância de OhaEnergyUseLog com
-     * o campo ohaStatusLog preenchido sinalizando algum problema na leitura do conteúdo do log.
+     * @return uma instância de {@see OhaEnergyUseLog} válido ou com erro {@see getExceptionLogContentWithError}.
      * @see OhaStatusLog
      */
-    public static OhaEnergyUseLog build(Context context, String strDate, String strHour, String strLogContent) {
-        final int I_SEQUENCE = 0; //indice para recuperar a sequência no conteúdo do log.
-        final int I_FIELDS = 1; //indice para recuperar as colunas no conteúdo do log.
+    public static OhaEnergyUseLog parse(Context context, String strDate, String strHour, String strLogContent) {
+        final int FLAG_SEQUENCE = 0; //Índice da sequência no conteúdo do log.
+        final int FLAG_FIELDS = 1; //Índice das colunas no conteúdo do log.
 
-        long sequenceRoot = Long.valueOf(String.format("%s%s", strDate, strHour));
+        long repository = Long.valueOf(String.format("%s%s", strDate, strHour));
         int sequence = -1; //Valor padrão da sequência quando o log for inválido.
 
         OhaEnergyUseLog ohaEnergyUseLog = null;
         try {
 
-            //Após o split o array strings deve conter 2 colunas, a primeira com a sequência do log e a segunda coluna com os atributos do
-            //log separadas por DIVISOR_LOG_VALUES.
+            //Após o split, alista de strings deve ter dois itens, o primeiro com a sequência e a segundo as colunas.
             String[] strings = strLogContent.split(FLAG_LOG_COLUMN);
 
-            if (strings.length == DIVISOR_LOG_AMOUNT) {
-                sequence = Integer.valueOf(strings[I_SEQUENCE]);
-                //Para validar o conteúdo do log, é necessário verificar se o conteúdo do log inicia com a tag TAG_LOG_START e é
-                //finalizado com a tag TAG_LOG_END e também deve ter a quantiade de DIVISOR_LOG_COLUMNS.
-                if ((strings[I_FIELDS].indexOf(TAG_LOG_START) != -1) && (strings[I_FIELDS].indexOf(TAG_LOG_END) != -1)) {
-                    String[] fields = strings[I_FIELDS].replace(TAG_LOG_START, "").replace(TAG_LOG_END, "").split(DIVISOR_LOG_VALUES);
-                    if (fields.length == DIVISOR_LOG_COLUMNS) {
-                        ohaEnergyUseLog = new OhaEnergyUseLog(sequenceRoot);
-                        ohaEnergyUseLog.sequence = sequence;
-                        ohaEnergyUseLog.strDate = strDate;
-                        ohaEnergyUseLog.strTime = fields[STR_TIME];
-                        ohaEnergyUseLog.voltage = Double.valueOf(fields[VOLTAGE]);
-                        ohaEnergyUseLog.currentPhase1 = Double.valueOf(fields[CURRENT_PHASE_1]);
-                        ohaEnergyUseLog.currentPhase2 = Double.valueOf(fields[CURRENT_PHASE_2]);
-                        ohaEnergyUseLog.currentPhase3 = Double.valueOf(fields[CURRENT_PHASE_3]);
-                        ohaEnergyUseLog.pastMillis =  Long.valueOf(fields[PAST_MILLIS]);
-                        ohaEnergyUseLog.ohaStatusLog = OhaStatusLog.VALID;
+            if (strings.length == FLAG_LOG_COLUMN_AMOUNT) {
+                sequence = Integer.valueOf(strings[FLAG_SEQUENCE]);
+                String columns = strings[FLAG_FIELDS];
+                /*Validar o conteúdo do log:
+                  1 - verificar se o conteúdo do log inicia com a tag FLAG_LOG_BEGIN;
+                  2 - verificar se o conteúdo do log finaliza com a tag FLAG_LOG_END.
+                */
+                if ((columns.indexOf(FLAG_LOG_BEGIN) != -1) && (columns.indexOf(FLAG_LOG_END) != -1)) {
+                    String[] fields = columns
+                            .replace(FLAG_LOG_BEGIN, "")
+                            .replace(FLAG_LOG_END, "")
+                            .split(FLAG_LOG_COLUMN_VALUES);
+                    if (fields.length == FLAG_LOG_COLUMN_VALUES_COLUMNS) {
+                        ohaEnergyUseLog = new OhaEnergyUseLog(repository);
+                        ohaEnergyUseLog.setSequence(sequence);
+                        ohaEnergyUseLog.setStrDate(strDate);
+                        ohaEnergyUseLog.setStrTime(fields[FIELD_STR_TIME]);
+                        ohaEnergyUseLog.setAvgVolts(Double.valueOf(fields[FIELD_VOLTS]));
+                        double avgAmpsPerPhase[] = new double[]{
+                                Double.valueOf(fields[FIELD_AMPS_PER_PHASE_1]),
+                                Double.valueOf(fields[FIELD_AMPS_PER_PHASE_2]),
+                                Double.valueOf(fields[FIELD_AMPS_PER_PHASE_3]),
+                        };
+                        ohaEnergyUseLog.setAvgAmpsPerPhase(avgAmpsPerPhase);
+                        ohaEnergyUseLog.setDuration(Long.valueOf(fields[FIELD_DURATION]));
+
                     }
 
                 }
 
             }
-
-            /**
-             * Se não for possível validar o log, e necessário verificar se o conteúdo do log é somente um OhaStatusLog
-             * com a situação do retorno da API ou se ocorreu algum erro na leitura do conteúdo do log.
-             * @see OhaStatusLog
-             * @see OhaEnergyUseApi */
+            //Sinalizar que o conteúdo do log é inválido:
             if (ohaEnergyUseLog == null) {
-                OhaStatusLog ohaStatusLog = OhaStatusLog.getOhaStatusLog(strLogContent);
-
-                if (ohaStatusLog != null) {
-                    ohaEnergyUseLog = new OhaEnergyUseLog(sequenceRoot,ohaStatusLog);
-                } else {
-                    throw new Exception(context.getString(R.string.exception_log_content_invalid));
-                }
+                    throw new Exception(context.getString(R.string.exception_on_parse_content_invalid));
             }
         } catch (Exception e) {
-            ohaEnergyUseLog = new OhaEnergyUseLog(sequenceRoot, sequence, strDate, strLogContent, OhaStatusLog.INVALID, e);
+            ohaEnergyUseLog = new OhaEnergyUseLog(repository, sequence, strDate, strLogContent, e);
         }
         return ohaEnergyUseLog;
-
     }
 
     /**
-     * ID único do Log de Utilização de Energia concatenando a sequenceRoot & sequence.
-     * @return será retornado a numero inteiro, exemplo 201601011 ou -1 se não for possível recupera a sequência do log.
+     * Gerar um ID único que pode ser utilizado como chave para recuperar um log.
+     * @return retornar a numero inteiro, no formato YYYYMMddHHmmSequence exemplo 2016012359000001 ou -1 se o log for inválido.
      */
     public long getId() {
         if (getSequence() < 1)
             return -1;
         else
-            return Long.valueOf(String.format("%s%06d", getSequenceRoot(), getSequence()));
+            return Long.valueOf(String.format("%s%06d", getRepository(), getSequence()));
     }
 
+    public long getRepository() {
+        return repository;
+    }
+
+    public int getSequence() {
+        return sequence;
+    }
+
+    public String getStrLogContentWithError() {
+        return strLogContentWithError;
+    }
+
+    public Exception getExceptionLogContentWithError() {
+        return exceptionLogContentWithError;
+    }
+
+
+    public void setSequence(int sequence) {
+        this.sequence = sequence;
+    }
+
+    public void setStrDate(String strDate) {
+        this.strDate = strDate;
+    }
+
+    public void setStrTime(String strTime) {
+        this.strTime = strTime;
+    }
+
+
+    public void setDuration(long duration) {
+        this.duration = duration;
+    }
+
+    public void setAvgVolts(double avgVolts) {
+        this.avgVolts = avgVolts;
+    }
+
+    public void setAvgAmpsPerPhase(double[] avgAmpsPerPhase) {
+        this.avgAmpsPerPhase = avgAmpsPerPhase;
+    }
 
 
 }
