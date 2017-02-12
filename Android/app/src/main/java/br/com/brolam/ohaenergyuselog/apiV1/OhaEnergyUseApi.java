@@ -23,7 +23,7 @@ public class OhaEnergyUseApi {
      * Recuperar uma sequencia de logs de consumo de energia conforme parâmetro abaixo:
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
      * @param strDate  informar texto com data no formato YYYYMMDD
-     * @param strHour  informar texto com hora e minuto no formato HHmm
+     * @param strHour  informar texto com a hora no formato HH
      * @param startSequence informar o inicio da sequência do log.
      * @param amountLogs informar a quantidade de logs.
      * @param deleteDate informar a data dos logs que podem ser excluidos para liberar espaço no cartão de memória do registrador de logs.
@@ -34,6 +34,7 @@ public class OhaEnergyUseApi {
         String url = OhaNetworkHelper.parseUrl
                 (
                         hostName,
+                        URL_LOG,
                         strDate,
                         strHour,
                         String.valueOf(startSequence),
@@ -48,12 +49,12 @@ public class OhaEnergyUseApi {
      * Atualizar o status, data e hora do registrador de logs.
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
      * @param strDate  informar texto com data no formato YYYYMMDD
-     * @param strTime  informar texto com hora e minuto no formato HHmm
+     * @param strHour  informar texto com a hora no formato HH
      * @return um OhaStatusLog {@see OhaStatusLog.OHA_ACTION_END}
      * @throws IOException
      */
-    public static OhaStatusLog setStatus(String hostName, String strDate, String strTime) throws IOException {
-        String url = OhaNetworkHelper.parseUrl(hostName, strDate, strTime);
+    public static OhaStatusLog setStatus(String hostName, String strDate, String strHour) throws IOException {
+        String url = OhaNetworkHelper.parseUrl(hostName, URL_STATUS, strDate, strHour);
         List<String> strings = OhaNetworkHelper.requestHttp("POST", url);
         for (String strLog : strings) {
             for(OhaStatusLog ohaStatus:  OhaStatusLog.values() )
@@ -62,5 +63,49 @@ public class OhaEnergyUseApi {
         }
         return null;
     }
+
+    /**
+     * Recuperar o status da sequência conforme parâmetros abaixo e do registrador de logs.
+     * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
+     * @param strDate  informar texto com data no formato YYYYMMDD
+     * @param strHour  informar texto com a hora no formato HH
+     * @return lista de texto com o conteúdo do status da sequência e do registrador de logs.
+     * @throws IOException
+     */
+    public static List<String> getStatus(String hostName, String strDate, String strHour) throws IOException {
+        String url = OhaNetworkHelper.parseUrl(hostName, URL_STATUS, strDate, strHour);
+        return OhaNetworkHelper.requestHttp("GET", url);
+    }
+
+
+    /**
+     * Reiniciar o registrador de logs.
+     * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
+     * @return um OhaStatusLog {@see OhaStatusLog.OHA_ACTION_END}
+     * @throws IOException
+     */
+    public static OhaStatusLog reset(String hostName) throws IOException {
+        String url = OhaNetworkHelper.parseUrl(hostName, URL_RESET);
+        List<String> strings = OhaNetworkHelper.requestHttp("POST", url);
+        for (String strLog : strings) {
+            for(OhaStatusLog ohaStatus:  OhaStatusLog.values() )
+                if ( strLog.contains(ohaStatus.toString()))
+                    return ohaStatus;
+        }
+        return null;
+    }
+
+
+    /**
+     * Recuperar informações sobre a conexão do registrador de log com a rede.
+     * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
+     * @return lista de texto com o conteúdo da situação da conexão ou nulo se o conteúdo for inválido.
+     * @throws IOException
+     */
+    public static List<String> getConnection(String hostName) throws IOException {
+        String url = OhaNetworkHelper.parseUrl(hostName, URL_CONNECTION);
+        return OhaNetworkHelper.requestHttp("GET", url);
+    }
+
 
 }

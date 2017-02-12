@@ -79,9 +79,12 @@ String parseRequestion(String httpRequestion) {
 */
 
 void sendConnectionStatus(WiFiClient client){
-  client.println("SSID:" + String(HOME_WIFI_SSID));
-  client.println("IP_LOCAL:" + String(WiFi.localIP().toString()));
-  client.println("IP_ACCESS_POINT:" + String(WiFi.softAPIP().toString()));
+  client.print("<"); //Sinalizar o inicio do conteúdo 
+  client.print(String(HOME_WIFI_SSID)); //Nome da rede wifi que o ESP8266 está conectado.
+  client.print("," + String(WiFi.softAPIP().toString())); //IP na rede wifi
+  client.print("," + String(WiFi.localIP().toString())); // IP local.
+  client.print(">");//Sinalizar o final do conteúdo 
+  client.println(String(OHA_REQUEST_END)); //Sinalizar o final da requisição.
 }
 
 
