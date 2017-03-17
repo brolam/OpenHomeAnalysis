@@ -92,6 +92,7 @@ void sendConnectionStatus(WiFiClient client){
 void setup() {
   Serial.begin(74880); // A velocidde 74880 foi a mais estável na comunicação com o Arduino.   
   delay(10);
+  WiFi.hostname(ESP8266_NAME);
   WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD);  
   WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point.
   //Aguardar o conexão com o Access Point.
