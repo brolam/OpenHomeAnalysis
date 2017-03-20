@@ -13,7 +13,6 @@ import br.com.brolam.ohaenergyuselog.apiV1.models.OhaStatusLog;
  * @since Release 01
  */
 public class OhaEnergyUseApi {
-    static final String DEBUG_TAG = "OhaEnergyUseApi";
     static final String URL_LOG = "log/";                //Solicitação de logs
     static final String URL_STATUS = "status/";          //Solicitação (GET) ou alteração(POST) do Status do registrador de consumo de energia.
     static final String URL_RESET = "reset/";            //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
@@ -49,12 +48,12 @@ public class OhaEnergyUseApi {
      * Atualizar o status, data e hora do registrador de logs.
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
      * @param strDate  informar texto com data no formato YYYYMMDD
-     * @param strHour  informar texto com a hora no formato HH
+     * @param strTime  informar texto com a Hora, Minuto e segundo no formato HHmmss
      * @return um OhaStatusLog {@see OhaStatusLog.OHA_ACTION_END}
      * @throws IOException
      */
-    public static OhaStatusLog setStatus(String hostName, String strDate, String strHour) throws IOException {
-        String url = OhaNetworkHelper.parseUrl(hostName, URL_STATUS, strDate, strHour);
+    public static OhaStatusLog setStatus(String hostName, String strDate, String strTime) throws IOException {
+        String url = OhaNetworkHelper.parseUrl(hostName, URL_STATUS, strDate, strTime);
         List<String> strings = OhaNetworkHelper.requestHttp("POST", url);
         for (String strLog : strings) {
             for(OhaStatusLog ohaStatus:  OhaStatusLog.values() )
@@ -77,7 +76,6 @@ public class OhaEnergyUseApi {
         return OhaNetworkHelper.requestHttp("GET", url);
     }
 
-
     /**
      * Reiniciar o registrador de logs.
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
@@ -95,7 +93,6 @@ public class OhaEnergyUseApi {
         return null;
     }
 
-
     /**
      * Recuperar informações sobre a conexão do registrador de log com a rede.
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
@@ -106,6 +103,4 @@ public class OhaEnergyUseApi {
         String url = OhaNetworkHelper.parseUrl(hostName, URL_CONNECTION);
         return OhaNetworkHelper.requestHttp("GET", url);
     }
-
-
 }
