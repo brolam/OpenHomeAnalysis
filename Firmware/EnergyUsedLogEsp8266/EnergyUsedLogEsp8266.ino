@@ -81,10 +81,11 @@ String parseRequestion(String httpRequestion) {
 void sendConnectionStatus(WiFiClient client){
   client.print("<"); //Sinalizar o inicio do conteúdo 
   client.print(String(HOME_WIFI_SSID)); //Nome da rede wifi que o ESP8266 está conectado.
-  client.print("," + String(WiFi.softAPIP().toString())); //IP na rede wifi
-  client.print("," + String(WiFi.localIP().toString())); // IP local.
-  client.print(">");//Sinalizar o final do conteúdo 
-  client.println(String(OHA_REQUEST_END)); //Sinalizar o final da requisição.
+  client.print("," + String(WiFi.localIP().toString())); //IP na rede wifi que o ESP8266 está conectado. 
+  client.print("," + String(ESP8266_NAME)); //Nome do ESP8266
+  client.print("," + String(WiFi.softAPIP().toString())); // IP local do ESP8266.
+  client.println(">");//Sinalizar o final do conteúdo 
+  client.print(String(OHA_REQUEST_END)); //Sinalizar o final da requisição.
 }
 
 
@@ -92,9 +93,9 @@ void sendConnectionStatus(WiFiClient client){
 void setup() {
   Serial.begin(74880); // A velocidde 74880 foi a mais estável na comunicação com o Arduino.   
   delay(10);
-  WiFi.hostname(ESP8266_NAME);
-  WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD);  
-  WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point.
+  WiFi.hostname(ESP8266_NAME); //Definir o nome do ESP8266 na rede.
+  WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD); //Definir o nome e senha do ESP8266.  
+  WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point da casa.
   //Aguardar o conexão com o Access Point.
   debug("Try to Connect WIFI : ", HOME_WIFI_SSID); 
   while ( WiFi.status() != WL_CONNECTED ) {
