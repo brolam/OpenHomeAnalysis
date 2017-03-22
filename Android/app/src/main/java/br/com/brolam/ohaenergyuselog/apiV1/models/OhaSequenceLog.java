@@ -4,7 +4,8 @@ import android.text.format.DateUtils;
 import java.io.Serializable;
 import java.util.List;
 
-/** OhaSequenceLog -  recuperar informações sobre o controle de  geração de logs, informando a última sequência
+/**
+ * OhaSequenceLog -  recuperar informações sobre o controle de  geração de logs, informando a última sequência
  *                    e situação da geração de logs para uma determinada data e hora.
  * @author Breno Marques
  * @version 1.00
@@ -82,14 +83,13 @@ public class OhaSequenceLog implements Serializable {
                     durationBoardRunning = Long.valueOf(values[FIELD_DURATION_BOARD_RUNNING]);
                     break;
                 }
-            //Se a data  e hora informada não existir:
-            } else if ( strValue.contains(OhaStatusLog.LOG_DATE_NOT_EXISTS.name()) ){
-                ohaStatusLog = OhaStatusLog.LOG_DATE_NOT_EXISTS;
-                break;
+            //Tentar recuepar o primeiro OhaStatusLog válido.
+            } else if ( ohaStatusLog == null ){
+                ohaStatusLog = OhaStatusLog.getOhaStatusLog(strValue);
             }
         }
         if ( (lastSequence == -1) && ( ohaStatusLog == null ) ){
-            ohaStatusLog = OhaStatusLog.OHA_ACTION_END;
+            ohaStatusLog = OhaStatusLog.OHA_REQUEST_END;
         }
         return new OhaSequenceLog(lastSequence, ohaStatusLog, durationBoardRunning);
     }

@@ -13,6 +13,7 @@ import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.ohaenergyuselog.apiV1.OhaEnergyUseApi;
 import br.com.brolam.ohaenergyuselog.apiV1.models.OhaConnectionStatus;
 import br.com.brolam.ohaenergyuselog.apiV1.models.OhaEnergyUseLog;
+import br.com.brolam.ohaenergyuselog.apiV1.models.OhaSequenceLog;
 import br.com.brolam.ohaenergyuselog.apiV1.models.OhaStatusLog;
 
 import static org.junit.Assert.*;
@@ -44,6 +45,17 @@ public class OhaEnergyUseApiV1Test {
         }
         assertNotNull("The method OhaEnergyUseApi.setStatus returned null!", ohaStatusLog);
         assertTrue("The status has not been configured successfully.", ohaStatusLog == OhaStatusLog.OHA_REQUEST_END);
+    }
+
+    @Test
+    public void getStatus() throws Exception {
+        Date date = new Date();
+        String strDate = OhaHelper.getStrDate(date);
+        String strHour = OhaHelper.getStrHour(date);
+        List<String> strings = OhaEnergyUseApi.getStatus(OHA_HOST_NAME, strDate, strHour);
+        OhaSequenceLog ohaSequenceLog = OhaSequenceLog.parse(strings);
+        boolean ohaStatusLogValid = (ohaSequenceLog.getOhaStatusLog() == OhaStatusLog.OHA_STATUS_RUNNING) || (ohaSequenceLog.getOhaStatusLog() == OhaStatusLog.OHA_STATUS_FINISHED);
+        assertTrue(String.format("The OhaStatusLog %s  is not valid!", ohaSequenceLog.getOhaStatusLog()), ohaStatusLogValid);
     }
 
     @Test
