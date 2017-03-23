@@ -1,5 +1,5 @@
 /*
-  EnergyUseLogEsp8266 - módulo de comunicação WiFi ESP8266 para processar as requisições e respotas HTTP 
+  EnergyUseLogEsp8266 - módulo de comunicação WiFi ESP8266 para processar as requisições e respotas HTTP
                  Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.00
@@ -10,7 +10,7 @@
 */
 
 //ATENÇÃO: Favor copiar o arquivo Config_model.h para Config.h e também configurar os parâmetros
-//antes de instalar esse código no módulo ESP8266. 
+//antes de instalar esse código no módulo ESP8266.
 #include "Config.h"
 #include <ESP8266WiFi.h>
 
@@ -43,7 +43,7 @@ void debug(String title, String value) {
 
 /* Analisar as respostas durante o processamento da requisição, na comunicação serial entre o Arduino e o módulo ESP8266.
    @param response informar a resposta do Arduino.
-   @param startedMillis informar quando o processamento da requisição foi iniciado em milisegundos 
+   @param startedMillis informar quando o processamento da requisição foi iniciado em milisegundos
    @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
 */
 String parseResponse(String response, unsigned long startedMillis) {
@@ -78,32 +78,33 @@ String parseRequestion(String httpRequestion) {
    @param client informar um WiFiClient para escrever a situação da conexão.
 */
 
-void sendConnectionStatus(WiFiClient client){
-  client.print("<"); //Sinalizar o inicio do conteúdo 
+void sendConnectionStatus(WiFiClient client) {
+  client.print("<"); //Sinalizar o inicio do conteúdo
   client.print(String(HOME_WIFI_SSID)); //Nome da rede wifi que o ESP8266 está conectado.
-  client.print("," + String(WiFi.localIP().toString())); //IP na rede wifi que o ESP8266 está conectado. 
+  client.print("," + String(WiFi.localIP().toString())); //IP na rede wifi que o ESP8266 está conectado.
   client.print("," + String(ESP8266_NAME)); //Nome do ESP8266
   client.print("," + String(WiFi.softAPIP().toString())); // IP local do ESP8266.
-  client.println(">");//Sinalizar o final do conteúdo 
+  client.println(">");//Sinalizar o final do conteúdo
   client.print(String(OHA_REQUEST_END)); //Sinalizar o final da requisição.
+  client.flush();
 }
 
 
 /*Configuração do programa*/
 void setup() {
-  Serial.begin(74880); // A velocidde 74880 foi a mais estável na comunicação com o Arduino.   
+  Serial.begin(74880); // A velocidde 74880 foi a mais estável na comunicação com o Arduino.
   delay(10);
   WiFi.hostname(ESP8266_NAME); //Definir o nome do ESP8266 na rede.
-  WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD); //Definir o nome e senha do ESP8266.  
+  WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD); //Definir o nome e senha do ESP8266.
   WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point da casa.
   //Aguardar o conexão com o Access Point.
-  debug("Try to Connect WIFI : ", HOME_WIFI_SSID); 
+  debug("Try to Connect WIFI : ", HOME_WIFI_SSID);
   while ( WiFi.status() != WL_CONNECTED ) {
     delay(500);
     debug("", ".");
   }
   delay(1);
-  server.begin(); //Inicializar o serviço HTTP 
+  server.begin(); //Inicializar o serviço HTTP
   debug("WiFi connected: ", HOME_WIFI_SSID);
   debug("Server started Local: ", String(WiFi.localIP().toString()));
   debug("Server started    AP: ", String(WiFi.softAPIP().toString()));
@@ -132,47 +133,48 @@ void loop() {
   delay(1);
   String url = parseRequestion(requestion); //Validar a URL.
   if (url != OHA_REQUEST_INVALID) {
-    Serial.println(url); //Enviar a URL para o Arduino.
-    Serial.flush();
-    String response = "";
-    String requestStatus = OHA_REQUEST_RUNNING; //Informar a situação da requisição
-    unsigned long startedMillis = millis();
-    //Processar a requisição até o Arduino sinalizar o fim da resposta 
-    //ou se o processamento exceder o tempo limite.   
-    while (requestStatus == OHA_REQUEST_RUNNING)
+    //Enviar a situação da conexão com o Access Point.
+    if ( url.indexOf(URL_CONNECTION) > -1 )
     {
-      response = "";
-      //Enviar a situação da conexão com o Access Point.
-      if ( url.indexOf(URL_CONNECTION) > -1 )
+      sendConnectionStatus(client);
+    } else {
+      //Enviar a requisição para o Arduino e transmitir a resposta do Arduino para o solicitante( client )
+      Serial.println(url); //Enviar a URL para o Arduino.
+      Serial.flush();
+      String response = "";
+      String requestStatus = OHA_REQUEST_RUNNING; //Informar a situação da requisição
+      unsigned long startedMillis = millis();
+      //Processar a requisição até o Arduino sinalizar o fim da resposta
+      //ou se o processamento exceder o tempo limite.
+      while (requestStatus == OHA_REQUEST_RUNNING)
       {
-        sendConnectionStatus(client);
-        response = OHA_REQUEST_END;
-      }
-      //Enviar um requisição de reset para o Arduino
-      else if ( url.indexOf(URL_RESET) > -1 )
-      {
-        client.println(url);
-        response = OHA_REQUEST_END;
-      }
-      //A funcionalidade {@see parseRequestion() } garante que somente URL válidas sejam processadas, 
-      //Sendo assim, a opção alternativa sempre será a requisição para recuperar os logs de consumo de energía:
-      else if (Serial.available())
-      {
-        while (Serial.available())
+        response = "";
+        //Enviar um requisição de reset para o Arduino
+        if ( url.indexOf(URL_RESET) > -1 )
         {
-          response.concat(char(Serial.read()));
+          response = OHA_REQUEST_END;
+          client.println(response);
         }
-        client.print(response);
-        startedMillis = millis();
+        //A funcionalidade {@see parseRequestion() } garante que somente URL válidas sejam processadas,
+        //Sendo assim, a opção alternativa sempre será a requisição para recuperar os logs de consumo de energía:
+        else if (Serial.available())
+        {
+          while (Serial.available())
+          {
+            response.concat(char(Serial.read()));
+          }
+          client.print(response);
+          startedMillis = millis();
+        }
+        client.flush();
+        requestStatus = parseResponse(response, startedMillis); //Verificar se foi sinalizado o final da resposta ou o tempo limite foi excedido.
+        delay(300);
       }
-      client.flush();
-      requestStatus = parseResponse(response, startedMillis); //Verificar se foi sinalizado o final da resposta ou o tempo limite foi excedido.
-      delay(300);
-    }
 
-    if ( requestStatus == OHA_REQUEST_TIMEOUT) {
-      client.println(String(OHA_REQUEST_TIMEOUT));
-      client.flush();
+      if ( requestStatus == OHA_REQUEST_TIMEOUT) {
+        client.println(String(OHA_REQUEST_TIMEOUT));
+        client.flush();
+      }
     }
   } else {
     client.println(String(OHA_REQUEST_INVALID));
