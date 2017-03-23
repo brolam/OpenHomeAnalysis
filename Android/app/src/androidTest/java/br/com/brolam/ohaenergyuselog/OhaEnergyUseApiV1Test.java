@@ -59,6 +59,35 @@ public class OhaEnergyUseApiV1Test {
     }
 
     @Test
+    public void getLogs() throws Exception {
+        Calendar calendar = Calendar.getInstance();
+        String strDate = OhaHelper.getStrDate(calendar.getTime());
+        String strHour = OhaHelper.getStrHour(calendar.getTime());
+        //Definir o dia de exclusão no registrador de logs.
+        calendar.add(Calendar.DATE, 1);
+        String strDateDelete = OhaHelper.getStrDate(calendar.getTime());
+        List<String> strings = OhaEnergyUseApi.getLogs(OHA_HOST_NAME, strDate, strHour, 1, 100, strDateDelete);
+        assertTrue("The OhaEnergyUseApi.getLogs is empty!", strings.size() > 2);
+        Context context = InstrumentationRegistry.getTargetContext();
+        String penultStrLogContent = strings.get(strings.size() -2); //Recuperar o antepenúltimo item da lista.
+        String lastStrLogContent = strings.get(strings.size() -1); //Recuperar o ultimo item da lista.
+        for(String strLogContent:strings ) {
+            if (lastStrLogContent.equals(strLogContent) == false) {
+                OhaEnergyUseLog ohaEnergyUseLog = OhaEnergyUseLog.parse(context, strDate, strHour, strLogContent);
+                OhaStatusLog ohaStatusLog = null;
+                //Verificar se o penúltimo conteúdo é um OhaStatusLog:
+                if (penultStrLogContent.equals(strLogContent)){
+                    ohaStatusLog = OhaStatusLog.getOhaStatusLog(penultStrLogContent);
+                }
+                assertFalse(String.format("The content log: %s error: %s ", strLogContent, ohaEnergyUseLog.getExceptionLogContentWithError()), ohaEnergyUseLog.getExceptionLogContentWithError() != null && ohaStatusLog == null );
+            } else {
+                OhaStatusLog ohaStatusLog = OhaStatusLog.getOhaStatusLog(lastStrLogContent);
+                assertTrue("The getLogs request was not completed with successfully!", ohaStatusLog == OhaStatusLog.OHA_REQUEST_END);
+            }
+        }
+    }
+
+    @Test
     public void getConnection() throws Exception {
         List<String> strings = OhaEnergyUseApi.getConnection(OHA_HOST_NAME);
         OhaConnectionStatus ohaConnectionStatus = OhaConnectionStatus.parse(strings);

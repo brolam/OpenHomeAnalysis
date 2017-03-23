@@ -23,7 +23,7 @@
 /****************************************************************************************************************************************************************
  Inicio do B1 - Constantes
  ****************************************************************************************************************************************************************/
-#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
+//#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log de consumo de energia. 
 
 //Constantes utilizadas na geração dos logs.
@@ -296,6 +296,7 @@ void saveLog() {
 #endif
   String path =  String(LOGS) + '/' + currentDatePath; // Diretório do log no cartão de memória.
   String fileName = String(currentSeq) + String(F_TXT); // Nome do arquivo do log. 
+  SD.remove(path + '/' + fileName); //Excluir log gravado com erro.
   File fileLog = getFile(path, fileName, false);
   fileLog.print(F_BEGIN); // Inicio do conteúdo do log
   fileLog.print(currentTime.substring(0, 6)); fileLog.print('|'); //Ultima hora e minuto atualizada no programa.
@@ -329,8 +330,8 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
   currentDelDate = strDelDate; //Para mais detalhes, por favor, veja {@see loop()} e {@see deleteLogs()}
   do {
     //Recuperar o conteúdo do Log informando Exemplo: 1:<195338|220.00|3.36|0.38|0.44|9150>
-    logRead = String(sequence) + ':' + getLog(strDate, strHour, sequence); 
-    esp8266.print(logRead);
+    logRead = getLog(strDate, strHour, sequence); 
+    esp8266.print(String(sequence) + ':' + logRead); esp8266.flush();
     delay(100); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
     sequence++;
     //Se for identificada o final da sequência de log ou a data não existir. 
@@ -340,7 +341,6 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
     }
   } while (sequence < ( start + amount));
   delay(300); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
-  esp8266.flush();
 }
 
 /* Atualizar o status do programa e também a data e hora utilizada no registro do log de consumo de energía:
