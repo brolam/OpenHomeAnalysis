@@ -50,7 +50,7 @@ public enum OhaStatusLog {
      */
     public static OhaStatusLog getOhaStatusLog(List<String> strings) {
         //Localicar o OhaStatusLog nos 3 ultimos itens da lista.
-        for (int item = 1; item < strings.size(); item++) {
+        for (int item = 1; item <= strings.size(); item++) {
             String ohaStatusLogName = strings.get(strings.size() - item);
             OhaStatusLog ohaStatusLog = getOhaStatusLog(ohaStatusLogName);
             if ((ohaStatusLog != null) || item > 3) return ohaStatusLog;

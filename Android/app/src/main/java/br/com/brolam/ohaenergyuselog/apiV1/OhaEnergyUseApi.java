@@ -85,12 +85,7 @@ public class OhaEnergyUseApi {
     public static OhaStatusLog reset(String hostName) throws IOException {
         String url = OhaNetworkHelper.parseUrl(hostName, URL_RESET);
         List<String> strings = OhaNetworkHelper.requestHttp("POST", url);
-        for (String strLog : strings) {
-            for(OhaStatusLog ohaStatus:  OhaStatusLog.values() )
-                if ( strLog.contains(ohaStatus.toString()))
-                    return ohaStatus;
-        }
-        return null;
+        return OhaStatusLog.getOhaStatusLog(strings);
     }
 
     /**

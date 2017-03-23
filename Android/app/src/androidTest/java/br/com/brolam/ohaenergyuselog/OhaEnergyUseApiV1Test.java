@@ -93,4 +93,28 @@ public class OhaEnergyUseApiV1Test {
         OhaConnectionStatus ohaConnectionStatus = OhaConnectionStatus.parse(strings);
         assertNotNull("The method OhaEnergyUseApi.getConnection returned null!", ohaConnectionStatus);
     }
+
+    @Test
+    public void reset() throws Exception {
+        OhaStatusLog ohaStatusLog = OhaEnergyUseApi.reset(OHA_HOST_NAME);
+        assertTrue("The reset request was not completed with successfully!", ohaStatusLog == OhaStatusLog.OHA_REQUEST_END);
+    }
+
+    @Test
+    public void ohaEnergyUseApiAllMethods() throws Exception {
+        int tenSeconds = 10000;
+        setStatus();
+        synchronized(this){
+            this.wait(tenSeconds);
+        }
+        getStatus();
+        synchronized(this){
+            this.wait(tenSeconds);
+        }
+        getConnection();
+        synchronized(this){
+            this.wait(tenSeconds);
+        }
+        getLogs();
+    }
 }
