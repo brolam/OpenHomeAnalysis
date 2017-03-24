@@ -1,9 +1,9 @@
-package br.com.brolam.ohaenergyuselog.apiV1;
+package br.com.brolam.oha.supervisory.apiV1;
 
 import java.io.IOException;
 import java.util.List;
 import br.com.brolam.library.helpers.OhaNetworkHelper;
-import br.com.brolam.ohaenergyuselog.apiV1.models.OhaStatusLog;
+import br.com.brolam.oha.supervisory.apiV1.models.OhaStatusLog;
 
 /**
  * OhaEnergyUseApi - Facilitar o acesso aos WebMethods e realizar requisições Http

@@ -1,8 +1,8 @@
-package br.com.brolam.ohaenergyuselog.apiV1.models;
+package br.com.brolam.oha.supervisory.apiV1.models;
 
 import android.content.Context;
 
-import br.com.brolam.ohaenergyuselog.R;
+import br.com.brolam.oha.supervisory.R;
 
 
 /** OhaEnergyUseLog - Ler o conteúdo do Log de consumo de Energía, exemplo "1:<181900|220.00|0.00|0.33|2.36|1525422>",

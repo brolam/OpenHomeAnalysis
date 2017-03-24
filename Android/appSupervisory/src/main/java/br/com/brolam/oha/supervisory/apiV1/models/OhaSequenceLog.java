@@ -1,4 +1,4 @@
-package br.com.brolam.ohaenergyuselog.apiV1.models;
+package br.com.brolam.oha.supervisory.apiV1.models;
 
 import android.text.format.DateUtils;
 import java.io.Serializable;

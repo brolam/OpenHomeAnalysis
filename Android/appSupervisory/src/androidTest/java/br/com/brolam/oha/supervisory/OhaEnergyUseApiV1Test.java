@@ -1,4 +1,4 @@
-package br.com.brolam.ohaenergyuselog;
+package br.com.brolam.oha.supervisory;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -10,11 +10,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import br.com.brolam.library.helpers.OhaHelper;
-import br.com.brolam.ohaenergyuselog.apiV1.OhaEnergyUseApi;
-import br.com.brolam.ohaenergyuselog.apiV1.models.OhaConnectionStatus;
-import br.com.brolam.ohaenergyuselog.apiV1.models.OhaEnergyUseLog;
-import br.com.brolam.ohaenergyuselog.apiV1.models.OhaSequenceLog;
-import br.com.brolam.ohaenergyuselog.apiV1.models.OhaStatusLog;
+import br.com.brolam.oha.supervisory.apiV1.OhaEnergyUseApi;
+import br.com.brolam.oha.supervisory.apiV1.models.OhaConnectionStatus;
+import br.com.brolam.oha.supervisory.apiV1.models.OhaEnergyUseLog;
+import br.com.brolam.oha.supervisory.apiV1.models.OhaSequenceLog;
+import br.com.brolam.oha.supervisory.apiV1.models.OhaStatusLog;
 
 import static org.junit.Assert.*;
 
@@ -116,5 +116,22 @@ public class OhaEnergyUseApiV1Test {
             this.wait(tenSeconds);
         }
         getLogs();
+    }
+
+    /**
+     * Realizar testes nos métodos da conectado ao Registrador de Logs de
+     * consumo de energia.
+     * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+     * @author Breno Marques
+     * @version 1.00
+     * @since Release 01
+     */
+    @RunWith(AndroidJUnit4.class)
+    public static class OhaEnergyUseProviderTest {
+
+        @Test
+        public void setStatus() throws Exception {
+            Context context = InstrumentationRegistry.getTargetContext();
+        }
     }
 }

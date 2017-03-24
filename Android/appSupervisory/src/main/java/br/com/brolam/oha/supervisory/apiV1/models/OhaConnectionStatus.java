@@ -1,4 +1,4 @@
-package br.com.brolam.ohaenergyuselog.apiV1.models;
+package br.com.brolam.oha.supervisory.apiV1.models;
 
 import java.io.Serializable;
 import java.util.List;
