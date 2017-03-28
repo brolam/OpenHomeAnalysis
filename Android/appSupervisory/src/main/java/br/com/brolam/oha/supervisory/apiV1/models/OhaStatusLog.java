@@ -57,6 +57,23 @@ public enum OhaStatusLog {
         }
         return null;
     }
+
+    /**
+     * Verificar se existe um OhaStatusLog em uma lista.
+     * @param ohaStatusLog informar um OhaStatusLog válido
+     * @param strings informar uma lista válida.
+     * @return verdadeiro se o OhaStatusLog existir nos e últimos itens da lista.
+     */
+    public static boolean exists(OhaStatusLog ohaStatusLog , List<String> strings ){
+        //Localicar o OhaStatusLog nos 3 ultimos itens da lista.
+        for (int item = 1; item <= strings.size(); item++) {
+            String ohaStatusLogName = strings.get(strings.size() - item);
+            if (ohaStatusLogName.contains(ohaStatusLog.toString()))
+                return true;
+            else if (item > 3) break;
+        }
+        return false;
+    }
 }
 
 
