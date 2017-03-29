@@ -27,7 +27,10 @@ public enum OhaStatusLog {
     OHA_STATUS_FINISHED,
 
     /** Sinalizar o final da requisição*/
-    OHA_REQUEST_END;
+    OHA_REQUEST_END,
+
+    /** Sinalizar que o Arduino não está respondendo ao módulo WIFI ( ESP8266)*/
+    OHA_REQUEST_TIMEOUT;
 
     /**
      * Recuperar um OhaStatusLog conforme texto com o nome do Status
