@@ -68,12 +68,11 @@ public class OhaEnergyUseApiV1Test {
         String strDateDelete = OhaHelper.getStrDate(calendar.getTime());
         List<String> strings = OhaEnergyUseApi.getLogs(OHA_HOST_NAME, strDate, strHour, 1, 100, strDateDelete);
         assertTrue("The OhaEnergyUseApi.getLogs is empty!", strings.size() > 2);
-        Context context = InstrumentationRegistry.getTargetContext();
         String penultStrLogContent = strings.get(strings.size() -2); //Recuperar o antepenúltimo item da lista.
         String lastStrLogContent = strings.get(strings.size() -1); //Recuperar o ultimo item da lista.
         for(String strLogContent:strings ) {
             if (lastStrLogContent.equals(strLogContent) == false) {
-                OhaEnergyUseLog ohaEnergyUseLog = OhaEnergyUseLog.parse(context, strDate, strHour, strLogContent);
+                OhaEnergyUseLog ohaEnergyUseLog = OhaEnergyUseLog.parse(strDate, strHour, strLogContent);
                 OhaStatusLog ohaStatusLog = null;
                 //Verificar se o penúltimo conteúdo é um OhaStatusLog:
                 if (penultStrLogContent.equals(strLogContent)){

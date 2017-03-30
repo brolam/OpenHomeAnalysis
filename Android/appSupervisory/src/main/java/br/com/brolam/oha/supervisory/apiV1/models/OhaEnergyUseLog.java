@@ -115,13 +115,12 @@ public class OhaEnergyUseLog {
 
     /**
      * Analisar o conteúdo do log para construir um {@see OhaEnergyUseLog}
-     * @param context informar o contexto da tela ou serviço.
      * @param strDate informar texto com a data no formado yyyyMMdd, exemplo: "20160131".
      * @param strLogContent informar texto com o conteúdo do log, exemplo: 1:<235959|220.00|0.56|0.56|0.56|5559>
      * @return uma instância de {@see OhaEnergyUseLog} válido ou com erro {@see getExceptionLogContentWithError}.
      * @see OhaStatusLog
      */
-    public static OhaEnergyUseLog parse(Context context, String strDate, String strHour, String strLogContent) {
+    public static OhaEnergyUseLog parse(String strDate, String strHour, String strLogContent) {
         final int FLAG_SEQUENCE = 0; //Índice da sequência no conteúdo do log.
         final int FLAG_FIELDS = 1; //Índice das colunas no conteúdo do log.
 
@@ -167,7 +166,7 @@ public class OhaEnergyUseLog {
             }
             //Sinalizar que o conteúdo do log é inválido:
             if (ohaEnergyUseLog == null) {
-                    throw new Exception(context.getString(R.string.exception_on_parse_content_invalid));
+                    throw new Exception("Energy log is valid.");
             }
         } catch (Exception e) {
             ohaEnergyUseLog = new OhaEnergyUseLog(repository, sequence, strDate, strLogContent, e);
@@ -192,6 +191,26 @@ public class OhaEnergyUseLog {
 
     public int getSequence() {
         return sequence;
+    }
+
+    public String getStrDate() {
+        return strDate;
+    }
+
+    public String getStrTime() {
+        return strTime;
+    }
+
+    public double getAvgVolts() {
+        return avgVolts;
+    }
+
+    public double[] getAvgAmpsPerPhase() {
+        return avgAmpsPerPhase;
+    }
+
+    public long getDuration() {
+        return duration;
     }
 
     public String getStrLogContentWithError() {
