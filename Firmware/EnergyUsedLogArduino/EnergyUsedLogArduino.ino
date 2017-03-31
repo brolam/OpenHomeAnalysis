@@ -311,9 +311,10 @@ void saveLog() {
   fileLog.close();
 #ifdef DEBUG
   debug(F("path:"), path + '/' + fileName);
+  debug(F("Sequece:"), String(currentSeq));
 #endif
   currentSeq++;
-  setResource(path, LOG_SEQ, String(currentSeq)); //Registrar a próxima sequência no cartão de memória.
+  setResource(path, String(LOG_SEQ), String(currentSeq)); //Registrar a próxima sequência no cartão de memória.
   timeSaveLog = millis();
 }
 
@@ -372,7 +373,7 @@ void sendStatus(String strDate, String strHour) {
     esp8266.println(LOG_DATE_NOT_EXISTS);
   } else {
     esp8266.print(F_BEGIN);
-    esp8266.print(getResource(path, LOG_SEQ, String("-1")));
+    esp8266.print(getResource(path, String(LOG_SEQ), String("-1")));
     esp8266.print(":");
     /*Status da sequencia:
          RUNNING - Novas logs estão sendo geradas para a data e hora informada;
@@ -469,8 +470,10 @@ void doUrl(String url) {
   String params[10];
   parseUrl(url, params); //Transformar a Url em uma lista de parâmtros, sendo o item 0 o tipo do Web Method, GET ou POST.
   boolean isPost = ( params[0].indexOf("POST") != -1);
-  //Se o cartão de memória não estiver disponível a funcionalidade na URL não será executada. 
-  if ( ohaStatus != OHA_STATUS_NOT_SD) {
+   //Reiniciar o programa 
+  if (isPost && ( params[1] == URL_RESET ) ) {
+        software_Reset();    
+  } else if ( ohaStatus != OHA_STATUS_NOT_SD) { //Se o cartão de memória não estiver disponível a funcionalidade nas URL abaixo não será executada.
     //Atualizar a data do programa.
     if (isPost && ( params[1] == URL_STATUS ) ) {
       setStatus(params[2], params[3]);
@@ -483,9 +486,6 @@ void doUrl(String url) {
       //Enviar status do programa.  
       } else if (!isPost && params[1] == URL_STATUS) {
         sendStatus(params[2], params[3]);
-      //Reiniciar o programa 
-      } else if (isPost && ( params[1] == URL_RESET ) ) {
-        software_Reset();
       } else {
 #ifdef DEBUG
         debug(F("Url invalid :"), params[1] );
@@ -583,5 +583,4 @@ void loop()
     debug(F("Status: "), ohaStatus);
 #endif
   }
-
 }
