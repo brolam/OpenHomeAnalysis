@@ -90,4 +90,51 @@ public class OhaHelper {
     public static Calendar getCalendar(String strDate, String strHour) throws ParseException {
         return getCalendar(strDate, strHour + "0000",0);
     }
+
+    /**
+     * Recuperar a quantidade de dias entre duas datas.
+     * @param begin informar a data de inicio
+     * @param end informar a data final
+     * @return quantidade de dias entre as duas datas.
+     */
+    public static int getAmountDays(long begin, long end) {
+        double days = ((end / (24.00 * 60.00 * 60.00 * 1000.00))
+                - (begin / (24.00 * 60.00 * 60.00 * 1000.00)));
+        return  (int)days;
+    }
+
+    /**
+     * Recuperar uma data reiniciando a hora.
+     * @param date informar uma data válida.
+     * @return uma data com a hora igual a 00:00:00.
+     */
+    public static Date getDateBegin(Date date)  {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY,0);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        calendar.set(Calendar.MILLISECOND,0);
+        return calendar.getTime();
+    }
+
+    /**
+     * Recuperar uma data com a hora final do dia.
+     * @param date informar uma data válida.
+     * @param untilToday informar se a hora final não deve ultrapassar a hora atual.
+     * @return uma data com a hora igual a 23:59:59.
+     */
+    public static Date getDateEnd(Date date, boolean untilToday) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        Date dateToday = new Date();
+        if ( untilToday && ( dateToday.before(calendar.getTime()) )){
+            calendar.setTime(dateToday);
+        }
+        return calendar.getTime();
+    }
 }
