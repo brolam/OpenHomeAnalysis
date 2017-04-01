@@ -23,7 +23,7 @@
 /****************************************************************************************************************************************************************
  Inicio do B1 - Constantes
  ****************************************************************************************************************************************************************/
-//#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
+#//define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log de consumo de energia. 
 
 //Constantes utilizadas na geração dos logs.
@@ -331,9 +331,9 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
   currentDelDate = strDelDate; //Para mais detalhes, por favor, veja {@see loop()} e {@see deleteLogs()}
   do {
     //Recuperar o conteúdo do Log informando Exemplo: 1:<195338|220.00|3.36|0.38|0.44|9150>
-    logRead = getLog(strDate, strHour, sequence); 
-    esp8266.print(String(sequence) + ':' + logRead); esp8266.flush();
-    delay(100); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
+    logRead = String(sequence) + ':' + getLog(strDate, strHour, sequence);
+    esp8266.print(logRead);
+    while(esp8266.overflow()) {delay(20);} //Necessário para sincronizar a comunicação serial e evitar dados truncados.
     sequence++;
     //Se for identificada o final da sequência de log ou a data não existir. 
     if ( (logRead.indexOf(LOG_FILE_NOT_EXISTS) != -1) || (logRead.indexOf(LOG_DATE_NOT_EXISTS)  != -1) ) {
@@ -342,6 +342,18 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
     }
   } while (sequence < ( start + amount));
   delay(300); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
+}
+
+/* Localizar a última sequência de log.*/
+int searchLastSequence(String path){
+  int sequence = 1;
+  while(SD.exists(path + '/' + String(sequence) + String(F_TXT))){
+    sequence++;
+  }
+#ifdef DEBUG
+  debug(F("searchLastSequence: "), String(sequence));
+#endif
+  return sequence;
 }
 
 /* Atualizar o status do programa e também a data e hora utilizada no registro do log de consumo de energía:
@@ -357,7 +369,13 @@ void setStatus(String strDate, String strTime) {
   millisOnSetTime = millis(); //Reiniciar a contagem de milissegundos para a nova data e hora, para mais informações vaje B3/Obeservação 02.
   ohaStatus = OHA_STATUS_OK; //Sinalizar que a gravação dos logs estão sendo realizadas sem problemas.
   //Atualizar a sequência atual para a data e hora informada ou reiniciar se não existir sequência para a data informada.
-  currentSeq = getResource(String(LOGS) + '/' + currentDatePath, String(LOG_SEQ), String('1')).toInt();
+  String path = String(LOGS) + '/' + currentDatePath;
+  currentSeq = getResource(path, String(LOG_SEQ), "-1").toInt();
+  //Por segurança, localizar a última sequencia do log se não for possível recuperar 
+  //a sequência atual no arquivo de recursos(Seq.txt).
+  if (currentSeq == -1) { 
+    currentSeq = searchLastSequence(path);
+  } 
   delay(100);
 }
 
@@ -373,7 +391,7 @@ void sendStatus(String strDate, String strHour) {
     esp8266.println(LOG_DATE_NOT_EXISTS);
   } else {
     esp8266.print(F_BEGIN);
-    esp8266.print(getResource(path, String(LOG_SEQ), String("-1")));
+    esp8266.print(String("-1")); //#TODO Remover quando finalizar a alteração no aplicativo de Supervisão. 
     esp8266.print(":");
     /*Status da sequencia:
          RUNNING - Novas logs estão sendo geradas para a data e hora informada;
@@ -451,6 +469,9 @@ double getVolts() {
    @param params informar uma lista de textos com 10 itens. 
 */
 void parseUrl(String url, String params[]) {
+#ifdef DEBUG
+  debug(F("URL: "), url);
+#endif
   //Dividir a url por "/" e atribuir para cada item do params[]. 
   for (byte iParam = 0; iParam < 10; iParam++ ) {
     int index = url.indexOf("/");
@@ -526,7 +547,9 @@ void saveLogBlink(long flashTime)
 /*Configuração do programa*/
 void setup()
 {
+#ifdef DEBUG
   Serial.begin(74880); // A velocidde 74880 foi a mais estável na comunicação com o Módulo ESP8266.   
+#endif
   analogReference(INTERNAL); //Referência igual a 1,1 volts
   esp8266Reset(); //Reiniciar o módulo ESP8266 na primeira conexão para garantir que o módulo não esteja travado.
   esp8266.begin(74880);  // A velocidade 74880 foi a mais estável na comunicação com o Arduino.
