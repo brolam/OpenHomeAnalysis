@@ -1,10 +1,16 @@
 package br.com.brolam.library.helpers;
 
+import android.content.Context;
+import android.text.format.DateUtils;
+
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import br.com.brolam.library.R;
 
 /**
  * Disponibilizar funcionalidades para converter e formatar texto, número, data e etc.
@@ -13,7 +19,6 @@ import java.util.Locale;
  * @since Release 01
  */
 public class OhaHelper {
-
     /**
      * Obter um texto com o Ano, Mês e Dia.
      * @param date informar uma data válida.
@@ -100,7 +105,7 @@ public class OhaHelper {
     public static int getAmountDays(long begin, long end) {
         double days = ((end / (24.00 * 60.00 * 60.00 * 1000.00))
                 - (begin / (24.00 * 60.00 * 60.00 * 1000.00)));
-        return  (int)days;
+        return days > 0 && days < 1? 1:(int)days;
     }
 
     /**
@@ -137,4 +142,79 @@ public class OhaHelper {
         }
         return calendar.getTime();
     }
+
+    /**
+     * Recuperar uma data formatada conforme o parâmetro date Format.
+     * @param date informar uma data válida
+     * @param dateFormat informar um formato conforme o Date and Time Patterns: https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+     * @return texto com a data formatada.
+     */
+    public static String formatDate(Date date, String dateFormat) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
+        return simpleDateFormat.format(date);
+    }
+
+    /**
+     * Recuperar uma data formatada conforme o parâmetro date Format.
+     * @param longDateTime informar uma data válida
+     * @param dateFormat informar um formato conforme o Date and Time Patterns{@link SimpleDateFormat} :
+     *                   https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html
+     * @return texto com a data formatada.
+     */
+    public static String formatDate(long longDateTime, String dateFormat) {
+        Date date = new Date(longDateTime);
+        return formatDate(date, dateFormat);
+    }
+
+    /**
+     * Recuperar uma número formatado conforme o decimalFormat.
+     * @param number informar um número válido
+     * @param pattern informar o formato conforme o {@link DecimalFormat}:
+     *                      https://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html
+     * @return texto com o número formatado.
+     */
+    public static String formatNumber(double number, String pattern ){
+        return new DecimalFormat(pattern).format(number);
+    }
+
+    /**
+     * Recuperar o percentual da precisão de um tempo sobre 24 horas.
+     * @param context informar um contexto válido.
+     * @param duration duração em milisegundos.
+     * @param untilNow informar se o tempo total não deve ser maior do que a hora atual.
+     * @return texto formatado informando o percentual da precisão, EX: Accuracy 99.99%
+     */
+    public static String formatAccuracyDay(Context context, double duration, boolean untilNow) {
+        long millisOnDay;
+        if (untilNow) {
+            Date now = new Date();
+            millisOnDay = now.getTime() - getDateBegin(now).getTime();
+        } else {
+            millisOnDay = DateUtils.DAY_IN_MILLIS;
+        }
+        double accuracy = duration > 0 ? (duration / millisOnDay) * 100 : 0.00;
+        return String.format(context.getString(R.string.format_accuracy_day), formatNumber(accuracy, "#0.00"));
+    }
+
+    /**
+     * Converter milisegundos em horas.
+     * @param millis informar os milisegundos.
+     * @return total em horas.
+     */
+    public static double convertMillisToHours(double millis){
+        return millis > 0.00? millis / DateUtils.HOUR_IN_MILLIS:0.00;
+    }
+
+    /**
+     * Converter o total de Watts em Kwh conforme os parâmetros abaixo:
+     * @param duration duração em milisegundos
+     * @param totalWatts total de watts utilizada.
+     * @return Kwh
+     */
+    public static double convertWattsToKWH(double duration, double totalWatts) {
+        double totalWH = totalWatts * convertMillisToHours(duration);
+        return totalWH > 0 ? (totalWH / DateUtils.HOUR_IN_MILLIS) / 1000.00 : 0.00;
+    }
+
+
 }
