@@ -23,7 +23,7 @@
 /****************************************************************************************************************************************************************
  Inicio do B1 - Constantes
  ****************************************************************************************************************************************************************/
-#//define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
+#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log de consumo de energia. 
 
 //Constantes utilizadas na geração dos logs.
@@ -333,7 +333,12 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
     //Recuperar o conteúdo do Log informando Exemplo: 1:<195338|220.00|3.36|0.38|0.44|9150>
     logRead = String(sequence) + ':' + getLog(strDate, strHour, sequence);
     esp8266.print(logRead);
-    while(esp8266.overflow()) {delay(20);} //Necessário para sincronizar a comunicação serial e evitar dados truncados.
+    //Necessário para sincronizar a comunicação serial e evitar dados truncados.
+    byte tryCount = 10;
+    do {
+      delay(200);
+      tryCount--;
+    } while(esp8266.overflow() && (tryCount > 0) );
     sequence++;
     //Se for identificada o final da sequência de log ou a data não existir. 
     if ( (logRead.indexOf(LOG_FILE_NOT_EXISTS) != -1) || (logRead.indexOf(LOG_DATE_NOT_EXISTS)  != -1) ) {
