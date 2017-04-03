@@ -212,8 +212,7 @@ public class OhaHelper {
      * @return Kwh
      */
     public static double convertWattsToKWH(double duration, double totalWatts) {
-        double totalWH = totalWatts * convertMillisToHours(duration);
-        return totalWH > 0 ? (totalWH / DateUtils.HOUR_IN_MILLIS) / 1000.00 : 0.00;
+        return (totalWatts > 0 && duration > 0 )? (totalWatts / convertMillisToHours(duration)) / 1000.00 :0.00;
     }
 
 
