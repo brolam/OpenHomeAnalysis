@@ -1,5 +1,6 @@
 package br.com.brolam.oha.supervisory.data;
 
+import android.annotation.TargetApi;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
@@ -9,6 +10,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import java.util.Date;
+import br.com.brolam.oha.supervisory.data.cursors.OhaEnergyUseDaysCursor;
+import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
 /**
  * Disponibilizar informações da utilização de energia através de um ContentProvider
@@ -20,6 +24,7 @@ public class OhaEnergyUseProvider extends ContentProvider {
 
     //Definir os códigos que serão relacionados as URIs para facilitar a identificaçãos das mesmas.
     public static final int CODE_ENERGY_USER_LOG = 100;
+    public static final int CODE_ENERGY_USER_LOG_DAYS = 101;
     //Esse UriMatcher será utilizado para realicionar as URIs as códigos supracitados.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private OhaSQLHelper ohaSQLHelper;
@@ -27,8 +32,9 @@ public class OhaEnergyUseProvider extends ContentProvider {
     public static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         //Mapeamento das URIs referente aos logs de utilização de energia:
-        final String energyUseLogAuthority = OhaEnergyUseContract.CONTENT_AUTHORITY;
-        matcher.addURI(energyUseLogAuthority, OhaEnergyUseContract.PATH_LOG, CODE_ENERGY_USER_LOG);
+        final String energyUseLogAuthority = CONTENT_AUTHORITY;
+        matcher.addURI(energyUseLogAuthority, PATH_LOG, CODE_ENERGY_USER_LOG);
+        matcher.addURI(energyUseLogAuthority, PATH_LOG_DAYS, CODE_ENERGY_USER_LOG_DAYS);
         return matcher;
     }
 
@@ -58,11 +64,11 @@ public class OhaEnergyUseProvider extends ContentProvider {
             for (int row = 0; row < values.length; row++) {
                 ContentValues value = values[row];
                 long insertedResult = sqLiteDatabase.insertWithOnConflict(
-                        OhaEnergyUseContract.EnergyUseLogEntry.TABLE_NAME,
+                        EnergyUseLogEntry.TABLE_NAME,
                         null,
                         value,
                         SQLiteDatabase.CONFLICT_REPLACE);
-                if ( insertedResult == -1){
+                if (insertedResult == -1) {
                     throw new SQLException(String.format("The EnergyUseLog content on the row %s It is not valid.", row));
                 }
             }
@@ -70,15 +76,51 @@ public class OhaEnergyUseProvider extends ContentProvider {
         } finally {
             sqLiteDatabase.endTransaction();
         }
+        //Notificar a atualização para as Uri relacionadas a tabela EnergyUseLog
         getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_LOG_DAY, null);
         return values.length;
     }
 
 
     @Nullable
     @Override
-    public Cursor query(@NonNull Uri uri, @Nullable String[] strings, @Nullable String s, @Nullable String[] strings1, @Nullable String s1) {
-        throw new UnsupportedOperationException("Unknown uri: " + uri);
+    public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+        SQLiteDatabase sqLiteDatabase = this.ohaSQLHelper.getReadableDatabase();
+        switch (sUriMatcher.match(uri)) {
+            case CODE_ENERGY_USER_LOG:
+                return sqLiteDatabase.query(
+                        EnergyUseLogEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+            //Retornar a um  {@link OhaEnergyUseDaysCursor};
+            case CODE_ENERGY_USER_LOG_DAYS:
+                //Sempre utilizar o index {@link EnergyUseLogEntry.INDEX_GROUP_BY_DATE_TIME}
+                //para realizar a consulta por dia:
+                String from = String.format("%s INDEXED BY %s", EnergyUseLogEntry.TABLE_NAME, EnergyUseLogEntry.INDEX_GROUP_BY_DATE_TIME);
+                Cursor cursor = sqLiteDatabase.query(
+                        from,
+                        EnergyUseLogEntry.COLUMNS_MIN_AND_MAX_DATE_TIME,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        null);
+                if (cursor.moveToFirst()) {
+                    long beginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_DATE_TIME_MIN);
+                    long endDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_DATE_TIME_MAX);
+                    return new OhaEnergyUseDaysCursor(ohaSQLHelper, new Date(beginDate), new Date(endDate));
+                } else {
+                    return new OhaEnergyUseDaysCursor();
+                }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
     }
 
     @Nullable
@@ -101,5 +143,17 @@ public class OhaEnergyUseProvider extends ContentProvider {
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
         throw new UnsupportedOperationException("Unknown uri: " + uri);
+    }
+
+    /**
+     * You do not need to call this method. This is a method specifically to assist the testing
+     * framework in running smoothly. You can read more at:
+     * http://developer.android.com/reference/android/content/ContentProvider.html#shutdown()
+     */
+    @Override
+    @TargetApi(11)
+    public void shutdown() {
+        this.ohaSQLHelper.close();
+        super.shutdown();
     }
 }
