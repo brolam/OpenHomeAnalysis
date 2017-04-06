@@ -19,21 +19,12 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 public class OhaEnergyUseDaysCursor extends AbstractCursor {
 
     private OhaSQLHelper ohaSQLHelper;
-    private int count;
-    private Date beginDate;
-    private Date endDate;
-    Cursor cursorEnergyUseDay = null;
+    Cursor cursorEnergyUseDay;
     Double kWhCost = 0.00;
 
-    public OhaEnergyUseDaysCursor(){
-        this.count = 0;
-    }
-
-    public OhaEnergyUseDaysCursor(OhaSQLHelper ohaSQLHelper, Date beginDate, Date endDate){
+    public OhaEnergyUseDaysCursor(OhaSQLHelper ohaSQLHelper, Cursor cursor){
         this.ohaSQLHelper = ohaSQLHelper;
-        this.beginDate = beginDate;
-        this.endDate = endDate;
-        this.count = OhaHelper.getAmountDays(this.beginDate.getTime(), this.endDate.getTime());
+        this.cursorEnergyUseDay = cursor;
     }
 
     /**
@@ -44,37 +35,14 @@ public class OhaEnergyUseDaysCursor extends AbstractCursor {
      */
     @Override
     public boolean onMove(int oldPosition, int newPosition) {
-        SQLiteDatabase sqLiteDatabase = this.ohaSQLHelper.getReadableDatabase();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(this.endDate);
-        calendar.add(Calendar.DATE,newPosition * -1); //ordem decrescente
-        //Definir a hora incial e final do dia:
-        long beginDate = OhaHelper.getDateBegin(calendar.getTime()).getTime();
-        long endDate = OhaHelper.getDateEnd(calendar.getTime(),true).getTime();
-        String selection = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry.COLUMN_DATE_TIME);
-        String[] selectionArgs = new String[]{String.valueOf(beginDate), String.valueOf(endDate)};
-        //Fechar o possição anterior.
-        if ( this.cursorEnergyUseDay != null){
-            this.cursorEnergyUseDay.close();
-        }
-        //Sempre utilizar o index {@link EnergyUseLogEntry.INDEX_GROUP_BY_DATE_TIME}
-        //para realizar a consulta por dia:
-        String from = String.format("%s INDEXED BY %s", EnergyUseLogEntry.TABLE_NAME, EnergyUseLogEntry.INDEX_GROUP_BY_DATE_TIME );
-        this.cursorEnergyUseDay = sqLiteDatabase.query(
-                from,
-                EnergyUseLogEntry.COLUMNS_SUM,
-                selection,
-                selectionArgs,
-                null,
-                null,
-                null);
+        this.cursorEnergyUseDay.moveToPosition(newPosition);
         this.kWhCost = 0.65; //TODO EnergyBill - Informar o custo por KWH.
-        return super.onMove(oldPosition, newPosition) && this.cursorEnergyUseDay.moveToFirst() ;
+        return  super.onMove(oldPosition, newPosition) ;
     }
 
     @Override
     public int getCount() {
-        return count;
+        return this.cursorEnergyUseDay !=  null? cursorEnergyUseDay.getCount():0;
     }
 
     @Override

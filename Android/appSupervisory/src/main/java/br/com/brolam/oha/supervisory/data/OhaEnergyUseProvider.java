@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import java.util.Date;
+
+import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.oha.supervisory.data.cursors.OhaEnergyUseDaysCursor;
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
@@ -103,21 +105,18 @@ public class OhaEnergyUseProvider extends ContentProvider {
                 //Sempre utilizar o index {@link EnergyUseLogEntry.INDEX_GROUP_BY_DATE_TIME}
                 //para realizar a consulta por dia:
                 String from = String.format("%s INDEXED BY %s", EnergyUseLogEntry.TABLE_NAME, EnergyUseLogEntry.INDEX_GROUP_BY_DATE_TIME);
+                Date dateNow = OhaHelper.getDateEnd(new Date(),false);
                 Cursor cursor = sqLiteDatabase.query(
                         from,
-                        EnergyUseLogEntry.COLUMNS_MIN_AND_MAX_DATE_TIME,
+                        EnergyUseLogEntry.COLUMNS_SUM_WH,
                         selection,
                         selectionArgs,
+                        //Group BY por dia, mas essa solução ainda não é a definitiva
+                        //Será desenvolvida uma solução para facilitar a soma por dia, semana, mês e etc.
+                        String.format("CAST((( %s / 86400000.00) - ( %s / 86400000.00)) AS INT)", EnergyUseLogEntry.COLUMN_DATE_TIME, dateNow.getTime()),
                         null,
-                        null,
-                        null);
-                if (cursor.moveToFirst()) {
-                    long beginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_DATE_TIME_MIN);
-                    long endDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_DATE_TIME_MAX);
-                    return new OhaEnergyUseDaysCursor(ohaSQLHelper, new Date(beginDate), new Date(endDate));
-                } else {
-                    return new OhaEnergyUseDaysCursor();
-                }
+                        sortOrder);
+                return new OhaEnergyUseDaysCursor(ohaSQLHelper, cursor);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }

@@ -71,31 +71,27 @@ public class OhaEnergyUseContract {
                 COLUMN_WATTS_TOTAL
         };
 
-        //Lista com todos os campos para consultar a soma da utilização de energia
-        //em um período.
-        public static final String[] COLUMNS_SUM = new String[]{
-                String.format("SUM(%s)", COLUMN_DURATION),
-                String.format("SUM(%s)", COLUMN_WATTS_1),
-                String.format("SUM(%s)", COLUMN_WATTS_2),
-                String.format("SUM(%s)", COLUMN_WATTS_3),
-                String.format("SUM(%s)", COLUMN_WATTS_TOTAL)
-        };
-        //Índices referente a lista de campos COLUMNS_SUM, favor sempre utilizar
-        //esses Índices para acessar as colunas no cursor.
-        public static final byte INDEX_COLUMN_SUM_DURATION = 0;
-        public static final byte INDEX_COLUMN_SUM_WATTS_1 = 1;
-        public static final byte INDEX_COLUMN_SUM_WATTS_2 = 2;
-        public static final byte INDEX_COLUMN_SUM_WATTS_3 = 3;
-        public static final byte INDEX_COLUMN_SUM_WATTS_TOTAL = 4;
-        public static final byte INDEX_COLUMN_SUM_KWH_COST = 5;
-
-        //Lista com os campos para recuperar a Menor e Maior Data e Hora em um perído de logs.
-        public static final String[] COLUMNS_MIN_AND_MAX_DATE_TIME = new String[]{
+        //Campos calculado por Watts Horas:
+        public static final String[] COLUMNS_SUM_WH = new String[]{
                 String.format("MIN(%s)", COLUMN_DATE_TIME),
                 String.format("MAX(%s)", COLUMN_DATE_TIME),
+                String.format("SUM(%s)", COLUMN_DURATION),
+                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_1, COLUMN_DURATION ),
+                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_2, COLUMN_DURATION ),
+                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_3, COLUMN_DURATION ),
+                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_TOTAL, COLUMN_DURATION ),
         };
-        public static final byte INDEX_COLUMNS_DATE_TIME_MIN = 0;
-        public static final byte INDEX_COLUMNS_DATE_TIME_MAX = 1;
+        //Índices referente a lista de campos COLUMNS_SUM_WH, favor sempre utilizar
+        //esses Índices para acessar as colunas no cursor.
+        public static final byte INDEX_COLUMN_SUM_DATE_TIME_MIN = 0;
+        public static final byte INDEX_COLUMN_SUM_DATE_TIME_MAX = 1;
+        public static final byte INDEX_COLUMN_SUM_DURATION = 2;
+        public static final byte INDEX_COLUMN_SUM_WH_1 = 3;
+        public static final byte INDEX_COLUMN_SUM_WH_2 = 4;
+        public static final byte INDEX_COLUMN_SUM_WH_3 = 5;
+        public static final byte INDEX_COLUMN_SUM_WH_TOTAL = 6;
+        //Somente disponível no {@link OhaEnergyUseDaysCursor}
+        public static final byte INDEX_COLUMN_SUM_KWH_COST = 7;
 
         /**
          * Recuperar o SQL para criar a tabela energyUserLog no banco de dados.
