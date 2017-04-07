@@ -384,8 +384,7 @@ void setStatus(String strDate, String strTime) {
   delay(100);
 }
 
-/* Evniar para o módulo ES8266 vai comunicação serial as informações do status do programa 
-   incluindo ultima sequencia e status da geração.
+/* Evniar para o módulo ES8266 vai comunicação serial as informações do status do programa. 
    @param strDate informar texto com data no formato YYYYMMDD
    @param strHour informar texto com hora e minuto no formato HHmm
 */
@@ -395,20 +394,18 @@ void sendStatus(String strDate, String strHour) {
   {
     esp8266.println(LOG_DATE_NOT_EXISTS);
   } else {
-    esp8266.print(F_BEGIN);
-    esp8266.print(String("-1")); //#TODO Remover quando finalizar a alteração no aplicativo de Supervisão. 
-    esp8266.print(":");
     /*Status da sequencia:
          RUNNING - Novas logs estão sendo geradas para a data e hora informada;
          STOPPED - Geração de logs finalizada para a data e hora informada. 
     */
-    esp8266.print((currentDatePath.equals( strDate + '/' + strHour) ? String("OHA_STATUS_RUNNING") : String("OHA_STATUS_FINISHED")));
-    esp8266.print(":");
+    esp8266.print(F_BEGIN); // Inicio do conteúdo do log
+    esp8266.print((path.indexOf(currentDatePath) > -1 ? String("OHA_STATUS_RUNNING") : String("OHA_STATUS_FINISHED")));
+    esp8266.print("|");
     esp8266.print(millis()); // Informar o tempo que o dispositivo está funcionando desde a ultima inicialização.
     esp8266.println(F_END);
   }
   esp8266.flush();
-}
+} 
 
 /* Excluir logs de consumo de energía para liberar espaço no cartão de memória.
    Excluir 5 logs por vez para impedir que essa funcionalidade interfira no registro de logs de consumo de energia. 
