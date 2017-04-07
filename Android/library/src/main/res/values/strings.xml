@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">library</string>
+    <string name="format_accuracy_day">Accuracy %s%%</string>
+</resources>
