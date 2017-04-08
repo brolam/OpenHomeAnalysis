@@ -46,7 +46,7 @@ public class OhaEnergyUseContract {
         public static final String COLUMN_SEQUENCE = "sequence";
         //Data e hora do registro do log.
         public static final String COLUMN_DATE_TIME = "date_time";
-        //Duração em milisegundos entre esse log e o log anterior.
+        //Duração em segundos entre esse log e o log anterior.
         public static final String COLUMN_DURATION = "duration";
         //Tensão média na Duração do log.
         public static final String COLUMN_VOLTAGE = "voltage";
@@ -76,10 +76,10 @@ public class OhaEnergyUseContract {
                 String.format("MIN(%s)", COLUMN_DATE_TIME),
                 String.format("MAX(%s)", COLUMN_DATE_TIME),
                 String.format("SUM(%s)", COLUMN_DURATION),
-                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_1, COLUMN_DURATION ),
-                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_2, COLUMN_DURATION ),
-                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_3, COLUMN_DURATION ),
-                String.format("SUM((%s * (%s /1000.00)) / 3600.00)", COLUMN_WATTS_TOTAL, COLUMN_DURATION ),
+                String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_1, COLUMN_DURATION ),
+                String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_2, COLUMN_DURATION ),
+                String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_3, COLUMN_DURATION ),
+                String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_TOTAL, COLUMN_DURATION ),
         };
         //Índices referente a lista de campos COLUMNS_SUM_WH, favor sempre utilizar
         //esses Índices para acessar as colunas no cursor.

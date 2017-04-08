@@ -180,19 +180,19 @@ public class OhaHelper {
     /**
      * Recuperar o percentual da precisão de um tempo sobre 24 horas.
      * @param context informar um contexto válido.
-     * @param duration duração em milisegundos.
+     * @param duration duração em segundos.
      * @param untilNow informar se o tempo total não deve ser maior do que a hora atual.
      * @return texto formatado informando o percentual da precisão, EX: Accuracy 99.99%
      */
     public static String formatAccuracyDay(Context context, double duration, boolean untilNow) {
-        long millisOnDay;
+        double secondsOnDay;
         if (untilNow) {
             Date now = new Date();
-            millisOnDay = now.getTime() - getDateBegin(now).getTime();
+            secondsOnDay = now.getTime() - getDateBegin(now).getTime() / 1000.00 ;
         } else {
-            millisOnDay = DateUtils.DAY_IN_MILLIS;
+            secondsOnDay = DateUtils.DAY_IN_MILLIS / 1000.00;
         }
-        double accuracy = duration > 0 ? (duration / millisOnDay) * 100 : 0.00;
+        double accuracy = duration > 0 ? (duration / secondsOnDay) * 100 : 0.00;
         return String.format(context.getString(R.string.format_accuracy_day), formatNumber(accuracy, "#0.00"));
     }
 
@@ -206,13 +206,12 @@ public class OhaHelper {
     }
 
     /**
-     * Converter o total de Watts em Kwh conforme os parâmetros abaixo:
-     * @param duration duração em milisegundos
-     * @param totalWatts total de watts utilizada.
+     * Converter o total de Wh em Kwh.
+     * @param totalWh total de Wh.
      * @return Kwh
      */
-    public static double convertWattsToKWH(double duration, double totalWatts) {
-        return (totalWatts > 0 && duration > 0 )? (totalWatts / convertMillisToHours(duration)) / 1000.00 :0.00;
+    public static double convertWhToKWH(double totalWh) {
+        return totalWh > 0?totalWh / 1000.00: 0.00;
     }
 
 

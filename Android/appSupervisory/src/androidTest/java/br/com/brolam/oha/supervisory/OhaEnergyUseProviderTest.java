@@ -67,7 +67,7 @@ public class OhaEnergyUseProviderTest {
                         id,
                         index,
                         beginHour.getTime(),
-                        10000,
+                        10,
                         220.00,
                         400.00,
                         400.00,
@@ -98,7 +98,7 @@ public class OhaEnergyUseProviderTest {
         long longBeginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMN_SUM_DATE_TIME_MIN);
         assertEquals("Begin Date", dateBegin.getTime().getTime(), longBeginDate);
         Double duration = cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_SUM_DURATION);
-        assertEquals("Duration", DateUtils.DAY_IN_MILLIS, duration, 0.00);
+        assertEquals("Duration", DateUtils.DAY_IN_MILLIS / 1000.00, duration, 0.00);
         Double totalKWH = OhaHelper.convertWhToKWH(cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_SUM_WH_TOTAL));
         assertEquals("Total KWH", "24.00", OhaHelper.formatNumber(totalKWH,"#0.00"));
     }
