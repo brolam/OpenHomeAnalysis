@@ -210,7 +210,7 @@ public class OhaEnergyUseLogTask {
             //Se não existir logs para a data hora informada, encerrar as tentarivas
             //e informar para o fluxo principal que não existe logs para a data hora informada:
             if ( OhaStatusLog.exists(OhaStatusLog.LOG_DATE_NOT_EXISTS, strings)){
-                return OhaStatusLog.OHA_STATUS_NOT_DATE;
+                return OhaStatusLog.LOG_DATE_NOT_EXISTS;
             }
             //Verificar se o status retornado é válido:
             assertOhaStatusLog(strings, tryCount);
