@@ -108,7 +108,7 @@ public class OhaEnergyUseProvider extends ContentProvider {
                 Date dateNow = OhaHelper.getDateEnd(new Date(),false);
                 Cursor cursor = sqLiteDatabase.query(
                         from,
-                        EnergyUseLogEntry.COLUMNS_SUM_WH,
+                        EnergyUseLogEntry.COLUMNS_CALC,
                         selection,
                         selectionArgs,
                         //Group BY por dia, mas essa solução ainda não é a definitiva

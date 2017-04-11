@@ -83,7 +83,7 @@ public class OhaEnergyUseDaysCursor extends AbstractCursor {
 
     @Override
     public double getDouble(int i) {
-        if ( i == EnergyUseLogEntry.INDEX_COLUMN_SUM_KWH_COST)
+        if ( i == EnergyUseLogEntry.INDEX_COLUMN_CALC_KWH_COST)
             return kWhCost;
         assertCursorEnergyUseDay();
         return this.cursorEnergyUseDay.getDouble(i);

@@ -95,11 +95,11 @@ public class OhaEnergyUseProviderTest {
         );
 
         assertTrue("Energy Logs is empty!", cursor.moveToFirst());
-        long longBeginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMN_SUM_DATE_TIME_MIN);
+        long longBeginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMN_CALC_DATE_TIME_MIN);
         assertEquals("Begin Date", dateBegin.getTime().getTime(), longBeginDate);
-        Double duration = cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_SUM_DURATION);
+        Double duration = cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_DURATION_SUN);
         assertEquals("Duration", DateUtils.DAY_IN_MILLIS / 1000.00, duration, 0.00);
-        Double totalKWH = OhaHelper.convertWhToKWH(cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_SUM_WH_TOTAL));
+        Double totalKWH = OhaHelper.convertWhToKWH(cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_WH_TOTAL_SUN));
         assertEquals("Total KWH", "24.00", OhaHelper.formatNumber(totalKWH,"#0.00"));
     }
 }

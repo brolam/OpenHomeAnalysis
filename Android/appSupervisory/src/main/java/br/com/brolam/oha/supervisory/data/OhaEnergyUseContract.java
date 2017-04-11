@@ -72,7 +72,7 @@ public class OhaEnergyUseContract {
         };
 
         //Campos calculado por Watts Horas:
-        public static final String[] COLUMNS_SUM_WH = new String[]{
+        public static final String[] COLUMNS_CALC = new String[]{
                 String.format("MIN(%s)", COLUMN_DATE_TIME),
                 String.format("MAX(%s)", COLUMN_DATE_TIME),
                 String.format("SUM(%s)", COLUMN_DURATION),
@@ -80,18 +80,20 @@ public class OhaEnergyUseContract {
                 String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_2, COLUMN_DURATION ),
                 String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_3, COLUMN_DURATION ),
                 String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_TOTAL, COLUMN_DURATION ),
+                String.format("MAX(%s)", COLUMN_WATTS_TOTAL),
         };
-        //Índices referente a lista de campos COLUMNS_SUM_WH, favor sempre utilizar
+        //Índices referente a lista de campos COLUMNS_CALC, favor sempre utilizar
         //esses Índices para acessar as colunas no cursor.
-        public static final byte INDEX_COLUMN_SUM_DATE_TIME_MIN = 0;
-        public static final byte INDEX_COLUMN_SUM_DATE_TIME_MAX = 1;
-        public static final byte INDEX_COLUMN_SUM_DURATION = 2;
-        public static final byte INDEX_COLUMN_SUM_WH_1 = 3;
-        public static final byte INDEX_COLUMN_SUM_WH_2 = 4;
-        public static final byte INDEX_COLUMN_SUM_WH_3 = 5;
-        public static final byte INDEX_COLUMN_SUM_WH_TOTAL = 6;
+        public static final byte INDEX_COLUMN_CALC_DATE_TIME_MIN = 0;
+        public static final byte INDEX_COLUMN_CALC_DATE_TIME_MAX = 1;
+        public static final byte INDEX_COLUMN_CALC_DURATION_SUN = 2;
+        public static final byte INDEX_COLUMN_CALC_WH_1_SUN = 3;
+        public static final byte INDEX_COLUMN_CALC_WH_2_SUN = 4;
+        public static final byte INDEX_COLUMN_CALC_WH_3_SUN = 5;
+        public static final byte INDEX_COLUMN_CALC_WH_TOTAL_SUN = 6;
+        public static final byte INDEX_COLUMN_CALC_WATTS_MAX = 7;
         //Somente disponível no {@link OhaEnergyUseDaysCursor}
-        public static final byte INDEX_COLUMN_SUM_KWH_COST = 7;
+        public static final byte INDEX_COLUMN_CALC_KWH_COST = 8;
 
         /**
          * Recuperar o SQL para criar a tabela energyUserLog no banco de dados.
