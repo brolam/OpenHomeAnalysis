@@ -88,6 +88,8 @@ public class OhaEnergyUseContract {
                 String.format("SUM(%s)", COLUMN_DURATION),
                 String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_TOTAL, COLUMN_DURATION ),
                 String.format("MAX(%s)", COLUMN_WATTS_TOTAL),
+                //Recuperar o custo por KWH:
+                String.format("(SELECT AVG(%s) FROM %s WHERE %s BETWEEN %s AND %s)", EnergyUseBillEntry.COLUMN_KWH_COST, EnergyUseBillEntry.TABLE_NAME, EnergyUseLogEntry.COLUMN_DATE_TIME, EnergyUseBillEntry.COLUMN_FROM, EnergyUseBillEntry.COLUMN_TO),
         };
 
         //Índices referente a lista de campos COLUMNS_CALC, favor sempre utilizar
@@ -95,8 +97,8 @@ public class OhaEnergyUseContract {
         public static final byte INDEX_COLUMN_CALC_DURATION_SUN = 0;
         public static final byte INDEX_COLUMN_CALC_WH_TOTAL_SUN = 1;
         public static final byte INDEX_COLUMN_CALC_WATTS_MAX = 2;
-        //Somente disponível no {@link OhaEnergyUseDaysCursor}
         public static final byte INDEX_COLUMN_CALC_KWH_COST = 3;
+        //Somente disponível no {@link OhaEnergyUseDaysCursor}
         public static final byte INDEX_COLUMN_CALC_DATE = 4;
 
         /**
