@@ -1,0 +1,107 @@
+<resources>
+    <string name="app_name">Oha Supervisory</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_energy">Energy</string>
+    <string name="action_bill">Bill</string>
+    <string name="action_alert">Alert</string>
+    <string name="action_filter">Filter</string>
+    <string name="action_settings">Settings</string>
+
+    <!--Mensagens de erro referente ao processo leitura do log de consumo de energia-->
+    <string name="exception_on_parse_content_invalid">Content of the power consumption log is invalid!</string>
+
+    <string name="content_authority_energy_use">br.com.brolam.oha.supervisory.energy.use</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Energy Use Sync Preferences Settings -->
+    <string name="pref_header_energy_use_sync">Energy Use Sync</string>
+    <string name="pref_title_energy_use_sync_turn_off">Does stop sync?</string>
+    <string name="pref_description_energy_use_sync_turn_off">It is need to stop the synchronization to change the settings!.</string>
+    <string name="pref_host_name_energy_use_sync">Host Name or IP</string>
+    <string name="pref_host_name_energy_use_sync_default">192.168.0.14</string>
+    <string name="pref_date_energy_use_sync">Current Sync Date</string>
+    <string name="pref_sequence_energy_use_sync">Current Sync Sequence</string>
+
+    <string name="pref_title_hour_energy_use_sync">Current Sync Hour</string>
+    <string-array name="pref_titles_hour_energy_use_sync">
+        <item>00 Hour</item>
+        <item>01 Hour</item>
+        <item>02 Hours</item>
+        <item>03 Hours</item>
+        <item>04 Hours</item>
+        <item>05 Hours</item>
+        <item>06 Hours</item>
+        <item>07 Hours</item>
+        <item>08 Hours</item>
+        <item>09 Hours</item>
+        <item>10 Hours</item>
+        <item>11 Hours</item>
+        <item>12 Hours</item>
+        <item>13 Hours</item>
+        <item>14 Hours</item>
+        <item>15 Hours</item>
+        <item>16 Hours</item>
+        <item>17 Hours</item>
+        <item>18 Hours</item>
+        <item>19 Hours</item>
+        <item>20 Hours</item>
+        <item>21 Hours</item>
+        <item>22 Hours</item>
+        <item>23 Hours</item>
+    </string-array>
+
+    <string-array name="pref_values_hour_energy_use_sync">
+        <item>00</item>
+        <item>01</item>
+        <item>02</item>
+        <item>03</item>
+        <item>04</item>
+        <item>05</item>
+        <item>06</item>
+        <item>07</item>
+        <item>08</item>
+        <item>09</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+    </string-array>
+
+    <string name="pref_title_energy_use_sync_volts">Standard voltage</string>
+    <string-array name="pref_titles_energy_use_sync_volts">
+        <item>110 Volts</item>
+        <item>220 Volts</item>
+    </string-array>
+
+    <string-array name="pref_values_energy_use_sync_volts">
+        <item>110</item>
+        <item>220</item>
+    </string-array>
+    <string name="title_activity_details">DetailsActivity</string>
+
+    <!-- Energy Use Columns -->
+    <string name="hour">Hour</string>
+    <string name="read">Read</string>
+    <string name="wh_phase1">Wh(1)</string>
+    <string name="wh_phase2">Wh(2)</string>
+    <string name="wh_phase3">Wh(3)</string>
+    <string name="kwh">Kwh</string>
+    <string name="cost">Cost</string>
+    <string name="watts">Watts</string>
+
+</resources>

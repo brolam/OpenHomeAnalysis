@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+Exibir uma linha com os valores totais da utilização de energia por Watts Horas em telas menores que 480dp.
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RadioButton
+        android:id="@+id/radioButtonHour"
+        style="@style/AppTheme.Col.EnergyUse.RadioButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/textViewHour"
+        style="@style/AppTheme.Col.EnergyUse.Hour"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        tools:text="23" />
+
+    <TextView
+        android:id="@+id/textViewDuration"
+        style="@style/AppTheme.Col.EnergyUse.Duration"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        tools:text="0.59" />
+
+    <TextView
+        android:id="@+id/textViewKwh"
+        style="@style/AppTheme.Col.EnergyUse.Kwh"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        tools:text="9.99" />
+
+    <TextView
+        android:id="@+id/textViewCost"
+        style="@style/AppTheme.Col.EnergyUse.Cost"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        tools:text="9.99" />
+
+</TableRow>
