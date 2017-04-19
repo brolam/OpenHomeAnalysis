@@ -6,11 +6,11 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.Calendar;
 import java.util.Date;
 import br.com.brolam.library.helpers.OhaHelper;
-import br.com.brolam.oha.supervisory.data.OhaSQLHelper;
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
+
 /**
- * Recupear a utilização de energia por dia, {@link EnergyUseLogEntry}
+ * Recuperar a utilização de energia por dia, {@link EnergyUseLogEntry}
  * na ordem decrescente.
  * @author Breno Marques
  * @version 1.00
@@ -18,13 +18,16 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
  */
 public class OhaEnergyUseDaysCursor extends AbstractCursor {
 
-    private OhaSQLHelper ohaSQLHelper;
+    SQLiteDatabase sqLiteDatabase;
+    Date endDate;
+    Calendar cursorCurrentDate;
     Cursor cursorEnergyUseDay;
-    Double kWhCost = 0.00;
+    int count;
 
-    public OhaEnergyUseDaysCursor(OhaSQLHelper ohaSQLHelper, Cursor cursor){
-        this.ohaSQLHelper = ohaSQLHelper;
-        this.cursorEnergyUseDay = cursor;
+    public OhaEnergyUseDaysCursor(SQLiteDatabase sqLiteDatabase, Date endDate, int count){
+        this.sqLiteDatabase = sqLiteDatabase;
+        this.endDate = endDate;
+        this.count = count;
     }
 
     /**
@@ -35,71 +38,81 @@ public class OhaEnergyUseDaysCursor extends AbstractCursor {
      */
     @Override
     public boolean onMove(int oldPosition, int newPosition) {
-        this.cursorEnergyUseDay.moveToPosition(newPosition);
-        this.kWhCost = 0.65; //TODO EnergyBill - Informar o custo por KWH.
+        this.cursorCurrentDate = Calendar.getInstance();
+        this.cursorCurrentDate.setTime(OhaHelper.getDateBegin(endDate));
+        this.cursorCurrentDate.add(Calendar.DATE,  newPosition * -1);
+        this.cursorEnergyUseDay = getCursorEnergyUseDay(this.cursorCurrentDate);
         return  super.onMove(oldPosition, newPosition) ;
+    }
+
+    /**
+     * Recuperar o total da utilização de energia para um dia
+     * @param cursorDate informar o dia da utilização de energia.
+     * @return
+     */
+    private Cursor getCursorEnergyUseDay(Calendar cursorDate) {
+        long longBeginDate = cursorDate.getTime().getTime();
+        long longEndDate = OhaHelper.getDateEnd(cursorDate.getTime(), false).getTime();
+        String selection = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry.COLUMN_DATE_TIME);
+        String selectionArgs[] = new String[]{Long.toString(longBeginDate), Long.toString(longEndDate)};
+        return  sqLiteDatabase.query(
+                EnergyUseLogEntry.FROM_INDEX_DATE_TIME,
+                EnergyUseLogEntry.COLUMNS_CALC_TOTAL,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
     }
 
     @Override
     public int getCount() {
-        return this.cursorEnergyUseDay !=  null? cursorEnergyUseDay.getCount():0;
+        return count;
     }
 
     @Override
     public String[] getColumnNames() {
-        assertCursorEnergyUseDay();
-        return this.getColumnNames();
+        throw new UnsupportedOperationException();
+
     }
 
     @Override
     public String getString(int i) {
-        assertCursorEnergyUseDay();
-        return this.cursorEnergyUseDay.getString(i);
+        return this.cursorEnergyUseDay.moveToFirst()? this.cursorEnergyUseDay.getString(i): null;
     }
 
     @Override
     public short getShort(int i) {
-        assertCursorEnergyUseDay();
-        return this.cursorEnergyUseDay.getShort(i);
+        return this.cursorEnergyUseDay.moveToFirst()? this.cursorEnergyUseDay.getShort(i): 0;
     }
 
     @Override
     public int getInt(int i) {
-        assertCursorEnergyUseDay();
-        return this.cursorEnergyUseDay.getInt(i);
+        return this.cursorEnergyUseDay.moveToFirst()? this.cursorEnergyUseDay.getInt(i): 0;
     }
 
     @Override
     public long getLong(int i) {
-        assertCursorEnergyUseDay();
-        return this.cursorEnergyUseDay.getLong(i);
+        if ( EnergyUseLogEntry.INDEX_COLUMN_CALC_DATE == i ){
+            return cursorCurrentDate.getTime().getTime();
+        }
+        return this.cursorEnergyUseDay.moveToFirst()? this.cursorEnergyUseDay.getLong(i): 0;
     }
 
     @Override
     public float getFloat(int i) {
-        assertCursorEnergyUseDay();
-        return this.cursorEnergyUseDay.getFloat(i);
+        return this.cursorEnergyUseDay.moveToFirst()?this.cursorEnergyUseDay.getFloat(i): 0;
     }
 
     @Override
     public double getDouble(int i) {
-        if ( i == EnergyUseLogEntry.INDEX_COLUMN_CALC_KWH_COST)
-            return kWhCost;
-        assertCursorEnergyUseDay();
-        return this.cursorEnergyUseDay.getDouble(i);
+        return this.cursorEnergyUseDay.moveToFirst()? this.cursorEnergyUseDay.getDouble(i): 0.00;
     }
 
     @Override
     public boolean isNull(int i) {
-        assertCursorEnergyUseDay();
         return this.cursorEnergyUseDay.isNull(i);
     }
 
-    /**
-     * Validar a situação do cursor:
-     */
-    private void assertCursorEnergyUseDay() {
-        if ((this.cursorEnergyUseDay == null) || (getCount() == 0))
-            throw new IllegalArgumentException("The Cursor EnergyUseDay is empty!");
-    }
 }
