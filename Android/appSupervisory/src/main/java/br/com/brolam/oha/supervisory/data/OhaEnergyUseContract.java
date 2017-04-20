@@ -23,7 +23,8 @@ public class OhaEnergyUseContract {
     /*Definir o caminho por recurso:*/
     public static final String PATH_LOG = "log";
     public static final String PATH_DAYS = "days";
-    public static final String PATH_DAYS_PARAM_BEING_DATE = "beginDate";
+    //Parêmetro para informar a data final para consultar a utilização de energia por dia:
+    public static final String PATH_DAYS_PARAM_END_DATE = "endDate";
     public static final String PATH_BILL = "bill";
 
     /*Definir as URLs:*/
@@ -35,8 +36,12 @@ public class OhaEnergyUseContract {
             .appendPath(PATH_DAYS)
             .build();
 
-    public static Uri getUriDays(Date beginDate){
-       return CONTENT_URI_DAYS.buildUpon().appendQueryParameter(PATH_DAYS_PARAM_BEING_DATE, Long.toString(beginDate.getTime())).build();
+    /**
+     * Recupear a URI para consultar a utilização de energia por dia {@link br.com.brolam.oha.supervisory.data.cursors.OhaEnergyUseDaysCursor}
+     * @param endDate informar a data final para limitar o curosr até a data informada.
+     */
+    public static Uri getUriDays(Date endDate){
+       return CONTENT_URI_DAYS.buildUpon().appendQueryParameter(PATH_DAYS_PARAM_END_DATE, Long.toString(endDate.getTime())).build();
     }
 
     public static final Uri CONTENT_URI_BILL = BASE_CONTENT_URI.buildUpon()
@@ -124,7 +129,7 @@ public class OhaEnergyUseContract {
         public static String getSQLCreateIndex(String indexName) {
             switch (indexName){
                 case INDEX_DATE_TIME:
-                    return String.format("CREATE INDEX %s ON %s (%s, %s, %s, %s);", indexName, TABLE_NAME, COLUMN_DATE_TIME, COLUMN_WATTS_TOTAL, COLUMN_DURATION);
+                    return String.format("CREATE INDEX %s ON %s (%s, %s, %s);", indexName, TABLE_NAME, COLUMN_DATE_TIME, COLUMN_WATTS_TOTAL, COLUMN_DURATION);
                 default:
                     throw new IllegalArgumentException(String.format("Index %s from table %s does not exist", indexName, TABLE_NAME ));
             }
