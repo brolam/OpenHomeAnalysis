@@ -19,28 +19,25 @@ Exibir uma linha com os títulos dos totais de utilização de energia por Watts
 
     <TextView
         android:id="@+id/textViewHour"
-        style="@style/AppTheme.Col.EnergyUse.Hour"
-        android:textColor="@color/white"
+        style="@style/AppTheme.Col.Title.EnergyUse.Hour"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/hour" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Duration"
-        android:textColor="@color/white"
+        style="@style/AppTheme.Col.Title.EnergyUse.Duration"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/read" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Kwh"
-        android:textColor="@color/white"
+        style="@style/AppTheme.Col.Title.EnergyUse.Kwh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/kwh" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Cost"
+        style="@style/AppTheme.Col.Title.EnergyUse.Cost"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/cost" />

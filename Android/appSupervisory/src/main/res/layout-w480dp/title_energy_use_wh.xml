@@ -16,43 +16,43 @@ Exibir uma linha com os títulos dos totais da utilização de energia por Watts
         android:visibility="invisible" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Hour"
+        style="@style/AppTheme.Col.Title.EnergyUse.Hour"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/hour" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Duration"
+        style="@style/AppTheme.Col.Title.EnergyUse.Duration"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/read" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Wh"
+        style="@style/AppTheme.Col.Title.EnergyUse.Wh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/wh_phase1" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Wh"
+        style="@style/AppTheme.Col.Title.EnergyUse.Wh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/wh_phase2" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Wh"
+        style="@style/AppTheme.Col.Title.EnergyUse.Wh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/wh_phase3" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Kwh"
+        style="@style/AppTheme.Col.Title.EnergyUse.Kwh"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/kwh" />
 
     <TextView
-        style="@style/AppTheme.Col.EnergyUse.Cost"
+        style="@style/AppTheme.Col.Title.EnergyUse.Cost"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/cost" />

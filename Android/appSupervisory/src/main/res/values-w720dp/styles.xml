@@ -1,22 +1,6 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <!-- Energy Use Columns para telas inferior a 720dp -->
+    <!-- Energy Use Columns para telas igual ou superior a 720dp -->
     <style name="AppTheme.Col.EnergyUse.RadioButton" parent="@style/Base.Widget.AppCompat.CompoundButton.RadioButton">
         <item name="android:layout_weight">0.8</item>
         <item name="android:gravity">center</item>
@@ -24,28 +8,28 @@
         <item name="android:lines">1</item>
     </style>
 
-    <style name="AppTheme.Col.EnergyUse.Hour" parent="@style/TextAppearance.AppCompat.Medium">
+    <style name="AppTheme.Col.EnergyUse.Hour" parent="@style/TextAppearance.AppCompat.Large">
         <item name="android:layout_weight">1.5</item>
         <item name="android:gravity">end</item>
         <item name="android:ellipsize">end</item>
         <item name="android:lines">1</item>
     </style>
 
-    <style name="AppTheme.Col.EnergyUse.Duration" parent="@style/TextAppearance.AppCompat.Medium">
+    <style name="AppTheme.Col.EnergyUse.Duration" parent="@style/TextAppearance.AppCompat.Large">
         <item name="android:layout_weight">2</item>
         <item name="android:gravity">end</item>
         <item name="android:ellipsize">end</item>
         <item name="android:lines">1</item>
     </style>
 
-    <style name="AppTheme.Col.EnergyUse.Wh" parent="@style/TextAppearance.AppCompat.Small">
+    <style name="AppTheme.Col.EnergyUse.Wh" parent="@style/TextAppearance.AppCompat.Medium">
         <item name="android:layout_weight">2</item>
         <item name="android:gravity">end</item>
         <item name="android:ellipsize">end</item>
         <item name="android:lines">1</item>
     </style>
 
-    <style name="AppTheme.Col.EnergyUse.Kwh" parent="@style/TextAppearance.AppCompat.Medium">
+    <style name="AppTheme.Col.EnergyUse.Kwh" parent="@style/TextAppearance.AppCompat.Large">
         <item name="android:layout_weight">3</item>
         <item name="android:gravity">end</item>
         <item name="android:textStyle">bold</item>
@@ -53,7 +37,7 @@
         <item name="android:lines">1</item>
     </style>
 
-    <style name="AppTheme.Col.EnergyUse.Cost" parent="@style/TextAppearance.AppCompat.Medium">
+    <style name="AppTheme.Col.EnergyUse.Cost" parent="@style/TextAppearance.AppCompat.Large">
         <item name="android:layout_weight">2</item>
         <item name="android:gravity">end</item>
         <item name="android:textStyle">bold</item>
@@ -61,7 +45,7 @@
         <item name="android:lines">1</item>
     </style>
 
-    <!-- Energy Use Columns para telas Titles inferior a 720dp  -->
+    <!-- Energy Use Columns Titles para telas igual ou superior a 720dp -->
     <style name="AppTheme.Col.Title.EnergyUse.Hour" parent="@style/AppTheme.Col.EnergyUse.Hour">
         <item name="android:textColor">@color/white</item>
     </style>

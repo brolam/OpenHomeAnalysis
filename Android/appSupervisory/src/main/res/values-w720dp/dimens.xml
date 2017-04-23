@@ -1,0 +1,4 @@
+<resources>
+    <!-- Para telas igual ou superior a 720dp -->
+    <integer name="cards_columns">2</integer>
+</resources>
