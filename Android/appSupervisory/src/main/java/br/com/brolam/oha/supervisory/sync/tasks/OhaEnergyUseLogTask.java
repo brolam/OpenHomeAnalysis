@@ -40,21 +40,23 @@ public class OhaEnergyUseLogTask {
     //Informar se a sincronização está em execuão ou parada:
     private boolean flagRunning;
 
-    public OhaEnergyUseLogTask() {
+    IOhaTask iOhaTask;
+
+    public OhaEnergyUseLogTask(IOhaTask iOhaTask) {
         super();
+        this.iOhaTask = iOhaTask;
         this.flagRunning = false;
+        this.ohaEnergyUseSyncHelper = new OhaEnergyUseSyncHelper(iOhaTask.getContext(), iOhaTask.getPreferences());
     }
 
     /**
      * Executar o fluxo principal da sincronização.
-     * @param ohaEnergyUseSyncHelper Ajudante para recuperar os parâmetros de preferência na sincronização dos logs.
      */
-    public void execute(OhaEnergyUseSyncHelper ohaEnergyUseSyncHelper) {
-        this.ohaEnergyUseSyncHelper = ohaEnergyUseSyncHelper;
+    public void execute() {
         this.flagRunning = true;
         //Executar até a sincronização estiver ligada {@link SettingsActivity.EnergyUsePreferenceFragment}
         // e se a sincronização estiver em execução:
-        while (!ohaEnergyUseSyncHelper.isSyncTurnOff() && flagRunning) {
+        while (!ohaEnergyUseSyncHelper.isSetupMode() && flagRunning) {
             try {
                 //Atualizar o status e data hora do Registrador de Utilização de Energia.
                 setStatus();
@@ -68,12 +70,13 @@ public class OhaEnergyUseLogTask {
                 //não existir:
                 if (ohaStatusLog == OhaStatusLog.LOG_DATE_NOT_EXISTS) {
                     setNextOhaSequenceLog();
+                } if ( ohaStatusLog.getDurationBoardRunning() > ohaEnergyUseSyncHelper.getOftenLoggerResetMillisecond() ) {
+                    tryResetEnergyUseLogger();
+                    delay(10 * DateUtils.SECOND_IN_MILLIS );
                 } else {
                     //Executar até existir logs disponíveis para a data hora informada:
                     while (doImport(ohaStatusLog, hostName, strDate, strHour)) {
-                        synchronized (this) {
-                            wait(15000);
-                        }
+                        delay(15 * DateUtils.SECOND_IN_MILLIS);
                     }
                 }
                 //O Registrador não é multitarefas, dessa forma, e necessário executar delays
@@ -92,8 +95,11 @@ public class OhaEnergyUseLogTask {
                 Log.e(TAG, e.toString());
             } catch (EnergyUseLogSyncFatalError e) {
                 //Desligar a sincronização quando ocorrer um erro fatal
-                ohaEnergyUseSyncHelper.setSyncTurnOff();
+                ohaEnergyUseSyncHelper.setSetupModeOn();
                 Log.e(TAG, e.toString());
+            } catch (BackupAndRestoreOperation e){
+                Log.e(TAG, e.toString());
+                break;
             } catch (Exception e) {
                 Log.e(TAG, e.toString());
             }
@@ -140,7 +146,8 @@ public class OhaEnergyUseLogTask {
             EnergyUseLogRead,
             EnergyUseLogSdCardFatalError,
             EnergyUseRequestTimeOut,
-            InterruptedException {
+            InterruptedException,
+            BackupAndRestoreOperation{
         //Recuperar a última sequencia importada:
         int startSequence = ohaEnergyUseSyncHelper.getSequence();
         //Informar se é permitido importar os logs mesmo se a sequencia do log estiver quebrada,
@@ -179,9 +186,12 @@ public class OhaEnergyUseLogTask {
                 setNextOhaSequenceLog();
                 return false;
             }
+        } else if ( OhaStatusLog.exists(OhaStatusLog.LOG_DATE_NOT_EXISTS, energyUseLogs)) {
+            //Retornar a falso se data e hora informada não existir:
+            return false;
         }
         //Retornar a verdadeiro se todos os logs ainda não foram importados:
-        return !OhaStatusLog.exists(OhaStatusLog.LOG_FILE_NOT_EXISTS, energyUseLogs);
+        return true;
     }
 
     /**
@@ -202,7 +212,8 @@ public class OhaEnergyUseLogTask {
             EnergyUseLogRead,
             EnergyUseLogSdCardFatalError,
             EnergyUseRequestTimeOut,
-            InterruptedException {
+            InterruptedException,
+            BackupAndRestoreOperation {
         List<String> strings = new ArrayList<>();
         //Realizar as tentativas para recuperar o status
         for (int tryCount = 1; tryCount <= NUMBER_ATTEMPTS; tryCount++) {
@@ -252,7 +263,8 @@ public class OhaEnergyUseLogTask {
             EnergyUseLogRead,
             EnergyUseLogSdCardFatalError,
             EnergyUseRequestTimeOut,
-            InterruptedException {
+            InterruptedException,
+            BackupAndRestoreOperation{
         //Definir a data de exclusão dos logs para liberar espaço no
         //SD Card do Registrador de Utilização de Energia:
         Calendar calendar = OhaHelper.getCalendar(strDate);
@@ -412,9 +424,12 @@ public class OhaEnergyUseLogTask {
             throws
             EnergyUseLogSdCardFatalError,
             EnergyUseLogRead,
-            EnergyUseRequestTimeOut {
+            EnergyUseRequestTimeOut,
+            BackupAndRestoreOperation {
 
-        if (!flagRunning) {
+        if ( this.iOhaTask.isBackupAndRestoreOperation()){
+            throw new BackupAndRestoreOperation("Energy Use sync was forced to stop, because backup or restore operation!");
+        } else if ((!flagRunning) || (this.ohaEnergyUseSyncHelper.isSetupMode())) {
             throw new EnergyUseLogRead("Energy Use sync was forced to stop!");
         } else if (OhaStatusLog.exists(OhaStatusLog.OHA_STATUS_NOT_SD, strings)) {
             throw new EnergyUseLogSdCardFatalError("SD Card is not available on Energy Use Looger");

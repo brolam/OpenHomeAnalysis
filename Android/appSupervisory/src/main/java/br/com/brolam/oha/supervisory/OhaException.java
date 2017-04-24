@@ -44,4 +44,10 @@ public class OhaException extends Exception {
             super(message);
         }
     }
+
+    public static class BackupAndRestoreOperation extends Exception {
+        public BackupAndRestoreOperation(String message) {
+            super(message);
+        }
+    }
 }

@@ -7,7 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 
-import br.com.brolam.oha.supervisory.sync.OhaEnergyUseSyncService;
+import br.com.brolam.oha.supervisory.sync.OhaSyncService;
 
 /**
  * Organizar todas os Broadcast do aplicativo
@@ -23,13 +23,13 @@ public class OhaBroadcast extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         switch (intent.getAction()) {
             case START_SYNC_ENERGY_USE:
-                OhaEnergyUseSyncService.start(context);
+                OhaSyncService.start(context);
                 return;
             case Intent.ACTION_BOOT_COMPLETED:
-                OhaEnergyUseSyncService.start(context);
+                OhaSyncService.start(context);
                 return;
             case ConnectivityManager.CONNECTIVITY_ACTION:
-                OhaEnergyUseSyncService.start(context);
+                OhaSyncService.start(context);
                 return;
 
         }
