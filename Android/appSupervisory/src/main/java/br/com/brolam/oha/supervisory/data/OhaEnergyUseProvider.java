@@ -190,6 +190,7 @@ public class OhaEnergyUseProvider extends ContentProvider {
         //Notificar a atualização para as Uri relacionadas a tabela EnergyUseLog
         getContext().getContentResolver().notifyChange(uri, null);
         getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_DAYS, null);
+        getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_BILL, null);
         return values.length;
     }
 
