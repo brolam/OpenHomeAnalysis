@@ -184,8 +184,8 @@ public class OhaEnergyUseLogTask {
         if (OhaStatusLog.exists(OhaStatusLog.LOG_FILE_NOT_EXISTS, energyUseLogs)) {
             if (ohaStatusLog == OhaStatusLog.OHA_STATUS_FINISHED) {
                 setNextOhaSequenceLog();
-                return false;
             }
+            return false;
         } else if ( OhaStatusLog.exists(OhaStatusLog.LOG_DATE_NOT_EXISTS, energyUseLogs)) {
             //Retornar a falso se data e hora informada não existir:
             return false;

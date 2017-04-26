@@ -1,0 +1,25 @@
+<!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="backup_activated"
+        android:title="@string/pref_title_backup_activated"
+        android:summary="@string/pref_description_backup_activated"
+        />
+
+    <ListPreference
+        android:dependency="backup_activated"
+        android:defaultValue="12"
+        android:entries="@array/pref_titles_backup_frequency"
+        android:entryValues="@array/pref_values_backup_frequency"
+        android:key="backup_frequency"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_backup_frequency" />
+
+</PreferenceScreen>

@@ -1,0 +1,15 @@
+<!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="br.com.brolam.oha.supervisory.ui.OhaEnergyUseDetailsActivity">
+    <item
+        android:id="@+id/action_filter"
+        android:icon="@drawable/ic_filter_white"
+        android:title="@string/action_filter"
+        app:showAsAction="always"/>
+</menu>

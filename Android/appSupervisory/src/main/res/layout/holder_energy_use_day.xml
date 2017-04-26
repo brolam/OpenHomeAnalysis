@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+Layout para exibir a utilização de energia por dia.
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/default_text_margin"
+        android:paddingLeft="@dimen/default_text_margin"
+        android:paddingRight="@dimen/default_text_margin"
+        android:paddingTop="@dimen/default_text_margin">
+
+        <TextView
+            android:id="@+id/textViewDay"
+            style="@style/AppTheme.Card.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            tools:text="Monday, January 1, 2017" />
+
+        <TextView
+            android:id="@+id/textViewAccuracy"
+            style="@style/AppTheme.Card.Subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewDay"
+            tools:text="Accuracy 99.99%" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/AppTheme.Card.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Max. Watts." />
+
+            <TextView
+                android:id="@+id/textViewWattsMax"
+                style="@style/AppTheme.Card.Subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="45.00" />
+
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/textViewDailyCost"
+            style="@style/AppTheme.Card.Cost"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewAccuracy"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/default_text_margin"
+            tools:text="$99.99" />
+
+        <TextView
+            android:id="@+id/textViewBody"
+            style="@style/AppTheme.Card.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textViewDailyCost"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/default_text_margin"
+            tools:text="KWH 24.00 and avg KWH1.00" />
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textViewBody"
+            android:layout_marginTop="@dimen/default_text_margin" />
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

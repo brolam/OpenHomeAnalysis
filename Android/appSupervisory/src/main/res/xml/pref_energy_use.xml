@@ -1,0 +1,71 @@
+<!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="energy_use_sync_setup_mode"
+        android:title="@string/pref_title_energy_use_sync_setup_mode"
+        android:summary="@string/pref_description_energy_use_sync_setup_mode" />
+
+    <EditTextPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:title="@string/pref_host_name_energy_use_sync"
+        android:defaultValue="@string/pref_host_name_energy_use_sync_default"
+        android:key="energy_use_sync_host_name"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"/>
+
+    <EditTextPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:title="@string/pref_date_energy_use_sync"
+        android:inputType="numberSigned"
+        android:key="energy_use_sync_date"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"/>
+
+    <ListPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:defaultValue="00"
+        android:entries="@array/pref_titles_hour_energy_use_sync"
+        android:entryValues="@array/pref_values_hour_energy_use_sync"
+        android:key="energy_use_sync_hour"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_hour_energy_use_sync" />
+
+    <EditTextPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:title="@string/pref_sequence_energy_use_sync"
+        android:inputType="numberSigned"
+        android:key="energy_use_sync_sequence"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"/>
+
+    <ListPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:defaultValue="220"
+        android:entries="@array/pref_titles_energy_use_sync_volts"
+        android:entryValues="@array/pref_values_energy_use_sync_volts"
+        android:key="energy_use_sync_volts"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_energy_use_sync_volts" />
+
+    <ListPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:defaultValue="48"
+        android:entries="@array/pref_titles_energy_use_sync_often_logger_reset"
+        android:entryValues="@array/pref_values_energy_use_sync_often_logger_reset"
+        android:key="energy_use_sync_often_logger_reset"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_energy_use_sync_often_logger_reset" />
+
+</PreferenceScreen>

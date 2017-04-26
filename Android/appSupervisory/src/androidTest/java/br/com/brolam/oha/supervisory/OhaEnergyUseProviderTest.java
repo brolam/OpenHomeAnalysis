@@ -87,7 +87,7 @@ public class OhaEnergyUseProviderTest {
                 String.valueOf(endDate.getTime().getTime())
         };
         Cursor cursor = context.getContentResolver().query(
-                OhaEnergyUseContract.CONTENT_URI_LOG_DAY,
+                OhaEnergyUseContract.CONTENT_URI_DAYS,
                 null,
                 selection,
                 selectionArgs,
@@ -95,12 +95,46 @@ public class OhaEnergyUseProviderTest {
         );
 
         assertTrue("Energy Logs is empty!", cursor.moveToFirst());
-        long longBeginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMN_CALC_DATE_TIME_MIN);
+        long longBeginDate = cursor.getLong(EnergyUseLogEntry.INDEX_COLUMN_CALC_DATE);
         assertEquals("Begin Date", dateBegin.getTime().getTime(), longBeginDate);
         Double duration = cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_DURATION_SUN);
         assertEquals("Duration", DateUtils.DAY_IN_MILLIS / 1000.00, duration, 0.00);
         Double totalKWH = OhaHelper.convertWhToKWH(cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_WH_TOTAL_SUN));
         assertEquals("Total KWH", "24.00", OhaHelper.formatNumber(totalKWH,"#0.00"));
+    }
+
+    @Test
+    public void caseEnergyUseBill() {
+
+        // 16/ 02 ate 20/03
+        Context context = InstrumentationRegistry.getTargetContext();
+        ContentResolver contentResolver = context.getContentResolver();
+        Calendar dateBegin = Calendar.getInstance();
+        //Utilização de energia no dia 01/01/2015.
+        dateBegin.set(2016, 11, 22, 0, 0, 0);
+        dateBegin.set(Calendar.MILLISECOND, 0);
+
+        Calendar dateEnd = Calendar.getInstance();
+        //Utilização de energia no dia 01/01/2015.
+        dateEnd.set(2016, 12, 21, 0, 0, 0);
+        dateEnd.set(Calendar.MILLISECOND, 0);
+        ContentValues contentValues = EnergyUseBillEntry.parse("February 2017", dateBegin.getTime(), dateEnd.getTime(), 0.65);
+        contentResolver.insert(OhaEnergyUseContract.CONTENT_URI_BILL, contentValues);
+
+        Cursor cursorBills = contentResolver.query(
+                OhaEnergyUseContract.CONTENT_URI_BILL,
+                null,
+                null,
+                null,
+                null
+        );
+        String tag = "Energy Bill:";
+        while (cursorBills.moveToNext()){
+            Log.i(tag,String.format("==============%s================", cursorBills.getString(1)));
+            for(int field = 0; field < cursorBills.getColumnCount(); field++ ){
+                Log.i(tag,String.format("%s: %s", cursorBills.getColumnName(field), cursorBills.getString(field) ) );
+            }
+        }
     }
 }
 

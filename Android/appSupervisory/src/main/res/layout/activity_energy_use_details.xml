@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+Layout de tela de detalhes da utilização de energia por watts ou watts hora.
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="br.com.brolam.oha.supervisory.ui.OhaEnergyUseDetailsActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:paddingBottom="@dimen/default_text_margin"
+            android:theme="@style/AppTheme.AppBarOverlay">
+            <include android:id="@+id/titleEnergyUseWh" layout="@layout/title_energy_use_wh" />
+            <include android:id="@+id/titleEnergyUseWhValues" layout="@layout/title_energy_use_wh_values" />
+        </TableLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <include layout="@layout/content_energy_use_details" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:srcCompat="@drawable/ic_add_alert_white" />
+
+</android.support.design.widget.CoordinatorLayout>

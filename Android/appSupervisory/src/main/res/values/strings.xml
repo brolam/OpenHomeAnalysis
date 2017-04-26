@@ -1,3 +1,8 @@
+<!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
 <resources>
     <string name="app_name">Oha Supervisory</string>
 
@@ -8,7 +13,13 @@
     <string name="action_bill">Bill</string>
     <string name="action_alert">Alert</string>
     <string name="action_filter">Filter</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
     <string name="action_settings">Settings</string>
+    <string name="action_backup">Backup</string>
+    <string name="action_restore">Restore</string>
+    <string name="action_details">MORE DETAILS</string>
+
 
     <!--Mensagens de erro referente ao processo leitura do log de consumo de energia-->
     <string name="exception_on_parse_content_invalid">Content of the power consumption log is invalid!</string>
@@ -20,8 +31,8 @@
 
     <!-- Energy Use Sync Preferences Settings -->
     <string name="pref_header_energy_use_sync">Energy Use Sync</string>
-    <string name="pref_title_energy_use_sync_turn_off">Does stop sync?</string>
-    <string name="pref_description_energy_use_sync_turn_off">It is need to stop the synchronization to change the settings!.</string>
+    <string name="pref_title_energy_use_sync_setup_mode">Enable setup mode?</string>
+    <string name="pref_description_energy_use_sync_setup_mode">The setup mode will stop the synchronization for configuration!.</string>
     <string name="pref_host_name_energy_use_sync">Host Name or IP</string>
     <string name="pref_host_name_energy_use_sync_default">192.168.0.14</string>
     <string name="pref_date_energy_use_sync">Current Sync Date</string>
@@ -93,6 +104,38 @@
         <item>220</item>
     </string-array>
     <string name="title_activity_details">DetailsActivity</string>
+
+
+    <string name="pref_title_energy_use_sync_often_logger_reset">Often logger reset</string>
+    <string-array name="pref_titles_energy_use_sync_often_logger_reset">
+        <item>24 Hours</item>
+        <item>48 Hours</item>
+        <item>62 Hours</item>
+    </string-array>
+
+    <string-array name="pref_values_energy_use_sync_often_logger_reset">
+        <item>24</item>
+        <item>48</item>
+        <item>62</item>
+    </string-array>
+
+    <!-- Backup Preferences Settings -->
+    <string name="pref_header_backup">Backup</string>
+    <string name="pref_title_backup_activated">Automatic Backup</string>
+    <string name="pref_description_backup_activated">Perform an automatic backup of the database on the SD card.</string>
+
+    <string name="pref_title_backup_frequency">Backup Frequency</string>
+    <string-array name="pref_titles_backup_frequency">
+        <item>Every 12 hours</item>
+        <item>Every 24 hours</item>
+        <item>Every 48 hours</item>
+    </string-array>
+
+    <string-array name="pref_values_backup_frequency">
+        <item>12</item>
+        <item>24</item>
+        <item>48</item>
+    </string-array>
 
     <!-- Energy Use Columns -->
     <string name="hour">Hour</string>

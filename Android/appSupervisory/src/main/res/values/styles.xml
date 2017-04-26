@@ -1,3 +1,8 @@
+<!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -15,6 +20,26 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+
+    <style name="AppTheme.Card.Title" parent="@style/TextAppearance.AppCompat.Medium">
+        <item name="android:ellipsize">end</item>
+        <item name="android:lines">1</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="AppTheme.Card.Subtitle" parent="AppTheme.Card.Title">
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="AppTheme.Card.Cost" parent="AppTheme.Card.Title">
+        <item name="android:textSize">56sp</item>
+    </style>
+
+    <style name="AppTheme.Card.Body" parent="Base.TextAppearance.AppCompat.Large">
+
+    </style>
+
 
     <!-- Energy Use Columns para telas inferior a 720dp -->
     <style name="AppTheme.Col.EnergyUse.RadioButton" parent="@style/Base.Widget.AppCompat.CompoundButton.RadioButton">
