@@ -57,7 +57,7 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
     IOhaEnergyUseLogHelper iOhaEnergyUseLogHelper;
     //Colunas para a projeção no Cursor:
     public static final String[] LOG_COLUMNS = new String[]{
-            OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_DATE_TIME,
+            OhaEnergyUseContract.EnergyUseLogEntry._ID,
             OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_DURATION,
             OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_WATTS_1,
             OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_WATTS_2,
@@ -123,9 +123,9 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
                 this.iOhaEnergyUseLogHelper.getContext(),
                 CONTENT_URI_LOG,
                 LOG_COLUMNS,
-                String.format("%s BETWEEN ? AND ?", OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_DATE_TIME),
+                String.format("%s BETWEEN ? AND ?", OhaEnergyUseContract.EnergyUseLogEntry._ID),
                 new String[]{Long.toString(this.beginDateTime), Long.toString(this.endDateTime)},
-                String.format("%s DESC", OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_DATE_TIME)
+                String.format("%s DESC", OhaEnergyUseContract.EnergyUseLogEntry._ID)
         );
     }
 

@@ -10,8 +10,16 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Pair;
+
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+
 import br.com.brolam.library.helpers.OhaHelper;
+import br.com.brolam.oha.supervisory.data.cursors.IOhaEnergyUseTotalCache;
 import br.com.brolam.oha.supervisory.data.cursors.OhaEnergyUseBillCursor;
 import br.com.brolam.oha.supervisory.data.cursors.OhaEnergyUseDaysCursor;
 import br.com.brolam.oha.supervisory.data.helpers.OhaSQLHelper;
@@ -24,7 +32,7 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
  * @version 1.00
  * @since Release 01
  */
-public class OhaEnergyUseProvider extends ContentProvider {
+public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyUseTotalCache {
 
     //Definir os códigos que serão relacionados as URIs para facilitar a identificaçãos das mesmas.
     public static final int CODE_ENERGY_USER_LOG = 100;
@@ -33,6 +41,8 @@ public class OhaEnergyUseProvider extends ContentProvider {
     //Esse UriMatcher será utilizado para realicionar as URIs as códigos supracitados.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private OhaSQLHelper ohaSQLHelper;
+    //Hash para armazenar o cache com os totais de utilização de energia.
+    private HashMap<Pair<Long,Long>,HashMap<Integer,String>> hashEnergyUseTotalCache;
 
     public static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -47,6 +57,7 @@ public class OhaEnergyUseProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         this.ohaSQLHelper = new OhaSQLHelper(getContext());
+        this.hashEnergyUseTotalCache = new HashMap<>();
         return true;
     }
 
@@ -123,7 +134,7 @@ public class OhaEnergyUseProvider extends ContentProvider {
      */
     private Cursor getOhaEnergyUseLogCursor(SQLiteDatabase sqLiteDatabase, String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         return sqLiteDatabase.query(
-                EnergyUseLogEntry.FROM_INDEX_DATE_TIME,
+                EnergyUseLogEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -140,9 +151,9 @@ public class OhaEnergyUseProvider extends ContentProvider {
         String strEndDate = uri.getQueryParameter(PATH_DAYS_PARAM_END_DATE);
         Date endDate = OhaHelper.getDateEnd(strEndDate == null ? new Date() : new Date(Long.parseLong(strEndDate)), false);
         Cursor cursor = sqLiteDatabase.query(
-                EnergyUseLogEntry.FROM_INDEX_DATE_TIME,
+                EnergyUseLogEntry.TABLE_NAME,
                 EnergyUseLogEntry.COLUMNS_CALC_PERIOD,
-                String.format("%s <= ?", EnergyUseLogEntry.COLUMN_DATE_TIME),
+                String.format("%s <= ?", EnergyUseLogEntry._ID),
                 new String[]{Long.toString(endDate.getTime())},
                 null,
                 null,
@@ -154,7 +165,7 @@ public class OhaEnergyUseProvider extends ContentProvider {
                     cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_CALC_PERIOD_END)
             );
         }
-        return new OhaEnergyUseDaysCursor(sqLiteDatabase, endDate, count);
+        return new OhaEnergyUseDaysCursor(sqLiteDatabase, endDate, count, this);
     }
 
     /**
@@ -162,7 +173,12 @@ public class OhaEnergyUseProvider extends ContentProvider {
      */
     private Cursor getOhaEnergyUseBillCursor(SQLiteDatabase sqLiteDatabase, String selection, String[] selectionArgs) {
         Cursor cursor = sqLiteDatabase.query(EnergyUseBillEntry.TABLE_NAME, EnergyUseBillEntry.COLUMN_ALL, selection, selectionArgs, null, null, String.format("%s DESC", EnergyUseBillEntry.COLUMN_FROM));
-        return  new OhaEnergyUseBillCursor(sqLiteDatabase, cursor);
+        //*Atualizar o cache de totais de utilização de energia para até 5 contas:
+        for(int index = 0; index < 5 && index < cursor.getCount(); index++ ){
+            cursor.moveToPosition(index);
+            getEnergyUseTotalOnCache(cursor.getLong(EnergyUseBillEntry.INDEX_COLUMN_FROM), cursor.getLong(EnergyUseBillEntry.INDEX_COLUMN_TO) );
+        }
+        return  new OhaEnergyUseBillCursor(sqLiteDatabase, cursor, this);
     }
 
 
@@ -171,6 +187,8 @@ public class OhaEnergyUseProvider extends ContentProvider {
      */
     private int bulkInsertEnergyUseLogs(@NonNull Uri uri, @NonNull ContentValues[] values, SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.beginTransaction();
+        //Armazenar as datas dos novos logs para atualizar o cache de  utilização de energia.
+        Set<Long> setDateUpdated = new TreeSet<>();
         try {
             for (int row = 0; row < values.length; row++) {
                 ContentValues value = values[row];
@@ -182,11 +200,14 @@ public class OhaEnergyUseProvider extends ContentProvider {
                 if (insertedResult == -1) {
                     throw new SQLException(String.format("The EnergyUseLog content on the row %s It is not valid.", row));
                 }
+                setDateUpdated.add(value.getAsLong(EnergyUseLogEntry._ID));
             }
             sqLiteDatabase.setTransactionSuccessful();
         } finally {
             sqLiteDatabase.endTransaction();
         }
+        //Atualizar o cache de  utilização de energia.
+        updateEnergyUseTotalOnCache(setDateUpdated);
         //Notificar a atualização para as Uri relacionadas a tabela EnergyUseLog
         getContext().getContentResolver().notifyChange(uri, null);
         getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_DAYS, null);
@@ -214,4 +235,61 @@ public class OhaEnergyUseProvider extends ContentProvider {
         return id;
     }
 
+    /**
+       Recuperar o total de utilização de energia do cache ou atualizar o cache ser for necessário.
+     */
+    @Override
+    public HashMap<Integer,String> getEnergyUseTotalOnCache(long beginDate, long endDate) {
+        Pair<Long, Long> pairKey = new Pair(beginDate, endDate);
+        HashMap<Integer,String> mapCache = hashEnergyUseTotalCache.get(pairKey);;
+        if ( (mapCache != null) ){
+            return mapCache;
+        } else {
+            SQLiteDatabase sqLiteDatabase = this.ohaSQLHelper.getReadableDatabase();
+            String selection = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry._ID);
+            String selectionArgs[] = new String[]{Long.toString(beginDate), Long.toString(endDate)};
+            Cursor cursor = sqLiteDatabase.query(
+                    EnergyUseLogEntry.TABLE_NAME,
+                    EnergyUseLogEntry.COLUMNS_CALC_TOTAL,
+                    selection,
+                    selectionArgs,
+                    null,
+                    null,
+                    null
+            );
+            try {
+                //Gerar o cache se existir utilização de energia no período informado.
+                if ((cursor.moveToFirst()) && (cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_DURATION_SUN) > 0)) {
+                    mapCache = new HashMap<>();
+                    for (int index = 0; index < cursor.getColumnCount(); index++) {
+                        mapCache.put(index, cursor.getString(index));
+                    }
+                    this.hashEnergyUseTotalCache.put(pairKey, mapCache);
+                }
+            } finally {
+                cursor.close();
+            }
+            return mapCache;
+        }
+    }
+
+    /**
+      Atualizar o cache de totais de utilização de energia.
+     */
+    private void updateEnergyUseTotalOnCache(Set<Long> setDateUpdated) {
+        //Verificar quais itens do cache devem ser atualizados:
+        HashSet<Pair<Long, Long>> isNeedUpdate = new HashSet<>();
+        for (Long endDate : setDateUpdated) {
+            for (Pair<Long, Long> key : hashEnergyUseTotalCache.keySet()) {
+                if ((endDate >= key.first) && (endDate <= key.second)) {
+                    isNeedUpdate.add(key);
+                }
+            }
+        }
+        //Atualizar os itens do cache que precisam ser atualizados:
+        for (Pair<Long, Long> key : isNeedUpdate) {
+            hashEnergyUseTotalCache.remove(key);
+            getEnergyUseTotalOnCache(key.first, key.second);
+        }
+    }
 }

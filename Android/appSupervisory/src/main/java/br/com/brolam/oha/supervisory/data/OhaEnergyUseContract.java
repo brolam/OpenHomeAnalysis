@@ -54,17 +54,6 @@ public class OhaEnergyUseContract {
         //Definir o nome  da tabela no banco de dados
         public static final String TABLE_NAME = "energyUserLog";
 
-        //Definir os nomes dos índices da tabela:
-        public static final String INDEX_DATE_TIME = "idx_" + TABLE_NAME + "_date_time";
-
-        //Definir os nomes das origens por indices:
-        public static final String FROM_INDEX_DATE_TIME = String.format("%s INDEXED BY %s", TABLE_NAME, INDEX_DATE_TIME);
-
-        /*Definir os nomes dos campos na tabela:*/
-        //Sequencia por bloco de registro {@link br.com.brolam.oha.supervisory.apiV1.models.OhaEnergyUseLog.repository}
-        public static final String COLUMN_SEQUENCE = "sequence";
-        //Data e hora do registro do log.
-        public static final String COLUMN_DATE_TIME = "date_time";
         //Duração em segundos entre esse log e o log anterior.
         public static final String COLUMN_DURATION = "duration";
         //Tensão média na Duração do log.
@@ -81,8 +70,8 @@ public class OhaEnergyUseContract {
         /*Campos calculado por Watts Horas: */
         //Recuperar o período de disponibilidade de logs:
         public static final String[] COLUMNS_CALC_PERIOD = new String[]{
-                String.format("MIN(%s)", COLUMN_DATE_TIME),
-                String.format("MAX(%s)", COLUMN_DATE_TIME)
+                String.format("MIN(%s)", _ID),
+                String.format("MAX(%s)", _ID)
         };
         //Índices referente a lista de campos COLUMNS_CALC_PERIOD, favor sempre utilizar
         //esses Índices para acessar as colunas no cursor.
@@ -94,7 +83,7 @@ public class OhaEnergyUseContract {
                 String.format("SUM((%s * %s) / 3600.00)", COLUMN_WATTS_TOTAL, COLUMN_DURATION ),
                 String.format("MAX(%s)", COLUMN_WATTS_TOTAL),
                 //Recuperar o custo por KWH:
-                String.format("(SELECT AVG(%s) FROM %s WHERE %s BETWEEN %s AND %s)", EnergyUseBillEntry.COLUMN_KWH_COST, EnergyUseBillEntry.TABLE_NAME, EnergyUseLogEntry.COLUMN_DATE_TIME, EnergyUseBillEntry.COLUMN_FROM, EnergyUseBillEntry.COLUMN_TO),
+                String.format("(SELECT AVG(%s) FROM %s WHERE %s.%s BETWEEN %s AND %s)", EnergyUseBillEntry.COLUMN_KWH_COST, EnergyUseBillEntry.TABLE_NAME, EnergyUseLogEntry.TABLE_NAME, EnergyUseLogEntry._ID, EnergyUseBillEntry.COLUMN_FROM, EnergyUseBillEntry.COLUMN_TO),
         };
 
         //Índices referente a lista de campos COLUMNS_CALC, favor sempre utilizar
@@ -110,11 +99,9 @@ public class OhaEnergyUseContract {
          * Recuperar o SQL para criar a tabela energyUserLog no banco de dados.
          */
         public static String getSQLCreate(){
-            return String.format("CREATE TABLE %s ( %s LONG PRIMARY KEY, %s INTEGER, %s LONG, %s REAL, %s REAL, %s REAL, %s REAL, %s REAL, %s REAL)",
+            return String.format("CREATE TABLE %s ( %s LONG PRIMARY KEY, %s REAL, %s REAL, %s REAL, %s REAL, %s REAL, %s REAL)",
                     TABLE_NAME,
                     _ID,
-                    COLUMN_SEQUENCE,
-                    COLUMN_DATE_TIME,
                     COLUMN_DURATION,
                     COLUMN_VOLTAGE,
                     COLUMN_WATTS_1,
@@ -124,25 +111,11 @@ public class OhaEnergyUseContract {
         }
 
         /**
-         * Recuperar o SQL para criar um índice na tabela energyUserLog.
-         */
-        public static String getSQLCreateIndex(String indexName) {
-            switch (indexName){
-                case INDEX_DATE_TIME:
-                    return String.format("CREATE INDEX %s ON %s (%s, %s, %s);", indexName, TABLE_NAME, COLUMN_DATE_TIME, COLUMN_WATTS_TOTAL, COLUMN_DURATION);
-                default:
-                    throw new IllegalArgumentException(String.format("Index %s from table %s does not exist", indexName, TABLE_NAME ));
-            }
-        }
-
-        /**
          * Analisar e validar um registro de utilização de energia
          */
-        public static ContentValues parse(long id, int sequence, Date dateTime, double duration, double voltage, double watts1, double watts2, double watts3){
+        public static ContentValues parse(Date dateTime, double duration, double voltage, double watts1, double watts2, double watts3){
             ContentValues contentValues = new ContentValues();
-            contentValues.put(_ID, id);
-            contentValues.put(COLUMN_SEQUENCE, sequence );
-            contentValues.put(COLUMN_DATE_TIME, dateTime.getTime() );
+            contentValues.put(_ID, dateTime.getTime());
             contentValues.put(COLUMN_DURATION, duration );
             contentValues.put(COLUMN_VOLTAGE, voltage );
             contentValues.put(COLUMN_WATTS_1, watts1 );
@@ -170,7 +143,7 @@ public class OhaEnergyUseContract {
                 COLUMN_TITLE,
                 COLUMN_FROM,
                 COLUMN_TO,
-                COLUMN_KWH_COST
+                COLUMN_KWH_COST,
         };
 
         //Índices referente a lista de campos COLUMN_ALL, favor sempre utilizar

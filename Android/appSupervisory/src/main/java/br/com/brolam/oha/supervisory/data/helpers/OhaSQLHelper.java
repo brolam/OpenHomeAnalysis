@@ -39,9 +39,6 @@ public class OhaSQLHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         //EnergyUseLogEntry
         sqLiteDatabase.execSQL(EnergyUseLogEntry.getSQLCreate());
-        sqLiteDatabase.execSQL(EnergyUseLogEntry.getSQLCreateIndex(
-                OhaEnergyUseContract.EnergyUseLogEntry.INDEX_DATE_TIME)
-        );
         //EnergyUseBillEntry
         sqLiteDatabase.execSQL(EnergyUseBillEntry.getSQLCreate());
 

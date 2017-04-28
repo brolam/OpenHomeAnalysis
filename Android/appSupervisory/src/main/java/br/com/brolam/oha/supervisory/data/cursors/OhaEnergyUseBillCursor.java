@@ -3,6 +3,9 @@ package br.com.brolam.oha.supervisory.data.cursors;
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import java.util.HashMap;
+
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
 
@@ -14,13 +17,16 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
  */
 public class OhaEnergyUseBillCursor extends AbstractCursor {
 
+    IOhaEnergyUseTotalCache iOhaEnergyUseTotalCache;
+
     SQLiteDatabase sqLiteDatabase;
     Cursor cursorEnergyUseBill;
-    Cursor cursorEnergyUse;
+    HashMap<Integer,String> energyUseTotal;
 
-    public OhaEnergyUseBillCursor(SQLiteDatabase sqLiteDatabase, Cursor cursorEnergyUseBill){
+    public OhaEnergyUseBillCursor(SQLiteDatabase sqLiteDatabase, Cursor cursorEnergyUseBill, IOhaEnergyUseTotalCache iOhaEnergyUseTotalCache){
         this.sqLiteDatabase = sqLiteDatabase;
         this.cursorEnergyUseBill = cursorEnergyUseBill;
+        this.iOhaEnergyUseTotalCache = iOhaEnergyUseTotalCache;
     }
 
     /**
@@ -29,32 +35,8 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
     @Override
     public boolean onMove(int oldPosition, int newPosition) {
         this.cursorEnergyUseBill.moveToPosition(newPosition);
-        if ( this.cursorEnergyUse != null) this.cursorEnergyUse.close();
-        this.cursorEnergyUse = getCursorEnergyUseBill(this.cursorEnergyUseBill);
+        this.energyUseTotal = this.iOhaEnergyUseTotalCache.getEnergyUseTotalOnCache(this.cursorEnergyUseBill.getLong(EnergyUseBillEntry.INDEX_COLUMN_FROM), this.cursorEnergyUseBill.getLong(EnergyUseBillEntry.INDEX_COLUMN_TO) );
         return  super.onMove(oldPosition, newPosition) ;
-    }
-
-    /**
-     * Recuperar o total da utilização de energia no período da conta.
-     * @param cursor informar o cursor com a posição atual da conta.
-     * @return
-     */
-    private Cursor getCursorEnergyUseBill(Cursor cursor) {
-
-        long longDateBegin = cursor.getLong(EnergyUseBillEntry.INDEX_COLUMN_FROM);
-        long longDateEnd = cursor.getLong(EnergyUseBillEntry.INDEX_COLUMN_TO);
-        String from = String.format("%s INDEXED BY %s", EnergyUseLogEntry.TABLE_NAME, EnergyUseLogEntry.INDEX_DATE_TIME);
-        String selection = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry.COLUMN_DATE_TIME);
-        String selectionArgs[] = new String[]{Long.toString(longDateBegin), Long.toString(longDateEnd)};
-        return  sqLiteDatabase.query(
-                from,
-                EnergyUseLogEntry.COLUMNS_CALC_TOTAL,
-                selection,
-                selectionArgs,
-                null,
-                null,
-                null
-        );
     }
 
     private boolean isCursorEnergyUseBill(int i) {
@@ -77,9 +59,8 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
             return this.cursorEnergyUseBill.getString(i);
         }
         int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.getString(col): "";
+        return energyUseTotal != null? this.energyUseTotal.get(col): "";
     }
-
 
     @Override
     public short getShort(int i) {
@@ -87,7 +68,7 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
             return this.cursorEnergyUseBill.getShort(i);
         }
         int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.getShort(col): 0;
+        return energyUseTotal != null? Short.parseShort(this.energyUseTotal.get(col)): 0;
     }
 
     @Override
@@ -96,7 +77,7 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
             return this.cursorEnergyUseBill.getInt(i);
         }
         int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.getInt(col): 0;
+        return energyUseTotal != null? Integer.parseInt(this.energyUseTotal.get(col)): 0;
     }
 
     @Override
@@ -105,7 +86,7 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
             return this.cursorEnergyUseBill.getLong(i);
         }
         int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.getLong(col): 0;
+        return energyUseTotal != null? Long.parseLong(this.energyUseTotal.get(col)): 0;
     }
 
     @Override
@@ -114,7 +95,7 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
             return this.cursorEnergyUseBill.getFloat(i);
         }
         int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.getFloat(col): 0;
+        return energyUseTotal != null? Float.parseFloat(this.energyUseTotal.get(col)): 0;
     }
 
     @Override
@@ -123,7 +104,7 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
             return this.cursorEnergyUseBill.getDouble(i);
         }
         int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.getDouble(col): 0;
+        return energyUseTotal != null? Double.parseDouble(this.energyUseTotal.get(col)): 0;
     }
 
     @Override
@@ -131,7 +112,6 @@ public class OhaEnergyUseBillCursor extends AbstractCursor {
         if ( isCursorEnergyUseBill(i) ){
             return this.cursorEnergyUseBill.isNull(i);
         }
-        int col = i - (this.cursorEnergyUseBill.getColumnCount());
-        return cursorEnergyUse.moveToFirst()? this.cursorEnergyUse.isNull(col): true;
+        return energyUseTotal == null;
     }
 }

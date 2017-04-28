@@ -184,9 +184,9 @@ public class OhaMainActivity extends AppCompatActivity
      * TODO Build restore interface
      */
     private void requestRestoreBackup() {
-        //OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
-        //ohaBackupHelper.setBackupRestoreFilePath("storage/sdcard0/Oha/Backups/2017_04_23_11_99_99.zip");
-        //ohaBackupHelper.setBackupRestoreFilePath("/storage/emulated/0/Oha/Backups/2017_04_23_11_99_99.zip");
+        OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
+        //ohaBackupHelper.setBackupRestoreFilePath("storage/sdcard0/Oha/Backups/9999_99_99_99_99_99.zip");
+        ohaBackupHelper.setBackupRestoreFilePath("/storage/emulated/0/Oha/Backups/9999_99_99_99_99_99.zip");
     }
 
     @Override
@@ -200,7 +200,7 @@ public class OhaMainActivity extends AppCompatActivity
                     null,
                     null,
                     null,
-                    String.format("%s DESC", OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_DATE_TIME)
+                    String.format("%s DESC", EnergyUseLogEntry._ID)
 
             );
         } else if (id == R.id.nav_energy_use_bill) {

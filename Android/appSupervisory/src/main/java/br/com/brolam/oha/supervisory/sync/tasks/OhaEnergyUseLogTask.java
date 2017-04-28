@@ -5,11 +5,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.util.Pair;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.oha.supervisory.apiV1.OhaEnergyUseApi;
@@ -159,15 +162,15 @@ public class OhaEnergyUseLogTask {
             energyUseLogs = getLogs(hostName, strDate, strHour, startSequence);
             try {
                 //Validar o contúdo dos logs:
-                ContentValues[] energyLogsValues = parseEnergyLogs(strDate, strHour, energyUseLogs, allowSequenceBroken);
+                Pair<Integer,ContentValues[]> resultEnergyLogs = parseEnergyLogs(strDate, strHour, energyUseLogs, allowSequenceBroken);
+                ContentValues[] energyLogsValues = resultEnergyLogs.second;
                 if (energyLogsValues.length > 0) {
                     //Salvar os logs no banco de dados:
                     Context context = ohaEnergyUseSyncHelper.getContext();
                     ContentResolver contentResolver = context.getContentResolver();
                     contentResolver.bulkInsert(OhaEnergyUseContract.CONTENT_URI_LOG, energyLogsValues);
                     //Atualizar a última sequencia importada:
-                    int lastSequenceSaved = energyLogsValues[energyLogsValues.length - 1].getAsInteger(OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_SEQUENCE);
-                    ohaEnergyUseSyncHelper.setSequence(lastSequenceSaved);
+                    ohaEnergyUseSyncHelper.setSequence(resultEnergyLogs.first);
                     break;
                 }
             } catch (EnergyUseLogRead e) {
@@ -300,7 +303,7 @@ public class OhaEnergyUseLogTask {
      * @throws EnergyUseLogRead se ocorrer erro na leitura dos logs.
      * @throws EnergyUseLogReadSequenceBroken se a sequencia dos logs for quebrada.
      */
-    private ContentValues[] parseEnergyLogs(String strDate, String strHour, List<String> energyUseLogs, boolean allowSequenceBroken)
+    private Pair<Integer,ContentValues[]> parseEnergyLogs(String strDate, String strHour, List<String> energyUseLogs, boolean allowSequenceBroken)
             throws
             ParseException,
             EnergyUseLogRead,
@@ -310,6 +313,7 @@ public class OhaEnergyUseLogTask {
         //Informar a última sequencia validada.
         int previousSequence = -1;
         ArrayList<ContentValues> valuesArrayList = new ArrayList<>();
+        int lastSequenceAdded  = 0;
         for (String strLogContent : energyUseLogs) {
             OhaEnergyUseLog ohaEnergyUseLog = OhaEnergyUseLog.parse(strDate, strHour, strLogContent);
             //Se não existir erro na validação do log:
@@ -331,8 +335,6 @@ public class OhaEnergyUseLogTask {
                 double watts2 = volts * ohaEnergyUseLog.getAvgAmpsPerPhase()[1];
                 double watts3 = volts * ohaEnergyUseLog.getAvgAmpsPerPhase()[2];
                 ContentValues values = OhaEnergyUseContract.EnergyUseLogEntry.parse(
-                        id,
-                        sequence,
                         dateTime.getTime(),
                         duration,
                         volts,
@@ -341,6 +343,7 @@ public class OhaEnergyUseLogTask {
                         watts3
                 );
                 valuesArrayList.add(values);
+                lastSequenceAdded = ohaEnergyUseLog.getSequence();
                 //Atualizar a última data, hora e sequencia validada:
                 previousDateTime = dateTime.getTime();
                 previousSequence = sequence;
@@ -359,7 +362,8 @@ public class OhaEnergyUseLogTask {
         //Retonar com a lista de logs validados:
         ContentValues[] resultContentValues = new ContentValues[valuesArrayList.size()];
         valuesArrayList.toArray(resultContentValues);
-        return resultContentValues;
+        Pair<Integer,ContentValues[]> resultEnergyLogs = new Pair<>(lastSequenceAdded,resultContentValues);
+        return resultEnergyLogs;
 
     }
 
@@ -390,6 +394,7 @@ public class OhaEnergyUseLogTask {
             EnergyUseLogSyncFatalError {
         Calendar calendar = OhaHelper.getCalendar(ohaEnergyUseSyncHelper.getStrDate(), ohaEnergyUseSyncHelper.getStrHour());
         calendar.add(Calendar.HOUR, 1);
+        //TODO Não permitir data de importação maior do que a data do Sistema.
         if (calendar.after(new Date())) {
             throw new EnergyUseLogSyncFatalError("Do not set the import period greater than the current date!");
         }
