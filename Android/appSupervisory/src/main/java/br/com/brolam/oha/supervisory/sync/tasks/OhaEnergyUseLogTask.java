@@ -394,9 +394,10 @@ public class OhaEnergyUseLogTask {
             EnergyUseLogSyncFatalError {
         Calendar calendar = OhaHelper.getCalendar(ohaEnergyUseSyncHelper.getStrDate(), ohaEnergyUseSyncHelper.getStrHour());
         calendar.add(Calendar.HOUR, 1);
-        //TODO Não permitir data de importação maior do que a data do Sistema.
-        if (calendar.after(new Date())) {
-            throw new EnergyUseLogSyncFatalError("Do not set the import period greater than the current date!");
+        //A data e hora de importação não pode ser maior do que a data e hora atual:
+        if (calendar.getTime().after (new Date())) {
+            delay(DateUtils.MINUTE_IN_MILLIS);
+            return;
         }
         ohaEnergyUseSyncHelper.setDate(OhaHelper.getStrDate(calendar.getTime()));
         ohaEnergyUseSyncHelper.setHour(OhaHelper.getStrHour(calendar.getTime()));
