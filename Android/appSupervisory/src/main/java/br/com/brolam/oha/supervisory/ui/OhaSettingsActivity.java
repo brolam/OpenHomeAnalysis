@@ -1,7 +1,7 @@
 package br.com.brolam.oha.supervisory.ui;
 
 import android.annotation.TargetApi;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -10,7 +10,10 @@ import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.view.MenuItem;
+
+import java.util.HashMap;
 import java.util.List;
+
 import br.com.brolam.oha.supervisory.R;
 import br.com.brolam.oha.supervisory.ui.helpers.AppCompatPreferenceHelper;
 import br.com.brolam.oha.supervisory.ui.helpers.OhaBackupHelper;
@@ -28,6 +31,8 @@ import br.com.brolam.oha.supervisory.ui.helpers.OhaEnergyUseSyncHelper;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class OhaSettingsActivity extends AppCompatPreferenceHelper {
+    //Registrar as Preferences para atualizar a tela se o valor da preference for atualizado.
+    static HashMap<String, Preference> upgradeablePreferences = new HashMap<>();
 
     /**
      * Binds a preference's summary to its value. More specifically, when the
@@ -116,6 +121,11 @@ public class OhaSettingsActivity extends AppCompatPreferenceHelper {
             bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE));
             bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_VOLTS));
             bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET));
+            //Registrar as Preferences para monitorar as alterações para atualizar a tela:
+            upgradeablePreferences.put(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_HOUR, findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_HOUR));
+            upgradeablePreferences.put(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE, findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE));
+            upgradeablePreferences.put(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET, findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET));
+
         }
 
         @Override
@@ -126,6 +136,14 @@ public class OhaSettingsActivity extends AppCompatPreferenceHelper {
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            upgradeablePreferences.remove(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_HOUR);
+            upgradeablePreferences.remove(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE);
+            upgradeablePreferences.remove(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET);
         }
     }
 
@@ -157,5 +175,17 @@ public class OhaSettingsActivity extends AppCompatPreferenceHelper {
             }
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        super.onSharedPreferenceChanged(sharedPreferences, key);
+        //Atualizar a tela com o novo valor da Preference.
+        key = OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING.equals(key) ? OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET : key;
+        Preference preference = upgradeablePreferences.get(key);
+        if (preference != null) {
+            bindPreferenceSummaryToValue(preference);
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 package br.com.brolam.oha.supervisory.ui.helpers;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
@@ -21,6 +23,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.oha.supervisory.R;
 
 /**
@@ -30,7 +33,7 @@ import br.com.brolam.oha.supervisory.R;
  * @version 1.00
  * @since Release 01
  */
-public abstract class AppCompatPreferenceHelper extends PreferenceActivity {
+public abstract class AppCompatPreferenceHelper extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private AppCompatDelegate mDelegate;
 
@@ -49,6 +52,18 @@ public abstract class AppCompatPreferenceHelper extends PreferenceActivity {
 
     public ActionBar getSupportActionBar() {
         return getDelegate().getSupportActionBar();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 
     public void setSupportActionBar(@Nullable Toolbar toolbar) {
@@ -145,12 +160,18 @@ public abstract class AppCompatPreferenceHelper extends PreferenceActivity {
                 // the preference's 'entries' list.
                 ListPreference listPreference = (ListPreference) preference;
                 int index = listPreference.findIndexOfValue(stringValue);
+                String title = index >= 0 ? String.valueOf(listPreference.getEntries()[index]) : "";
+                //Exibir o tempo total de funcionamento do registrador depois do ultimo reset.
+                if (OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET.equals(preference.getKey())){
+                    Context context = preference.getContext();
+                    long durationLoggerRunning = preference.getSharedPreferences().getLong(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING,0);
+                    preference.setTitle(String.format(context.getString(R.string.pref_title_energy_use_sync_often_logger_reset), title));
+                    preference.setSummary(String.format(context.getString(R.string.pref_summary_energy_use_sync_often_logger_reset), OhaHelper.convertMillisToHours(durationLoggerRunning)));
 
-                // Set the summary to reflect the new value.
-                preference.setSummary(
-                        index >= 0
-                                ? listPreference.getEntries()[index]
-                                : null);
+                } else {
+                    // Set the summary to reflect the new value.
+                    preference.setSummary(title);
+                }
 
             } else if (preference instanceof RingtonePreference) {
                 // For ringtone preferences, look up the correct display value
@@ -177,6 +198,7 @@ public abstract class AppCompatPreferenceHelper extends PreferenceActivity {
             }
             return true;
         }
+
     };
 
     /**
@@ -188,4 +210,8 @@ public abstract class AppCompatPreferenceHelper extends PreferenceActivity {
                 & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+
+    }
 }

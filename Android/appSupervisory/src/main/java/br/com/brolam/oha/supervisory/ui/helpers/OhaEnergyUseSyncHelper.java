@@ -27,6 +27,7 @@ public class OhaEnergyUseSyncHelper {
     public static final String ENERGY_USE_SYNC_SEQUENCE = "energy_use_sync_sequence";
     public static final String ENERGY_USE_SYNC_VOLTS = "energy_use_sync_volts";
     public static final String ENERGY_USE_SYNC_OFTEN_LOGGER_RESET = "energy_use_sync_often_logger_reset";
+    public static final String ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING = "energy_use_sync_duration_logger_running";
 
     Context context;
     SharedPreferences preferences;
@@ -35,6 +36,11 @@ public class OhaEnergyUseSyncHelper {
         this.context = context;
         this.preferences = preferences;
     }
+
+    public OhaEnergyUseSyncHelper(Context context ) {
+        this(context,PreferenceManager.getDefaultSharedPreferences(context) );
+    }
+
 
     public Context getContext() {
         return context;
@@ -92,6 +98,12 @@ public class OhaEnergyUseSyncHelper {
         return getOftenLoggerReset() * DateUtils.HOUR_IN_MILLIS;
     }
 
+    public long getDurationLoggerRunning(){
+        return preferences.getLong(ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING, 0);
+    }
+
+
+
     public void setSetupModeOn() {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putBoolean(ENERGY_USE_SYNC_SETUP_MODE, true);
@@ -119,6 +131,12 @@ public class OhaEnergyUseSyncHelper {
     public void setSequence(int sequence) {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(ENERGY_USE_SYNC_SEQUENCE, String.valueOf(sequence));
+        editor.commit();
+    }
+
+    public void setDurationLoggerRunning(long milliseconds) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING, milliseconds);
         editor.commit();
     }
 

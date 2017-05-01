@@ -234,6 +234,9 @@ public class OhaEnergyUseLogTask {
                 for (String ohaStatusLogContent : strings) {
                     OhaStatusLog ohaStatusLog = OhaStatusLog.getOhaStatusLog(ohaStatusLogContent);
                     if (ohaStatusLog == OhaStatusLog.OHA_STATUS_RUNNING || ohaStatusLog == OhaStatusLog.OHA_STATUS_FINISHED) {
+                        if ( ohaStatusLog.getDurationBoardRunning() > -1){
+                            this.ohaEnergyUseSyncHelper.setDurationLoggerRunning(ohaStatusLog.getDurationBoardRunning());
+                        }
                         //Encerrar as tentativas e retornar com o OhaStatusLog localizado:
                         return ohaStatusLog;
                     }
