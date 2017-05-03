@@ -34,7 +34,7 @@ public class OhaEnergyUseLogTask {
     //Definir a duração máxima em segundo de um Log de utilização de energia:
     private static final int MAX_DURATION_LOG = 35;
     //Definir a duração padrão se não for possível recuperar a duração real do Log:
-    private static final double DEFAULT_DURATION =  9.9; // Segundos.
+    private static final double DEFAULT_DURATION =  11; // Segundos.
     //Definir a quantidade de tentativas para realizar uma requisição(GET ou POST) com sucesso
     //no Registrador de Utilização de Energiar:
     private static final int NUMBER_ATTEMPTS = 3;
