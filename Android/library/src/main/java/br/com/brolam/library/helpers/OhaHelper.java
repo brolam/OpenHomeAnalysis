@@ -249,6 +249,22 @@ public class OhaHelper {
     }
 
     /**
+     * Converter um texto em um valor numérico
+     * @param string texto com um valor numérico válido.
+     * @param ifError valor que deve ser retornado se o texto for inválido.
+     * @return um valor numérico válido.
+     */
+    public static double convertToDouble(String string, double ifError){
+        if ((string  == null ) || string.isEmpty() ) return ifError;
+        try {
+            return Double.parseDouble(string);
+        } catch (Exception e){
+            e.printStackTrace();
+            return ifError;
+        }
+    }
+
+    /**
      * Converter milisegundos em horas.
      *
      * @param millis informar os milisegundos.
