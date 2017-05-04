@@ -14,34 +14,30 @@ Layout para exibir listas com as Horas, minutos e segundos no TimeFragment
         android:id="@+id/textViewTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/default_text_margin"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         tools:text="Begin" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="horizontal">
 
         <Spinner
             android:id="@+id/spinnerHour"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/default_text_margin"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
 
         <Spinner
             android:id="@+id/spinnerMinute"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/default_text_margin"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
 
         <Spinner
             android:id="@+id/spinnerSecond"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"/>
     </LinearLayout>
 </LinearLayout>
-

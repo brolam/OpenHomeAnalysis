@@ -11,7 +11,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import java.util.ArrayList;
 
-
 import br.com.brolam.library.R;
 
 /**
@@ -25,10 +24,31 @@ public class TimeFragment extends Fragment {
     Spinner spinnerHour;
     Spinner spinnerMinute;
     Spinner spinnerSecond;
+    int[] spinnerSavedInstanceState = null;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        this.spinnerSavedInstanceState = new int[]{
+                this.spinnerHour.getSelectedItemPosition(),
+                this.spinnerMinute.getSelectedItemPosition(),
+                this.spinnerSecond.getSelectedItemPosition(),
+        };
+        outState.putIntArray(String.valueOf(this.getId()), spinnerSavedInstanceState);
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState == null) return;
+        if (savedInstanceState.containsKey(String.valueOf(this.getId()))) {
+            this.spinnerSavedInstanceState = savedInstanceState.getIntArray(String.valueOf(this.getId()));
+        }
     }
 
     @Nullable
@@ -42,41 +62,46 @@ public class TimeFragment extends Fragment {
         return view;
     }
 
-    public void build(String title){
-        build(title, 0, 0, 0);
-    }
-
-    public void build(String title, int selectHour, int selectMinute, int selectSecond ){
+    public void build(String title, int selectHour, int selectMinute, int selectSecond) {
         this.textViewTitle.setText(title);
         this.buildSpinnerHour(selectHour);
         this.buildSpinnerMinuteAndSeconds(selectMinute, selectSecond);
+        this.spinnerSavedInstanceState = null;
 
     }
 
-    private void buildSpinnerHour(int selectHour){
+    private void buildSpinnerHour(int selectHour) {
         ArrayList<String> hours = new ArrayList<>();
-        for(byte hour= 0; hour < 24; hour++){
-            hours.add(String.format("%02d",hour));
+        for (byte hour = 0; hour < 24; hour++) {
+            hours.add(String.format("%02d", hour));
         }
-        ArrayAdapter arrayAdapter = new ArrayAdapter(textViewTitle.getContext(),android.R.layout.simple_spinner_item, hours);
+        ArrayAdapter arrayAdapter = new ArrayAdapter(textViewTitle.getContext(), android.R.layout.simple_spinner_item, hours);
         this.spinnerHour.setAdapter(arrayAdapter);
-        this.spinnerHour.setSelection(selectHour);
-
-    }
-
-    private void buildSpinnerMinuteAndSeconds(int selectMinute, int selectSecond){
-        ArrayList<String> list = new ArrayList<>();
-        for(byte index= 0; index < 60; index++){
-            list.add(String.format("%02d",index));
+        if (this.spinnerSavedInstanceState != null) {
+            this.spinnerHour.setSelection(spinnerSavedInstanceState[0]);
+        } else {
+            this.spinnerHour.setSelection(selectHour);
         }
-        ArrayAdapter arrayAdapter = new ArrayAdapter(textViewTitle.getContext(),android.R.layout.simple_spinner_item, list);
-        this.spinnerMinute.setAdapter(arrayAdapter);
-        this.spinnerMinute.setSelection(selectMinute);
-        this.spinnerSecond.setAdapter(arrayAdapter);
-        this.spinnerSecond.setSelection(selectSecond);
     }
 
-    public int getHour(){
+    private void buildSpinnerMinuteAndSeconds(int selectMinute, int selectSecond) {
+        ArrayList<String> list = new ArrayList<>();
+        for (byte index = 0; index < 60; index++) {
+            list.add(String.format("%02d", index));
+        }
+        ArrayAdapter arrayAdapter = new ArrayAdapter(textViewTitle.getContext(), android.R.layout.simple_spinner_item, list);
+        this.spinnerMinute.setAdapter(arrayAdapter);
+        this.spinnerSecond.setAdapter(arrayAdapter);
+        if (this.spinnerSavedInstanceState != null) {
+            this.spinnerMinute.setSelection(spinnerSavedInstanceState[1]);
+            this.spinnerSecond.setSelection(spinnerSavedInstanceState[2]);
+        } else {
+            this.spinnerMinute.setSelection(selectMinute);
+            this.spinnerSecond.setSelection(selectSecond);
+        }
+    }
+
+    public int getHour() {
         return this.spinnerHour.getSelectedItemPosition();
     }
 
@@ -84,16 +109,13 @@ public class TimeFragment extends Fragment {
         return this.spinnerMinute.getSelectedItemPosition();
     }
 
-    public int getSecond(){
+    public int getSecond() {
         return this.spinnerSecond.getSelectedItemPosition();
     }
 
-    public void setEnabled(boolean hour, boolean minute, boolean second){
+    public void setEnabled(boolean hour, boolean minute, boolean second) {
         this.spinnerHour.setEnabled(hour);
         this.spinnerMinute.setEnabled(minute);
         this.spinnerSecond.setEnabled(second);
     }
-
-
-
 }
