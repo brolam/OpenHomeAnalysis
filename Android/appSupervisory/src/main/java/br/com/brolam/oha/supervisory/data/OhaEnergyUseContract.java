@@ -124,6 +124,24 @@ public class OhaEnergyUseContract {
             contentValues.put(COLUMN_WATTS_TOTAL, watts1 + watts2 + watts3 );
             return contentValues;
         }
+
+        public enum FilterWatts{
+            NONE,
+            PHASE1,
+            PHASE2,
+            PHASE3,
+            TOTAL;
+
+            public String getFieldName(){
+                switch (this){
+                    case PHASE1: return EnergyUseLogEntry.COLUMN_WATTS_1;
+                    case PHASE2: return EnergyUseLogEntry.COLUMN_WATTS_2;
+                    case PHASE3: return EnergyUseLogEntry.COLUMN_WATTS_3;
+                    case TOTAL: return EnergyUseLogEntry.COLUMN_WATTS_TOTAL;
+                    default:return EnergyUseLogEntry.COLUMN_WATTS_TOTAL;
+                }
+            }
+        }
     }
 
     /**
