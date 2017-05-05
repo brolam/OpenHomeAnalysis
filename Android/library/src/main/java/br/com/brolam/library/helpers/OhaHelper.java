@@ -229,6 +229,15 @@ public class OhaHelper {
     }
 
     /**
+     * Recuperar um texto para ser editado em um EditText.
+     * @param value informar um valor numérico válido.
+     * @return texto formatado para ser editado em um EditText.
+     */
+    public static String getEditable(double value) {
+        return value == 0.00 ? "" : String.valueOf(value);
+    }
+
+    /**
      * Recuperar o percentual da precisão de um tempo sobre 24 horas.
      *
      * @param context  informar um contexto válido.
