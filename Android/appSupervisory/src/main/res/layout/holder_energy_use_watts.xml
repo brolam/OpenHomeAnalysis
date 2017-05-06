@@ -9,16 +9,9 @@ Exibir uma linha com os valores da utilização de energia por Watts em telas me
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <RadioButton
-        android:id="@+id/radioButtonHour"
-        style="@style/AppTheme.Col.EnergyUse.RadioButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:visibility="invisible" />
-
     <TextView
         android:id="@+id/textViewTime"
-        style="@style/AppTheme.Col.EnergyUse.Hour"
+        style="@style/AppTheme.Col.EnergyUse.Time"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         tools:text="59:59" />

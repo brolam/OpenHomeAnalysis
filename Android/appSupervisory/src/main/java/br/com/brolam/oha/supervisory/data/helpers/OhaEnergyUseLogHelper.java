@@ -13,6 +13,8 @@ import java.util.Date;
 
 import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract;
+import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.EnergyUseLogEntry;
+import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.EnergyUseLogEntry.FilterWatts;
 
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.CONTENT_URI_LOG;
 
@@ -57,13 +59,14 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
     IOhaEnergyUseLogHelper iOhaEnergyUseLogHelper;
     //Colunas para a projeção no Cursor:
     public static final String[] LOG_COLUMNS = new String[]{
-            OhaEnergyUseContract.EnergyUseLogEntry._ID,
-            OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_DURATION,
-            OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_WATTS_1,
-            OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_WATTS_2,
-            OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_WATTS_3,
-            OhaEnergyUseContract.EnergyUseLogEntry.COLUMN_WATTS_TOTAL
+            EnergyUseLogEntry._ID,
+            EnergyUseLogEntry.COLUMN_DURATION,
+            EnergyUseLogEntry.COLUMN_WATTS_1,
+            EnergyUseLogEntry.COLUMN_WATTS_2,
+            EnergyUseLogEntry.COLUMN_WATTS_3,
+            EnergyUseLogEntry.COLUMN_WATTS_TOTAL
     };
+
 
     public static final int INDEX_LOG_DATE_TIME = 0;
     public static final int INDEX_DURATION = 1;
@@ -73,15 +76,21 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
     public static final int INDEX_WATTS_TOTAL = 5;
     //Informar a hora de inicio e final para realizar a consulta no tabela de logs de utilização de energia.
     private long beginDateTime, endDateTime;
+    private FilterWatts filterWatts;
+    private double beginWatts = 0, endWatts = 0;
 
-    public OhaEnergyUseLogHelper(IOhaEnergyUseLogHelper iOhaEnergyUseLogHelper, long beginDateTime, long endDateTime) {
+    public OhaEnergyUseLogHelper(IOhaEnergyUseLogHelper iOhaEnergyUseLogHelper, long beginDateTime, long endDateTime, FilterWatts filterWatts, double beginWatts, double endWatts) {
         this.iOhaEnergyUseLogHelper = iOhaEnergyUseLogHelper;
         this.beginDateTime = beginDateTime;
         this.endDateTime = endDateTime;
         this.energyUseWhs = new ArrayList<>();
+        this.filterWatts = filterWatts;
+        this.beginWatts = beginWatts;
+        this.endWatts = endWatts;
         //Solicitar o carregamento do cursor com os logs de utilização de energia.
-        iOhaEnergyUseLogHelper.getSupportLoaderManager().initLoader(0, null, this);
+        this.iOhaEnergyUseLogHelper.getSupportLoaderManager().initLoader(0, null, this);
     }
+
 
     /**
      * Ler o cursor com os logs de utilização de energia para realizar os calculos.
@@ -90,7 +99,7 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
         double totalDuration = 0, totalWh1 = 0, totalWh2 = 0, totalWh3 = 0, totalWh = 0;
         this.energyUseWhs.clear();
         while (!cursor.isAfterLast()) {
-            long dateTime = OhaHelper.getBeginHour(new Date(cursor.getLong(INDEX_LOG_DATE_TIME))).getTime();
+            long dateTime = OhaHelper.getEndHour(new Date(cursor.getLong(INDEX_LOG_DATE_TIME)), false).getTime();
             EnergyUseWh energyUseWh = new EnergyUseWh();
             //Realizar os totais por hora:
             do {
@@ -100,7 +109,7 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
                 energyUseWh.wh3 += getWh(cursor, INDEX_WATTS_3);
                 energyUseWh.whTotal += getWh(cursor, INDEX_WATTS_TOTAL);
             }
-            while (cursor.moveToNext() && cursor.getLong(INDEX_LOG_DATE_TIME) >= dateTime);
+            while (cursor.moveToNext() && cursor.getLong(INDEX_LOG_DATE_TIME) <= dateTime);
             //No final do calculo de cada hora, adicionar o total por hora a lista energyUseWhs:
             energyUseWh.dateTime = dateTime;
             this.energyUseWhs.add(energyUseWh);
@@ -115,17 +124,33 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
     }
 
     /**
-     * Carregar o cursor conforme a hora inicila e final.
+     * Carregar o cursor conforme a hora inicial, final e {@link FilterWatts}
      */
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String selections;
+        String[] selectionsArgs;
+        switch (this.filterWatts) {
+            case PHASE1:
+            case PHASE2:
+            case PHASE3:
+            case TOTAL:
+                selections = String.format("(%s BETWEEN ? AND ?) AND (%s BETWEEN ? AND ?)", EnergyUseLogEntry._ID, this.filterWatts.getFieldName());
+                selectionsArgs = new String[]{Long.toString(this.beginDateTime), Long.toString(this.endDateTime), Double.toString(this.beginWatts), Double.toString(this.endWatts)};
+                break;
+            case NONE:
+            default:
+                selections = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry._ID);
+                selectionsArgs = new String[]{Long.toString(this.beginDateTime), Long.toString(this.endDateTime)};
+                break;
+        }
         return new CursorLoader(
                 this.iOhaEnergyUseLogHelper.getContext(),
                 CONTENT_URI_LOG,
                 LOG_COLUMNS,
-                String.format("%s BETWEEN ? AND ?", OhaEnergyUseContract.EnergyUseLogEntry._ID),
-                new String[]{Long.toString(this.beginDateTime), Long.toString(this.endDateTime)},
-                String.format("%s DESC", OhaEnergyUseContract.EnergyUseLogEntry._ID)
+                selections,
+                selectionsArgs,
+                String.format("%s ASC", EnergyUseLogEntry._ID)
         );
     }
 

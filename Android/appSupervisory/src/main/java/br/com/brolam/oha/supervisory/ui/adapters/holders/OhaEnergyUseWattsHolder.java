@@ -38,7 +38,7 @@ public class OhaEnergyUseWattsHolder extends RecyclerView.ViewHolder {
     }
 
     public void bindView(final Cursor cursor) {
-        String time = OhaHelper.formatDate(cursor.getLong(OhaEnergyUseLogHelper.INDEX_LOG_DATE_TIME), "mm:ss");
+        String time = OhaHelper.formatDate(cursor.getLong(OhaEnergyUseLogHelper.INDEX_LOG_DATE_TIME), "HH:mm:ss");
         this.textViewTime.setText(time);
         this.textViewDuration.setText(DateUtils.formatElapsedTime(cursor.getLong(OhaEnergyUseLogHelper.INDEX_DURATION)));
         if ( this.textViewWatts1 != null) {

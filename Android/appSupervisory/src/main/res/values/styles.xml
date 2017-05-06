@@ -56,6 +56,13 @@
         <item name="android:lines">1</item>
     </style>
 
+    <style name="AppTheme.Col.EnergyUse.Time" parent="@style/TextAppearance.AppCompat.Medium">
+        <item name="android:layout_weight">2.3</item>
+        <item name="android:gravity">end</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:lines">1</item>
+    </style>
+
     <style name="AppTheme.Col.EnergyUse.Duration" parent="@style/TextAppearance.AppCompat.Medium">
         <item name="android:layout_weight">2</item>
         <item name="android:gravity">end</item>
@@ -93,6 +100,11 @@
 
     <style name="AppTheme.Col.Title.EnergyUse.Duration" parent="@style/AppTheme.Col.EnergyUse.Duration">
         <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="AppTheme.Col.Title.EnergyUse.DurationValue" parent="@style/AppTheme.Col.EnergyUse.Duration">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:layout_weight">4.3</item>
     </style>
 
     <style name="AppTheme.Col.Title.EnergyUse.Wh" parent="@style/AppTheme.Col.EnergyUse.Wh">

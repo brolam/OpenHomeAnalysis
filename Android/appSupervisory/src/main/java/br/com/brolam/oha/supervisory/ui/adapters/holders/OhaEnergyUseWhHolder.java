@@ -20,6 +20,13 @@ import br.com.brolam.oha.supervisory.ui.OhaEnergyUseDetailsActivity;
  * @since Release 01
  */
 public class OhaEnergyUseWhHolder extends RecyclerView.ViewHolder {
+
+    public interface IOhaEnergyUseWhHolder{
+        void onSelectedEnergyUseWh(long beginDateTime, long endDateTime, double kwhCost);
+
+    }
+
+
     RadioButton radioButtonHour;
     TextView textViewHour;
     TextView textViewDuration;
@@ -41,7 +48,7 @@ public class OhaEnergyUseWhHolder extends RecyclerView.ViewHolder {
         this.textViewCost = (TextView) itemView.findViewById(R.id.textViewCost);
     }
 
-    public void bindView(OhaEnergyUseLogHelper.EnergyUseWh energyUseWh, final double kwhCost) {
+    public void bindView(OhaEnergyUseLogHelper.EnergyUseWh energyUseWh, final double kwhCost, final IOhaEnergyUseWhHolder iOhaEnergyUseWhHolder) {
         double totalKwh = OhaHelper.convertWhToKWH(energyUseWh.whTotal);
         String hour = OhaHelper.formatDate(energyUseWh.dateTime, "HH");
         this.textViewHour.setText(hour);
@@ -62,7 +69,7 @@ public class OhaEnergyUseWhHolder extends RecyclerView.ViewHolder {
         radioButtonHour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                OhaEnergyUseDetailsActivity.showEnergyUse(itemView.getContext(), beginDateHour, endDateHour, kwhCost, true);
+                iOhaEnergyUseWhHolder.onSelectedEnergyUseWh(beginDateHour, endDateHour, kwhCost);
                 radioButtonHour.setChecked(false);
             }
         });

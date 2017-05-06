@@ -10,24 +10,9 @@ Exibir uma linha com os valores totais da utilização de energia por Watts Hora
     android:layout_height="wrap_content"
     android:layout_marginBottom="5dp">
 
-    <RadioButton
-        android:id="@+id/radioButtonHour"
-        style="@style/AppTheme.Col.EnergyUse.RadioButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:visibility="invisible" />
-
-    <TextView
-        android:id="@+id/textViewHour"
-        style="@style/AppTheme.Col.Title.EnergyUse.Hour"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        tools:text="23" />
-
     <TextView
         android:id="@+id/textViewDuration"
-        style="@style/AppTheme.Col.Title.EnergyUse.Duration"
+        style="@style/AppTheme.Col.Title.EnergyUse.DurationValue"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textStyle="bold"

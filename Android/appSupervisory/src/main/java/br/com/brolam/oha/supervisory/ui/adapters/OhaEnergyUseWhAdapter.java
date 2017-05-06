@@ -23,10 +23,12 @@ public class OhaEnergyUseWhAdapter extends RecyclerView.Adapter<OhaEnergyUseWhHo
     private Context context;
     private ArrayList<OhaEnergyUseLogHelper.EnergyUseWh> energyUseWhs;
     private double costKwh;
+    private OhaEnergyUseWhHolder.IOhaEnergyUseWhHolder iOhaEnergyUseWhHolder;
 
-    public OhaEnergyUseWhAdapter(Context context, double costKwh) {
+    public OhaEnergyUseWhAdapter(Context context, double costKwh, OhaEnergyUseWhHolder.IOhaEnergyUseWhHolder iOhaEnergyUseWhHolder) {
         this.context = context;
         this.costKwh = costKwh;
+        this.iOhaEnergyUseWhHolder = iOhaEnergyUseWhHolder;
         this.energyUseWhs = new ArrayList<>();
     }
 
@@ -43,7 +45,7 @@ public class OhaEnergyUseWhAdapter extends RecyclerView.Adapter<OhaEnergyUseWhHo
 
     @Override
     public void onBindViewHolder(OhaEnergyUseWhHolder holder, int position) {
-        holder.bindView(this.energyUseWhs.get(position), this.costKwh);
+        holder.bindView(this.energyUseWhs.get(position), this.costKwh, iOhaEnergyUseWhHolder);
     }
 
     @Override

@@ -15,4 +15,8 @@
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <integer name="cards_columns">1</integer>
+    <item name="visible" type="id"/>
+    <item name="masked" type="id"/>
+    <integer name="energy_use_log_filter_fragment_width_percent">98</integer>
+    <integer name="energy_use_log_filter_fragment_height_percent">80</integer>
 </resources>

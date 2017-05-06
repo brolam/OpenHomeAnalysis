@@ -29,7 +29,6 @@ import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract;
 import br.com.brolam.oha.supervisory.ui.adapters.OhaMainAdapter;
 import br.com.brolam.oha.supervisory.ui.adapters.holders.OhaMainHolder;
 import br.com.brolam.oha.supervisory.ui.helpers.OhaBackupHelper;
-
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
 /**
@@ -186,7 +185,7 @@ public class OhaMainActivity extends AppCompatActivity
     private void requestRestoreBackup() {
         OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
         //ohaBackupHelper.setBackupRestoreFilePath("storage/sdcard0/Oha/Backups/9999_99_99_99_99_99.zip");
-        ohaBackupHelper.setBackupRestoreFilePath("/storage/emulated/0/Oha/Backups/9999_99_99_99_99_99.zip");
+        //ohaBackupHelper.setBackupRestoreFilePath("/storage/emulated/0/Oha/Backups/9999_99_99_99_99_99.zip");
     }
 
     @Override
@@ -261,7 +260,7 @@ public class OhaMainActivity extends AppCompatActivity
         switch (menuItemId){
             case R.id.action_details:
                 long endDateTime = OhaHelper.getDateEnd(new Date(beginDate), false).getTime();
-                OhaEnergyUseDetailsActivity.showEnergyUse(this, beginDate, endDateTime, kwhCost, false);
+                OhaEnergyUseDetailsActivity.show(this, beginDate, endDateTime, kwhCost, false, EnergyUseLogEntry.FilterWatts.NONE, 0, 0);
                 return;
             case R.id.action_chart:
                 showSnackBar("Day energy use chart not implemented yet!");
@@ -287,18 +286,14 @@ public class OhaMainActivity extends AppCompatActivity
     }
 
     private void addAlert() {
-        Snackbar.make(this.floatingActionButton, "Add Alert is not implemented yet!", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        showSnackBar("Add Alert is not implemented yet!");
     }
 
     private void addBill() {
-        Snackbar.make(this.floatingActionButton, "Add Bill is not implemented yet!", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        showSnackBar("Add Bill is not implemented yet!");
     }
 
     private void filter() {
-        Snackbar.make(this.floatingActionButton, "Filter is not implemented yet!", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
+        showSnackBar("Filter is not implemented yet!");
     }
-
 }

@@ -148,4 +148,21 @@
     <string name="cost">Cost</string>
     <string name="watts">Watts</string>
 
+    <!-- Energy Use Columns Watts filter -->
+    <string name="energy_Use_Column_filter_none">None</string>
+    <string name="energy_Use_Column_filter_phase1">Phase1</string>
+    <string name="energy_Use_Column_filter_phase2">Phase2</string>
+    <string name="energy_Use_Column_filter_phase3">Phase3</string>
+    <string name="energy_Use_Column_filter_total">Total</string>
+    <string name="action_accept">ACCEPT</string>
+    <string name="action_cancel">CANCEL</string>
+
+    <!-- Energy Use Filter -->
+    <string name="energy_use_log_filter_fragment_begin_time">Begin time</string>
+    <string name="energy_use_log_filter_fragment_end_time">End time</string>
+    <string name="energy_use_log_filter_fragment_phases">Select a phase</string>
+    <string name="energy_use_log_filter_fragment_WattsGreaterEqual_hint">Watts greater or equal</string>
+    <string name="energy_use_log_filter_fragment_WattsLessEqual_hint">Watts less or equal</string>
+
+
 </resources>
