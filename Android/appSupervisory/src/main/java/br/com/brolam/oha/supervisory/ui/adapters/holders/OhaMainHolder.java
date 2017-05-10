@@ -20,7 +20,7 @@ public abstract class OhaMainHolder extends RecyclerView.ViewHolder {
     public interface IOhaMainHolder {
         Context getContext();
         void onEnergyUseDaySelect(long beginDate, double kwhCost, int menuItemId);
-        void onEnergyUseBillSelect(long id, int menuItemId);
+        void onEnergyUseBillSelect(int id, long fromDate, long toDate, double kwhCost, int menuItemId);
     }
 
     public void bindView(final Cursor cursor, final OhaMainHolder.IOhaMainHolder iOhaMainHolder) {

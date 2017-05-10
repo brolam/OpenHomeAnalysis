@@ -1,8 +1,10 @@
 package br.com.brolam.oha.supervisory.ui;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -27,7 +29,9 @@ import br.com.brolam.oha.supervisory.OhaBroadcast;
 import br.com.brolam.oha.supervisory.R;
 import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract;
 import br.com.brolam.oha.supervisory.ui.adapters.OhaMainAdapter;
+import br.com.brolam.oha.supervisory.ui.adapters.holders.OhaEnergyUseBillHolder;
 import br.com.brolam.oha.supervisory.ui.adapters.holders.OhaMainHolder;
+import br.com.brolam.oha.supervisory.ui.fragments.OhaEnergyUseBillFragment;
 import br.com.brolam.oha.supervisory.ui.helpers.OhaBackupHelper;
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
@@ -44,7 +48,8 @@ public class OhaMainActivity extends AppCompatActivity
         implements
         NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor>,
-        View.OnClickListener, OhaMainHolder.IOhaMainHolder {
+        View.OnClickListener, OhaMainHolder.IOhaMainHolder,
+        OhaEnergyUseBillFragment.IOhaEnergyUseBillFragment {
     GridLayoutManager gridLayoutManager;
     RecyclerView recyclerView;
     NavigationView navigationView;
@@ -133,8 +138,8 @@ public class OhaMainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    private void showSnackBar(String mensage){
-        Snackbar.make(this.floatingActionButton, mensage, Snackbar.LENGTH_LONG)
+    private void showSnackBar(String message){
+        Snackbar.make(this.floatingActionButton, message, Snackbar.LENGTH_LONG)
                 .setAction(null, null).show();
     }
 
@@ -237,16 +242,16 @@ public class OhaMainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onEnergyUseBillSelect(long id, int menuItemId) {
+    public void onEnergyUseBillSelect(int id, long fromDate, long toDate, double kwhCost, int menuItemId) {
         switch (menuItemId){
             case R.id.action_details:
                 showSnackBar("Bill details not implemented yet!");
                 return;
             case R.id.action_edit:
-                showSnackBar("Bill edit not implemented yet!");
+                OhaEnergyUseBillFragment.update(this, id, fromDate, toDate, kwhCost);
                 return;
             case R.id.action_delete:
-                showSnackBar("Bill delete not implemented yet!");
+                requestDeleteEnergyBill(id, fromDate, toDate);
                 return;
             case R.id.action_chart:
                 showSnackBar("Bill chart not implemented yet!");
@@ -290,10 +295,38 @@ public class OhaMainActivity extends AppCompatActivity
     }
 
     private void addBill() {
-        showSnackBar("Add Bill is not implemented yet!");
+        OhaEnergyUseBillFragment.add(this);
     }
 
     private void filter() {
         showSnackBar("Filter is not implemented yet!");
+    }
+
+    @Override
+    public void onSaveEnergyUseBill(int id, long fromDate, long toDate, double kwhCost) {
+        ContentValues contentValues = EnergyUseBillEntry.parse(new Date(fromDate), new Date(toDate), kwhCost);
+        //Alterar a conta de energia se o id for válido:
+        if ( id > 0){
+            Uri uriEnergyBill = OhaEnergyUseContract.getUriBillById(id);
+            getContentResolver().update(uriEnergyBill, contentValues, null, null);
+        } else {
+            getContentResolver().insert(CONTENT_URI_BILL, contentValues);
+            this.gridLayoutManager.scrollToPosition(0);
+        }
+    }
+
+    //Exibir uma pergunta para confirmar a exclusão da conta de energia selecionada.
+    private void requestDeleteEnergyBill(final int id, long fromDate, long toDate) {
+        String message = getString(R.string.main_activity_request_delete_energy_use_bill, OhaEnergyUseBillHolder.getEnergyBillTitle(this, fromDate, toDate));
+        Snackbar.make(this.floatingActionButton, message, Snackbar.LENGTH_LONG)
+                .setAction(
+                        getString(R.string.action_accept),
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Uri uriEnergyBill = OhaEnergyUseContract.getUriBillById(id);
+                                getContentResolver().delete(uriEnergyBill, null, null);
+                            }
+                        }).show();
     }
 }

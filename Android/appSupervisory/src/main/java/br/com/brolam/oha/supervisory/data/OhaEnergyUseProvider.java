@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Pair;
@@ -95,7 +96,11 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
             case CODE_ENERGY_USER_DAYS:
                 return getOhaEnergyUseDaysCursor(sqLiteDatabase, uri);
             case CODE_ENERGY_USER_BILL:
-                return getOhaEnergyUseBillCursor(sqLiteDatabase, selection, selectionArgs);
+                String strID = uri.getQueryParameter(EnergyUseBillEntry._ID);
+                if ( strID != null){
+                    return sqLiteDatabase.query(EnergyUseBillEntry.TABLE_NAME, projection, String.format("%s = ?", EnergyUseBillEntry._ID), new String[]{strID}, null, null, null);
+                }
+                return getOhaEnergyUseBillCursor(sqLiteDatabase, selection, selectionArgs, sortOrder);
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -109,12 +114,36 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        throw new UnsupportedOperationException("Unknown uri: " + uri);
+        SQLiteDatabase sqLiteDatabase = this.ohaSQLHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)) {
+            case CODE_ENERGY_USER_BILL:
+                String strID = uri.getQueryParameter(EnergyUseBillEntry._ID);
+                if ( strID != null){
+                   int deleted = sqLiteDatabase.delete(EnergyUseBillEntry.TABLE_NAME, String.format("%s = ?", EnergyUseBillEntry._ID), new String[]{strID});
+                    //Notificar a atualização para as Uri relacionadas a tabela EnergyUseBill
+                    notifyUpdatedEntities(uri);
+                    return deleted;
+                }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
     }
 
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        throw new UnsupportedOperationException("Unknown uri: " + uri);
+        SQLiteDatabase sqLiteDatabase = this.ohaSQLHelper.getWritableDatabase();
+        switch (sUriMatcher.match(uri)) {
+            case CODE_ENERGY_USER_BILL:
+                String strID = uri.getQueryParameter(EnergyUseBillEntry._ID);
+                if ( strID != null){
+                    int updated = sqLiteDatabase.update(EnergyUseBillEntry.TABLE_NAME, contentValues, String.format("%s = ?", EnergyUseBillEntry._ID), new String[]{strID});
+                    //Notificar a atualização para as Uri relacionadas a tabela EnergyUseBill
+                    notifyUpdatedEntities(uri);
+                    return updated;
+                }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
     }
 
     /**
@@ -171,8 +200,8 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
     /**
      * Recuperar um Cursor {@link OhaEnergyUseBillCursor} com a conta de energia e utilização no período da conta.
      */
-    private Cursor getOhaEnergyUseBillCursor(SQLiteDatabase sqLiteDatabase, String selection, String[] selectionArgs) {
-        Cursor cursor = sqLiteDatabase.query(EnergyUseBillEntry.TABLE_NAME, EnergyUseBillEntry.COLUMN_ALL, selection, selectionArgs, null, null, String.format("%s DESC", EnergyUseBillEntry.COLUMN_FROM));
+    private Cursor getOhaEnergyUseBillCursor(SQLiteDatabase sqLiteDatabase, String selection, String[] selectionArgs, String sortOrder) {
+        Cursor cursor = sqLiteDatabase.query(EnergyUseBillEntry.TABLE_NAME, EnergyUseBillEntry.COLUMN_ALL, selection, selectionArgs, null, null, sortOrder);
         //*Atualizar o cache de totais de utilização de energia para até 5 contas:
         for(int index = 0; index < 5 && index < cursor.getCount(); index++ ){
             cursor.moveToPosition(index);
@@ -209,14 +238,12 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
         //Atualizar o cache de  utilização de energia.
         updateEnergyUseTotalOnCache(setDateUpdated);
         //Notificar a atualização para as Uri relacionadas a tabela EnergyUseLog
-        getContext().getContentResolver().notifyChange(uri, null);
-        getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_DAYS, null);
-        getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_BILL, null);
+        notifyUpdatedEntities(uri);
         return values.length;
     }
 
     /**
-     * Inclusão em bloco dos logs de utilização de energia.
+     * Inclusão de uma conta de energia.
      */
     private long insertEnergyUseBill(@NonNull Uri uri, @NonNull ContentValues values, SQLiteDatabase sqLiteDatabase) {
         long id = -1;
@@ -231,7 +258,7 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
             sqLiteDatabase.endTransaction();
         }
         //Notificar a atualização para as Uri relacionadas a tabela EnergyUseBill
-        getContext().getContentResolver().notifyChange(uri, null);
+        notifyUpdatedEntities(uri);
         return id;
     }
 
@@ -292,4 +319,17 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
             getEnergyUseTotalOnCache(key.first, key.second);
         }
     }
+
+    /*
+    Notificar a atualização para as Uris relacionadas a todas as tabelas desse provider
+     */
+    private void notifyUpdatedEntities(Uri uri) {
+        getContext().getContentResolver().notifyChange(uri, null);
+        if (!uri.equals(OhaEnergyUseContract.CONTENT_URI_DAYS))
+            getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_DAYS, null);
+        if (!uri.equals(OhaEnergyUseContract.CONTENT_URI_BILL))
+            getContext().getContentResolver().notifyChange(OhaEnergyUseContract.CONTENT_URI_BILL, null);
+    }
+
+
 }

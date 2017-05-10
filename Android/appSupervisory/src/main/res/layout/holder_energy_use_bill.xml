@@ -28,12 +28,12 @@ Layout para exibir a utilização de energia por conta de energia.
             tools:text="January 2017" />
 
         <TextView
-            android:id="@+id/textViewAccuracy"
+            android:id="@+id/textViewRead"
             style="@style/AppTheme.Card.Subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/textViewTitle"
-            tools:text="Accuracy 99.99%" />
+            tools:text="Read 30 of 30 Days" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -64,7 +64,7 @@ Layout para exibir a utilização de energia por conta de energia.
             style="@style/AppTheme.Card.Cost"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textViewAccuracy"
+            android:layout_below="@id/textViewRead"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="@dimen/default_text_margin"
             tools:text="$99.99" />

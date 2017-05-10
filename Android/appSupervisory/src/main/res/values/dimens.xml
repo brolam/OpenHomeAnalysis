@@ -19,4 +19,7 @@
     <item name="masked" type="id"/>
     <integer name="energy_use_log_filter_fragment_width_percent">98</integer>
     <integer name="energy_use_log_filter_fragment_height_percent">80</integer>
+
+    <integer name="energy_use_bill_fragment_width_percent">98</integer>
+    <integer name="energy_use_bill_fragment_height_percent">90</integer>
 </resources>

@@ -19,7 +19,9 @@
     <string name="action_backup">Backup</string>
     <string name="action_restore">Restore</string>
     <string name="action_details">MORE DETAILS</string>
-
+    <string name="action_accept">ACCEPT</string>
+    <string name="action_save">SAVE</string>
+    <string name="action_cancel">CANCEL</string>
 
     <!--Mensagens de erro referente ao processo leitura do log de consumo de energia-->
     <string name="exception_on_parse_content_invalid">Content of the power consumption log is invalid!</string>
@@ -105,7 +107,6 @@
     </string-array>
     <string name="title_activity_details">DetailsActivity</string>
 
-
     <string name="pref_title_energy_use_sync_often_logger_reset">Often Logger reset every %s </string>
     <string name="pref_summary_energy_use_sync_often_logger_reset">Logger running %.2f hours</string>
     <string-array name="pref_titles_energy_use_sync_often_logger_reset">
@@ -138,6 +139,9 @@
         <item>48</item>
     </string-array>
 
+    <!-- Tela Principal -->
+    <string name="main_activity_request_delete_energy_use_bill">Energy Bill %s, Confirm the deletion?</string>
+
     <!-- Energy Use Columns -->
     <string name="hour">Hour</string>
     <string name="read">Read</string>
@@ -154,8 +158,6 @@
     <string name="energy_Use_Column_filter_phase2">Phase2</string>
     <string name="energy_Use_Column_filter_phase3">Phase3</string>
     <string name="energy_Use_Column_filter_total">Total</string>
-    <string name="action_accept">ACCEPT</string>
-    <string name="action_cancel">CANCEL</string>
 
     <!-- Energy Use Filter -->
     <string name="energy_use_log_filter_fragment_begin_time">Begin time</string>
@@ -164,5 +166,14 @@
     <string name="energy_use_log_filter_fragment_WattsGreaterEqual_hint">Watts greater or equal</string>
     <string name="energy_use_log_filter_fragment_WattsLessEqual_hint">Watts less or equal</string>
 
+    <!-- Energy Use Bill Card -->
+    <string name="energy_use_bill_card_title" formatted="false">%s to %s</string>
+    <string name="energy_use_bill_card_read" formatted="false">Read %s of %s days</string>
+    <string name="energy_use_bill_card_body" formatted="false">Kwh %s Avg %s per day.</string>
+
+    <!-- Energy Use Bill Add and Update -->
+    <string name="fragment_energy_use_bill_begin_date">Begin date</string>
+    <string name="fragment_energy_use_bill_end_date">End date</string>
+    <string name="fragment_energy_use_bill_kwh_cost">Kwh cost</string>
 
 </resources>

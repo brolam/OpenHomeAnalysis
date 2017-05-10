@@ -1,0 +1,9 @@
+<!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<resources>
+    <integer name="energy_use_bill_fragment_width_percent">95</integer>
+    <integer name="energy_use_bill_fragment_height_percent">97</integer>
+</resources>

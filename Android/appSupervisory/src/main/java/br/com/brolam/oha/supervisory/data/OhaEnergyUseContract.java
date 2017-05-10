@@ -47,6 +47,17 @@ public class OhaEnergyUseContract {
     public static final Uri CONTENT_URI_BILL = BASE_CONTENT_URI.buildUpon()
             .appendPath(PATH_BILL)
             .build();
+
+    /**
+     * Recuperar a Uri de uma conta de energia por ID para ser utilizada nas operações de Consulta,
+     * alteração e exclusão.
+     * @param id informar uma ID válido.
+     * @return Uri com o parâmetro _id
+     */
+    public static Uri getUriBillById(int id){
+        return CONTENT_URI_BILL.buildUpon().appendQueryParameter(BaseColumns._ID, String.valueOf(id)).build();
+    }
+
     /**
      * Armazenar os registros de utilização da energia.
      */
@@ -152,13 +163,11 @@ public class OhaEnergyUseContract {
         public static final String TABLE_NAME = "energyUserBill";
 
         /*Definir os nomes dos campos na tabela:*/
-        public static final String COLUMN_TITLE = "title";
         public static final String COLUMN_FROM = "period_from";
         public static final String COLUMN_TO = "period_to";
         public static final String COLUMN_KWH_COST = "kwh_cost";
         public static final String[] COLUMN_ALL = new String[]{
                 _ID,
-                COLUMN_TITLE,
                 COLUMN_FROM,
                 COLUMN_TO,
                 COLUMN_KWH_COST,
@@ -167,23 +176,21 @@ public class OhaEnergyUseContract {
         //Índices referente a lista de campos COLUMN_ALL, favor sempre utilizar
         //esses Índices para acessar as colunas no cursor.
         public static final byte INDEX_COLUMN_ID = 0;
-        public static final byte INDEX_COLUMN_TITLE = 1;
-        public static final byte INDEX_COLUMN_FROM = 2;
-        public static final byte INDEX_COLUMN_TO = 3;
-        public static final byte INDEX_COLUMN_KWH_COST = 4;
+        public static final byte INDEX_COLUMN_FROM = 1;
+        public static final byte INDEX_COLUMN_TO = 2;
+        public static final byte INDEX_COLUMN_KWH_COST = 3;
         //Somente disponível no {@link OhaEnergyUseBillCursor}
-        public static final byte INDEX_COLUMN_CALC_DURATION_SUN = 5;
-        public static final byte INDEX_COLUMN_CALC_WH_TOTAL_SUN = 6;
-        public static final byte INDEX_COLUMN_CALC_WATTS_MAX = 7;
+        public static final byte INDEX_COLUMN_CALC_DURATION_SUN = 4;
+        public static final byte INDEX_COLUMN_CALC_WH_TOTAL_SUN = 5;
+        public static final byte INDEX_COLUMN_CALC_WATTS_MAX = 6;
 
         /**
          * Recuperar o SQL para criar a tabela energyUserBill no banco de dados.
          */
         public static String getSQLCreate(){
-            return String.format("CREATE TABLE %s ( %s INTEGER PRIMARY KEY autoincrement, %s TEXT, %s LONG, %s LONG, %s REAL)",
+            return String.format("CREATE TABLE %s ( %s INTEGER PRIMARY KEY autoincrement, %s LONG, %s LONG, %s REAL)",
                     TABLE_NAME,
                     _ID,
-                    COLUMN_TITLE,
                     COLUMN_FROM,
                     COLUMN_TO,
                     COLUMN_KWH_COST
@@ -193,9 +200,8 @@ public class OhaEnergyUseContract {
         /**
          * Analisar e validar um conta de utilização de energia
          */
-        public static ContentValues parse(String title, Date from, Date to, double kwhCust) {
+        public static ContentValues parse(Date from, Date to, double kwhCust) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(COLUMN_TITLE, title);
             contentValues.put(COLUMN_FROM, OhaHelper.getDateBegin(from).getTime());
             contentValues.put(COLUMN_TO, OhaHelper.getDateEnd(to, false).getTime());
             contentValues.put(COLUMN_KWH_COST, kwhCust);
