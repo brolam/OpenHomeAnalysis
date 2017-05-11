@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+@author Breno Marques
+@version 1.00
+@since Release 01
+-->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:anim/accelerate_interpolator" >
+
+    <alpha
+        android:fromAlpha="0"
+        android:toAlpha="2"
+        android:duration="1000" >
+    </alpha>
+</set>
