@@ -22,6 +22,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import java.io.File;
 import java.util.Date;
 
 import br.com.brolam.library.helpers.OhaHelper;
@@ -32,6 +34,7 @@ import br.com.brolam.oha.supervisory.ui.adapters.OhaMainAdapter;
 import br.com.brolam.oha.supervisory.ui.adapters.holders.OhaEnergyUseBillHolder;
 import br.com.brolam.oha.supervisory.ui.adapters.holders.OhaMainHolder;
 import br.com.brolam.oha.supervisory.ui.fragments.OhaEnergyUseBillFragment;
+import br.com.brolam.oha.supervisory.ui.fragments.OhaRestoreDatabaseFragment;
 import br.com.brolam.oha.supervisory.ui.helpers.OhaBackupHelper;
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
@@ -40,6 +43,8 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
  *  Exibir os cartões de utilização de energia por dia.
  *  Exibir os cartões de utilização de energia por conta.
  *  Exibir o NavigationView com o menu do aplicativo.
+ *  Solicitar o backup do banco de dados.
+ *  Solicitar o restore do banco de dados.
  * @author Breno Marques
  * @version 1.00
  * @since Release 01
@@ -49,7 +54,9 @@ public class OhaMainActivity extends AppCompatActivity
         NavigationView.OnNavigationItemSelectedListener,
         LoaderManager.LoaderCallbacks<Cursor>,
         View.OnClickListener, OhaMainHolder.IOhaMainHolder,
-        OhaEnergyUseBillFragment.IOhaEnergyUseBillFragment {
+        OhaEnergyUseBillFragment.IOhaEnergyUseBillFragment,
+        OhaRestoreDatabaseFragment.IOhaRestoreDatabaseFragment{
+
     GridLayoutManager gridLayoutManager;
     RecyclerView recyclerView;
     NavigationView navigationView;
@@ -165,7 +172,7 @@ public class OhaMainActivity extends AppCompatActivity
                     requestBackup();
                     return false;
                 case R.id.nav_restore:
-                    requestRestoreBackup();
+                    OhaRestoreDatabaseFragment.show(this);
                     return false;
                 default:
                     return true;
@@ -177,20 +184,41 @@ public class OhaMainActivity extends AppCompatActivity
     }
 
     /**
-     * TODO Build Backup interface
+     * Solicitar a confirmação do backup
      */
     private void requestBackup() {
-        OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
-        ohaBackupHelper.setBackupTime();
+        String message = getString(R.string.main_activity_request_backup_database);
+        Snackbar.make(this.floatingActionButton, message, Snackbar.LENGTH_LONG)
+                .setAction(
+                        getString(R.string.action_accept),
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(OhaMainActivity.this);
+                                ohaBackupHelper.setBackupTime();
+                                showSnackBar(getString(R.string.main_activity_request_backup_database_started));
+                            }
+                        }).show();
     }
 
     /**
-     * TODO Build restore interface
+     * Envento para solicitar a confirmação do restore do banco de dados.
+     * @param backup informar o arquivo do backup válido.
      */
-    private void requestRestoreBackup() {
-        OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
-        //ohaBackupHelper.setBackupRestoreFilePath("storage/sdcard0/Oha/Backups/9999_99_99_99_99_99.zip");
-        //ohaBackupHelper.setBackupRestoreFilePath("/storage/emulated/0/Oha/Backups/9999_99_99_99_99_99.zip");
+    @Override
+    public void onRequestRestoreDatabase(final File backup) {
+        String message = getString(R.string.main_activity_request_restore_database, backup.getName());
+        Snackbar.make(this.floatingActionButton, message, Snackbar.LENGTH_LONG)
+                .setAction(
+                        getString(R.string.action_accept),
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(OhaMainActivity.this);
+                                ohaBackupHelper.setBackupRestoreFilePath(backup.getAbsolutePath());
+                                showSnackBar(getString(R.string.main_activity_request_restore_database_started));
+                            }
+                        }).show();
     }
 
     @Override

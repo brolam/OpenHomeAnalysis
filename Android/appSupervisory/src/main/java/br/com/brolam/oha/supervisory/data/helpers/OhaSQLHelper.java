@@ -4,19 +4,10 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
-
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.FileFilter;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.util.Date;
-
 import br.com.brolam.library.helpers.OhaHelper;
-import br.com.brolam.oha.supervisory.OhaException;
-import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract;
-
 import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
 
 /**
@@ -41,16 +32,12 @@ public class OhaSQLHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(EnergyUseLogEntry.getSQLCreate());
         //EnergyUseBillEntry
         sqLiteDatabase.execSQL(EnergyUseBillEntry.getSQLCreate());
-
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        switch (newVersion) {
-            //case 2:
-        }
+        switch (newVersion) {}
     }
-
 
     /**
      * Realizar o backup do banco de dados compactado.
@@ -84,6 +71,21 @@ public class OhaSQLHelper extends SQLiteOpenHelper {
         File data = Environment.getDataDirectory();
         File directoryDataBase = new File(data, dataBasePath);
         OhaHelper.unZipFile(backupNamePath, DATABASE_NAME, directoryDataBase.getPath(), iZipFile);
+    }
+
+    /**
+     * Recuperar uma lista com os backups do banco de dados.
+     */
+    public static File[] getBackups() {
+        //recuperar somente os arquivos com extenção zip:
+        FileFilter fileFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.getName().toLowerCase().contains("zip");
+            }
+        };
+        File backupsPath = new File(Environment.getExternalStorageDirectory(), BACKUP_DIRECTORY);
+        return backupsPath.listFiles(fileFilter);
     }
 
 }

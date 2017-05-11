@@ -22,6 +22,7 @@
     <string name="action_accept">ACCEPT</string>
     <string name="action_save">SAVE</string>
     <string name="action_cancel">CANCEL</string>
+    <string name="action_restore_database">Restore Database</string>
 
     <!--Mensagens de erro referente ao processo leitura do log de consumo de energia-->
     <string name="exception_on_parse_content_invalid">Content of the power consumption log is invalid!</string>
@@ -141,6 +142,10 @@
 
     <!-- Tela Principal -->
     <string name="main_activity_request_delete_energy_use_bill">Energy Bill %s, Confirm the deletion?</string>
+    <string name="main_activity_request_backup_database">Confirm the backup</string>
+    <string name="main_activity_request_backup_database_started">Backup has started.</string>
+    <string name="main_activity_request_restore_database">Confirm backup restore %s</string>
+    <string name="main_activity_request_restore_database_started">Backup Restore has started.</string>
 
     <!-- Energy Use Columns -->
     <string name="hour">Hour</string>

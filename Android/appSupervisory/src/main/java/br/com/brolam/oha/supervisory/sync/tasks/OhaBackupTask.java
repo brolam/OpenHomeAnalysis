@@ -58,6 +58,9 @@ public class OhaBackupTask implements OhaHelper.IZipFile {
             this.flagRunning = false;
             this.ohaBackupHelper.clearBackupRestoreFilePath();
             this.ohaBackupHelper.setLastDateTime();
+            //TODO Notify that app will be finalized.
+            int id= android.os.Process.myPid();
+            android.os.Process.killProcess(id);
         }
     }
 
