@@ -200,11 +200,11 @@ public class OhaEnergyUseContract {
         /**
          * Analisar e validar um conta de utilização de energia
          */
-        public static ContentValues parse(Date from, Date to, double kwhCust) {
+        public static ContentValues parse(Date from, Date to, double kwhCost) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(COLUMN_FROM, OhaHelper.getDateBegin(from).getTime());
             contentValues.put(COLUMN_TO, OhaHelper.getDateEnd(to, false).getTime());
-            contentValues.put(COLUMN_KWH_COST, kwhCust);
+            contentValues.put(COLUMN_KWH_COST, kwhCost);
             return contentValues;
         }
 

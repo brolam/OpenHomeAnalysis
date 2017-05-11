@@ -150,6 +150,7 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_save:
+                this.kwhCost = OhaHelper.convertToDouble(this.editKwhCost.getText().toString(), 0.0);
                 //Acionar o evento onSaveEnergyUseBill se a atividade suportar a interface IOhaEnergyUseBillFragment
                 IOhaEnergyUseBillFragment iOhaEnergyUseBillFragment  = getActivity() instanceof IOhaEnergyUseBillFragment? (IOhaEnergyUseBillFragment)getActivity(): null;
                 if ( iOhaEnergyUseBillFragment != null ){
@@ -183,7 +184,6 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
         radioButtonDate.setText(OhaHelper.formatDate(date, "dd, MMM yyyy"));
     }
 
-
     @Override
     public void onResume() {
         //Definir o tamanho da janela conforme percentual definido no dimens.xml:
@@ -197,7 +197,6 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
         window.setGravity(Gravity.CENTER);
         super.onResume();
     }
-
 
     @Override
     public void onSelectedDayChange(@NonNull CalendarView calendarView, int year, int month, int dayOfMonth) {
