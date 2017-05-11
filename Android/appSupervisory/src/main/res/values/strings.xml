@@ -171,6 +171,10 @@
     <string name="energy_use_log_filter_fragment_WattsGreaterEqual_hint">Watts greater or equal</string>
     <string name="energy_use_log_filter_fragment_WattsLessEqual_hint">Watts less or equal</string>
 
+    <!-- Energy Use Day Card -->
+    <string name="energy_use_day_card_cost" formatted="false">$%s</string>
+    <string name="energy_use_day_card_body" formatted="false">Kwh %s Avg %s per day.</string>
+
     <!-- Energy Use Bill Card -->
     <string name="energy_use_bill_card_title" formatted="false">%s to %s</string>
     <string name="energy_use_bill_card_read" formatted="false">Read %s of %s days</string>

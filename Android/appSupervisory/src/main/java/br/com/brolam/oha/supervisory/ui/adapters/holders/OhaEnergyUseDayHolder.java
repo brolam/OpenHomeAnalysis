@@ -50,13 +50,10 @@ public class OhaEnergyUseDayHolder extends OhaMainHolder {
 
         this.textViewDay.setText(OhaHelper.formatDate(beginDate, "EEE, dd MMM yyyy"));
         this.textViewAccuracy.setText(OhaHelper.formatAccuracyDay(context, duration, false));
-        this.textViewDailyCost.setText(OhaHelper.formatNumber(dailyCost, "$,#0.00"));
-        this.textViewBody.setText(
-                String.format(
-                        "Kwh %s, avg %s per hour.",
-                        OhaHelper.formatNumber(totalKWH, "#0.00"), OhaHelper.formatNumber(avgKWH, "#0.00")
-                )
-        );
+        String strCost = context.getString(R.string.energy_use_day_card_cost, OhaHelper.formatNumber(dailyCost, "#0.00"));
+        this.textViewDailyCost.setText(strCost);
+        String body = context.getString(R.string.energy_use_day_card_body, OhaHelper.formatNumber(totalKWH, "#0.00"), OhaHelper.formatNumber(avgKWH, "#0.00"));
+        this.textViewBody.setText(body);
         this.textViewWattsMax.setText(OhaHelper.formatNumber(wattsMax, ",##0.00"));
         this.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
