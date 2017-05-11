@@ -9,5 +9,6 @@
         android:id="@+id/action_filter"
         android:icon="@drawable/ic_filter_white"
         android:title="@string/action_filter"
-        app:showAsAction="always"/>
+        app:showAsAction="always"
+        android:visible="false"/>
 </menu>
