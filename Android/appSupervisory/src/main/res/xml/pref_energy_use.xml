@@ -20,7 +20,7 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"/>
 
-    <EditTextPreference
+    <br.com.brolam.oha.supervisory.ui.fragments.OhaDatePickerDialogPreference
         android:dependency="energy_use_sync_setup_mode"
         android:title="@string/pref_date_energy_use_sync"
         android:inputType="numberSigned"
