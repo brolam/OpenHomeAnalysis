@@ -22,6 +22,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import java.io.File;
 import java.util.Date;
@@ -253,10 +255,14 @@ public class OhaMainActivity extends AppCompatActivity
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (loader.getId() == R.id.nav_energy_use_day) {
             data.setNotificationUri(getContentResolver(), OhaEnergyUseContract.CONTENT_URI_DAYS);
+            this.floatingActionButton.setImageResource(R.drawable.ic_add_alert_white);
         } else if (loader.getId() == R.id.nav_energy_use_bill) {
             data.setNotificationUri(getContentResolver(), CONTENT_URI_BILL);
+            this.floatingActionButton.setImageResource(R.drawable.ic_add_white);
         }
         this.ohaMainAdapter.swapCursor(data, loader.getId());
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.fab_button);
+        this.floatingActionButton.startAnimation(animation);
     }
 
     @Override
