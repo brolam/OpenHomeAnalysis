@@ -47,8 +47,8 @@ public class OhaEnergyUseDayHolder extends OhaMainHolder {
         Double dailyCost = totalKWH * kwhCost;
         Double avgKWH = totalKWH > 0 ? totalKWH / OhaHelper.convertMillisToHours(duration * 1000) : 0.00;
         Double wattsMax = cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_WATTS_MAX);
-
-        this.textViewDay.setText(OhaHelper.formatDate(beginDate, "EEE, dd MMM yyyy"));
+        String titleDay = OhaHelper.formatDate(beginDate, "EEE, dd MMM yyyy");
+        this.textViewDay.setText(OhaHelper.formatCamelCase(titleDay));
         this.textViewAccuracy.setText(OhaHelper.formatAccuracyDay(context, duration, false));
         String strCost = context.getString(R.string.energy_use_day_card_cost, OhaHelper.formatNumber(dailyCost, "#0.00"));
         this.textViewDailyCost.setText(strCost);

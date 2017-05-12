@@ -111,7 +111,8 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
         this.toolbar = (Toolbar) findViewById(R.id.toolbar);
 
         //Atualizar o título da tela
-        this.toolbar.setTitle(OhaHelper.formatDate(this.beginDateTime, "EEE, dd MMM yyyy"));
+        String title = OhaHelper.formatDate(this.beginDateTime, "EEE, dd MMM yyyy");
+        this.toolbar.setTitle(OhaHelper.formatCamelCase(title));
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {

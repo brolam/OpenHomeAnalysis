@@ -258,6 +258,17 @@ public class OhaHelper {
     }
 
     /**
+     * Recuperar um texto com a primeira letra maiúscula.
+     * @param string informar uma string válida.
+     */
+    public static String formatCamelCase(String string) {
+        return string.length() > 0 ? string.replaceFirst(
+                Character.toString(string.charAt(0)),
+                Character.toString(Character.toUpperCase(string.charAt(0)))
+        ) : string;
+    }
+
+    /**
      * Converter um texto em um valor numérico
      * @param string texto com um valor numérico válido.
      * @param ifError valor que deve ser retornado se o texto for inválido.
