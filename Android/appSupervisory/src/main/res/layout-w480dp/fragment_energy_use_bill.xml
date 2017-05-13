@@ -78,12 +78,13 @@ Layout para adicionar ou alterar uma Conta de Energia: OhaEnergyUseBillFragment
 
     </LinearLayout>
 
-    <CalendarView
-        android:id="@+id/calendarView"
+    <DatePicker
+        android:id="@+id/datePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/linearLayoutRangeDate"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:spinnersShown="false"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"

@@ -14,9 +14,10 @@ Exibir um calendario na tela de configuracoes
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="br.com.brolam.oha.supervisory.ui.fragments.OhaDatePickerDialogPreference">
 
-    <CalendarView
-        android:id="@+id/calendarView"
+    <DatePicker
+        android:id="@+id/datePicker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:spinnersShown="false"/>
 </RelativeLayout>

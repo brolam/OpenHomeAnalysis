@@ -2,6 +2,7 @@ package br.com.brolam.oha.supervisory.ui.fragments;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.os.Bundle;
@@ -15,7 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.CalendarView;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioButton;
 
@@ -32,7 +33,7 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
  * @author Breno Marques
  * @version 1.00
  * @since Release 01
- */public class OhaEnergyUseBillFragment extends DialogFragment implements View.OnClickListener, CalendarView.OnDateChangeListener, Toolbar.OnMenuItemClickListener {
+ */public class OhaEnergyUseBillFragment extends DialogFragment implements View.OnClickListener, Toolbar.OnMenuItemClickListener, DatePicker.OnDateChangedListener {
     public static String TAG = OhaEnergyUseBillFragment.class.getName();
 
     public interface IOhaEnergyUseBillFragment{
@@ -52,7 +53,7 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
     RadioButton radioButtonFromDate;
     RadioButton radioButtonToDate;
     EditText editKwhCost;
-    CalendarView calendarView;
+    DatePicker datePicker;
     Toolbar toolbar;
 
     @Override
@@ -131,8 +132,8 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
         View view = inflater.inflate(R.layout.fragment_energy_use_bill, container, false);
         this.radioButtonFromDate = (RadioButton) view.findViewById(R.id.radioButtonFromDate);
         this.radioButtonToDate = (RadioButton) view.findViewById(R.id.radioButtonToDate);
-        this.editKwhCost = (EditText)  view.findViewById(R.id.editKwhCost);
-        this.calendarView = (CalendarView) view.findViewById(R.id.calendarView);
+        this.editKwhCost = (EditText) view.findViewById(R.id.editKwhCost);
+        this.datePicker = (DatePicker) view.findViewById(R.id.datePicker);
         this.toolbar = (Toolbar) view.findViewById(R.id.toolbar);
         this.setTextRadioButtonDate(radioButtonFromDate, this.fromDate);
         this.setTextRadioButtonDate(radioButtonToDate, this.toDate);
@@ -140,7 +141,12 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
         this.editKwhCost.setText(OhaHelper.getEditable(this.kwhCost));
         this.radioButtonFromDate.setOnClickListener(this);
         this.radioButtonToDate.setOnClickListener(this);
-        this.calendarView.setOnDateChangeListener(this);
+        this.datePicker.setOnClickListener(this);
+        //Remover o date_picker_header do datePicker se o mesmo existir
+        View viewDayDatePicker = datePicker.findViewById(Resources.getSystem().getIdentifier("date_picker_header", "id", "android"));
+        if (viewDayDatePicker != null) {
+            viewDayDatePicker.setVisibility(View.GONE);
+        }
         this.toolbar.inflateMenu(R.menu.fragment_energy_use_bill);
         this.toolbar.setOnMenuItemClickListener(this);
         return view;
@@ -177,7 +183,9 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
             this.radioButtonFromDate.setChecked(true);
             this.radioButtonToDate.setChecked(false);
         }
-        calendarView.setDate(selectedDate);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(selectedDate));
+        datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), this);
     }
 
     private void setTextRadioButtonDate(RadioButton radioButtonDate, long date) {
@@ -199,7 +207,21 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
     }
 
     @Override
-    public void onSelectedDayChange(@NonNull CalendarView calendarView, int year, int month, int dayOfMonth) {
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.radioButtonFromDate:
+                this.radioButtonToDate.setChecked(false);
+                setCalendarView();
+                return;
+            case R.id.radioButtonToDate:
+                this.radioButtonFromDate.setChecked(false);
+                setCalendarView();
+                return;
+        }
+    }
+
+    @Override
+    public void onDateChanged(DatePicker datePicker, int year, int month, int dayOfMonth) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, dayOfMonth);
         if (this.radioButtonFromDate.isChecked()) {
@@ -223,17 +245,4 @@ import static br.com.brolam.oha.supervisory.data.OhaEnergyUseContract.*;
         this.amountDays = (int) OhaHelper.getAmountDays(this.fromDate, this.toDate);
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.radioButtonFromDate:
-                this.radioButtonToDate.setChecked(false);
-                setCalendarView();
-                return;
-            case R.id.radioButtonToDate:
-                this.radioButtonFromDate.setChecked(false);
-                setCalendarView();
-                return;
-        }
-    }
 }
