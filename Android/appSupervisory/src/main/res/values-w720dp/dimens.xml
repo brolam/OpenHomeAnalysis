@@ -8,7 +8,6 @@
     <integer name="cards_columns">2</integer>
     <integer name="energy_use_log_filter_fragment_width_percent">70</integer>
     <integer name="energy_use_log_filter_fragment_height_percent">30</integer>
-
-    <integer name="energy_use_bill_fragment_width_percent">79</integer>
-    <integer name="energy_use_bill_fragment_height_percent">55</integer>
+    <integer name="energy_use_bill_fragment_width_percent">65</integer>
+    <integer name="energy_use_bill_fragment_height_percent">45</integer>
 </resources>

@@ -6,8 +6,9 @@
 <resources>
     <!-- Para telas igual ou superior a 720dp -->
     <integer name="cards_columns">2</integer>
+    <dimen name="activity_horizontal_margin">120dp</dimen>
     <integer name="energy_use_log_filter_fragment_width_percent">50</integer>
     <integer name="energy_use_log_filter_fragment_height_percent">50</integer>
-    <integer name="energy_use_bill_fragment_width_percent">60</integer>
-    <integer name="energy_use_bill_fragment_height_percent">55</integer>
+    <integer name="energy_use_bill_fragment_width_percent">45</integer>
+    <integer name="energy_use_bill_fragment_height_percent">70</integer>
 </resources>
