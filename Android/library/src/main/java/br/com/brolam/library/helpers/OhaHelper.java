@@ -238,22 +238,33 @@ public class OhaHelper {
     }
 
     /**
-     * Recuperar o percentual da precisão de um tempo sobre 24 horas.
-     *
+     * Recuperar o percentual da precisão do tempo de leitura sobre 24 horas.
      * @param context  informar um contexto válido.
-     * @param duration duração em segundos.
+     * @param duration duração em segundos da leitura.
      * @param untilNow informar se o tempo total não deve ser maior do que a hora atual.
      * @return texto formatado informando o percentual da precisão, EX: Accuracy 99.99%
      */
     public static String formatAccuracyDay(Context context, double duration, boolean untilNow) {
-        double secondsOnDay;
-        if (untilNow) {
-            Date now = new Date();
-            secondsOnDay = now.getTime() - getDateBegin(now).getTime() / 1000.00;
-        } else {
-            secondsOnDay = DateUtils.DAY_IN_MILLIS / 1000.00;
-        }
-        double accuracy = duration > 0 ? (duration / secondsOnDay) * 100 : 0.00;
+        Date date = new Date();
+        long beginDate = getDateBegin(date).getTime();
+        long endDate = getDateEnd(date, false).getTime();
+        return formatAccuracy(context, beginDate, endDate, duration, untilNow);
+    }
+    
+    /**
+     * Recuperar o percentual da precisão do tempo de leitura sobre um período.
+     * @param context  informar um contexto válido.
+     * @param beginDateTime informar a data e hora inicial.
+     * @param endDateTime informar a data e hora final.
+     * @param duration duração em segundos da leitura.
+     * @param untilNow informar se a data e hora final deve ser menor do que a data e hora atual.
+     * @return texto formatado informando o percentual da precisão, EX: Accuracy 99.99%
+     */
+    public static String formatAccuracy(Context context, long beginDateTime, long endDateTime, double duration, boolean untilNow) {
+        long now = new Date().getTime();
+        //Se o paramentro untilNow for verdadeiro, considerar o hora final a hora atual:
+        double periodInMillis = (((untilNow && now < endDateTime) ? now : endDateTime) - beginDateTime) / 1000.00;
+        double accuracy = duration > 0 ? (duration / periodInMillis) * 100 : 0.00;
         return String.format(context.getString(R.string.format_accuracy_day), formatNumber(accuracy, "#0.00"));
     }
 

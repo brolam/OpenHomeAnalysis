@@ -168,7 +168,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
     @Override
     public void onCalculationCompleted(double totalDuration, double totalWh1, double totalWh2, double totalWh3, double totalWh, ArrayList<OhaEnergyUseLogHelper.EnergyUseWh> energyUseWhs, Cursor cursor) {
         double totalKwh = OhaHelper.convertWhToKWH(totalWh);
-        this.toolbar.setSubtitle(OhaHelper.formatAccuracyDay(this, totalDuration, false));
+        this.toolbar.setSubtitle(OhaHelper.formatAccuracy(this, this.beginDateTime, this.endDateTime, totalDuration, DateUtils.isToday(this.beginDateTime)));
         ((TextView) this.titleEnergyUseWhValues.findViewById(R.id.textViewDuration)).setText(DateUtils.formatElapsedTime((long) totalDuration));
         ((TextView) this.titleEnergyUseWhValues.findViewById(R.id.textViewKwh)).setText(OhaHelper.formatNumber(totalKwh, "#0.00"));
         ((TextView) this.titleEnergyUseWhValues.findViewById(R.id.textViewCost)).setText(OhaHelper.formatNumber(totalKwh * this.kwhCost, "#0.00"));

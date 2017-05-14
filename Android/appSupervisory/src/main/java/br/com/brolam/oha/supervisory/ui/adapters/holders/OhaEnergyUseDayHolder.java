@@ -3,6 +3,7 @@ package br.com.brolam.oha.supervisory.ui.adapters.holders;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -49,7 +50,7 @@ public class OhaEnergyUseDayHolder extends OhaMainHolder {
         Double wattsMax = cursor.getDouble(EnergyUseLogEntry.INDEX_COLUMN_CALC_WATTS_MAX);
         String titleDay = OhaHelper.formatDate(beginDate, "EEE, dd MMM yyyy");
         this.textViewDay.setText(OhaHelper.formatCamelCase(titleDay));
-        this.textViewAccuracy.setText(OhaHelper.formatAccuracyDay(context, duration, false));
+        this.textViewAccuracy.setText(OhaHelper.formatAccuracyDay(context, duration, DateUtils.isToday(beginDate)));
         String strCost = context.getString(R.string.energy_use_day_card_cost, OhaHelper.formatNumber(dailyCost, "#0.00"));
         this.textViewDailyCost.setText(strCost);
         String body = context.getString(R.string.energy_use_day_card_body, OhaHelper.formatNumber(totalKWH, "#0.00"), OhaHelper.formatNumber(avgKWH, "#0.00"));
