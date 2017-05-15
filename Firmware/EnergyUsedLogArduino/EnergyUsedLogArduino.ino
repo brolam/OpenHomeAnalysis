@@ -23,7 +23,7 @@
 /****************************************************************************************************************************************************************
  Inicio do B1 - Constantes
  ****************************************************************************************************************************************************************/
-#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
+//#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log de consumo de energia. 
 
 //Constantes utilizadas na geração dos logs.
@@ -296,7 +296,6 @@ void saveLog() {
 #endif
   String path =  String(LOGS) + '/' + currentDatePath; // Diretório do log no cartão de memória.
   String fileName = String(currentSeq) + String(F_TXT); // Nome do arquivo do log. 
-  SD.remove(path + '/' + fileName); //Excluir log gravado com erro.
   File fileLog = getFile(path, fileName, false);
   fileLog.print(F_BEGIN); // Inicio do conteúdo do log
   fileLog.print(currentTime.substring(0, 6)); fileLog.print('|'); //Ultima hora e minuto atualizada no programa.
@@ -349,18 +348,6 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
   delay(300); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
 }
 
-/* Localizar a última sequência de log.*/
-int searchLastSequence(String path){
-  int sequence = 1;
-  while(SD.exists(path + '/' + String(sequence) + String(F_TXT))){
-    sequence++;
-  }
-#ifdef DEBUG
-  debug(F("searchLastSequence: "), String(sequence));
-#endif
-  return sequence;
-}
-
 /* Atualizar o status do programa e também a data e hora utilizada no registro do log de consumo de energía:
    @param strDate informar texto com data no formato YYYYMMDD
    @param strDate informar texto com hora e minuto no formato HHmm
@@ -375,12 +362,7 @@ void setStatus(String strDate, String strTime) {
   ohaStatus = OHA_STATUS_OK; //Sinalizar que a gravação dos logs estão sendo realizadas sem problemas.
   //Atualizar a sequência atual para a data e hora informada ou reiniciar se não existir sequência para a data informada.
   String path = String(LOGS) + '/' + currentDatePath;
-  currentSeq = getResource(path, String(LOG_SEQ), "-1").toInt();
-  //Por segurança, localizar a última sequencia do log se não for possível recuperar 
-  //a sequência atual no arquivo de recursos(Seq.txt).
-  if (currentSeq == -1) { 
-    currentSeq = searchLastSequence(path);
-  } 
+  currentSeq = getResource(path, String(LOG_SEQ), "1").toInt();
   delay(100);
 }
 
