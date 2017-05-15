@@ -52,7 +52,7 @@ public class OhaEnergyUseBillHolder extends OhaMainHolder {
         this.textViewTitle.setText(getEnergyBillTitle(this.textViewTitle.getContext(), cursor.getLong(EnergyUseBillEntry.INDEX_COLUMN_FROM), cursor.getLong(EnergyUseBillEntry.INDEX_COLUMN_TO)));
         String read = textViewRead.getContext().getString(R.string.energy_use_bill_card_read, OhaHelper.formatNumber(billReadingDays, "#0.00"), OhaHelper.formatNumber(billAmountDays, "#0") );
         this.textViewRead.setText(read);
-        this.textViewDailyCost.setText(OhaHelper.formatNumber(dailyCost, "$#,##0.00"));
+        this.textViewDailyCost.setText(OhaHelper.formatMoney(dailyCost, "#,##0.00"));
         String body = this.textViewBody.getContext().getString(R.string.energy_use_bill_card_body, OhaHelper.formatNumber(totalKWH, "#0.00"), OhaHelper.formatNumber(avgKWH, "##0.00"));
         this.textViewBody.setText(body);
         this.textViewWattsMax.setText(OhaHelper.formatNumber(wattsMax, ",##0.00"));

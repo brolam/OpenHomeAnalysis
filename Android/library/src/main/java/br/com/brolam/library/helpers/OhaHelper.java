@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
@@ -27,6 +28,7 @@ import br.com.brolam.library.R;
  * @since Release 01
  */
 public class OhaHelper {
+    static String defaultCurrencySymbol;
     /**
      * Obter um texto com o Ano, Mês e Dia.
      *
@@ -216,9 +218,16 @@ public class OhaHelper {
         return formatDate(date, dateFormat);
     }
 
+    //Recuperar o símbolo monentário padrão para o usuário.
+    public static String getDefaultCurrencySymbol(){
+        if ( defaultCurrencySymbol == null){
+            defaultCurrencySymbol = Currency.getInstance(Locale.getDefault()).getSymbol();
+        }
+        return defaultCurrencySymbol;
+    }
+
     /**
-     * Recuperar uma número formatado conforme o decimalFormat.
-     *
+     * Recuperar um número formatado conforme o decimalFormat.
      * @param number  informar um número válido
      * @param pattern informar o formato conforme o {@link DecimalFormat}:
      *                https://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html
@@ -226,6 +235,17 @@ public class OhaHelper {
      */
     public static String formatNumber(double number, String pattern) {
         return new DecimalFormat(pattern).format(number);
+    }
+
+    /**
+     * Recuperar um número formatado conforme o decimalFormat mais o símbolo monentário
+     * @param number  informar um número válido
+     * @param pattern informar o formato conforme o {@link DecimalFormat}:
+     *                https://docs.oracle.com/javase/7/docs/api/java/text/DecimalFormat.html
+     * @return texto com o número formatado.
+     */
+    public static String formatMoney(double number, String pattern) {
+        return String.format("%s%s", getDefaultCurrencySymbol(), new DecimalFormat(pattern).format(number));
     }
 
     /**
