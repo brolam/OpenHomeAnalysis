@@ -47,7 +47,7 @@ Layout para exibir a utilização de energia por conta de energia.
                 style="@style/AppTheme.Card.Title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Max. Watts." />
+                android:text="@string/energy_use_bill_card_title_max_watts" />
 
             <TextView
                 android:id="@+id/textViewWattsMax"
