@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,7 +39,7 @@ import br.com.brolam.oha.supervisory.ui.fragments.OhaEnergyUseLogFilterFragment;
  * @version 1.00
  * @since Release 01
  */
-public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements OhaEnergyUseLogHelper.IOhaEnergyUseLogHelper, View.OnClickListener, OhaEnergyUseLogFilterFragment.IOhaFilterWattsFragment, OhaEnergyUseWhHolder.IOhaEnergyUseWhHolder {
+public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements OhaEnergyUseLogHelper.IOhaEnergyUseLogHelper, View.OnClickListener, OhaEnergyUseLogFilterFragment.IOhaFilterWattsFragment, OhaEnergyUseWhHolder.IOhaEnergyUseWhHolder, SwipeRefreshLayout.OnRefreshListener {
 
     //Parâmetro obrigatório para informar a data e hora inicial.
     private static final String PARAM_BEGIN_DATE_TIME = "param_begin_date_time";
@@ -67,6 +68,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
 
 
     Toolbar toolbar;
+    SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView recyclerView;
     View titleEnergyUseWhValues;
     RecyclerView.Adapter ohaEnergyUseAdapter;
@@ -74,14 +76,15 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
 
     /**
      * Iniciar a atividade conforme os parâmetros abaixo:
-     * @param context informar um contexto válido.
-     * @param beginDateTime informar a data e hora de incial.
-     * @param endDateTime informar a data e hora final
-     * @param kwhCost informar o custo por kwh da data informada.
-     * @param isShowLog exibir os logs de utilização de energia ou o resumo por Watts hora.
-     * @param filterWatts informar a fase que deve ser filtrada.
+     *
+     * @param context           informar um contexto válido.
+     * @param beginDateTime     informar a data e hora de incial.
+     * @param endDateTime       informar a data e hora final
+     * @param kwhCost           informar o custo por kwh da data informada.
+     * @param isShowLog         exibir os logs de utilização de energia ou o resumo por Watts hora.
+     * @param filterWatts       informar a fase que deve ser filtrada.
      * @param wattsGreaterEqual informar o watts inicial
-     * @param wattsLessEqual informar o watts final.
+     * @param wattsLessEqual    informar o watts final.
      */
     public static void show(Context context, long beginDateTime, long endDateTime, double kwhCost, boolean isShowLog, FilterWatts filterWatts, double wattsGreaterEqual, double wattsLessEqual) {
         Intent intent = new Intent(context, OhaEnergyUseDetailsActivity.class);
@@ -120,11 +123,12 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
         }
 
         this.titleEnergyUseWhValues = findViewById(R.id.titleEnergyUseWhValues);
+        this.swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         this.recyclerView = (RecyclerView) this.findViewById(R.id.recyclerView);
         this.recyclerView.setLayoutManager(new LinearLayoutManager(this));
         //Instanciar o adaptador conforme o paramemto isShowLog
-        if ( this.isShowLog){
-            this.ohaEnergyUseAdapter =  new  OhaEnergyUseWattsAdapter(this);
+        if (this.isShowLog) {
+            this.ohaEnergyUseAdapter = new OhaEnergyUseWattsAdapter(this);
         } else {
             this.ohaEnergyUseAdapter = new OhaEnergyUseWhAdapter(this, this.kwhCost, this);
         }
@@ -132,6 +136,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
 
         this.floatingActionButton = (FloatingActionButton) findViewById(R.id.fab);
         this.floatingActionButton.setOnClickListener(this);
+        this.swipeRefreshLayout.setOnRefreshListener(this);
         this.ohaEnergyUseLogHelper = new OhaEnergyUseLogHelper(this, this.beginDateTime, this.endDateTime, this.filterWatts, this.wattsGreaterEqual, this.wattsLessEqual);
     }
 
@@ -144,7 +149,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 this.finish();
                 return true;
@@ -155,7 +160,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
         return super.onOptionsItemSelected(item);
     }
 
-    private void showSnackBar(String mensage){
+    private void showSnackBar(String mensage) {
         Snackbar.make(this.floatingActionButton, mensage, Snackbar.LENGTH_LONG)
                 .setAction(null, null).show();
     }
@@ -186,6 +191,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
             ((OhaEnergyUseWhAdapter) this.ohaEnergyUseAdapter).swapCursor(energyUseWhs);
         }
     }
+
 
     @Override
     public void onSelectedEnergyUseWh(long beginDateTime, long endDateTime, double kwhCost) {
@@ -251,7 +257,7 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
         endCalendar.set(Calendar.SECOND, endSecond);
         long beginDateTime = beginCalendar.getTime().getTime();
         long endDateTime = endCalendar.getTime().getTime();
-        show(this,beginDateTime, endDateTime, this.kwhCost, this.isShowLog, filterWatts, wattsGreaterEqual, wattsLessEqual);
+        show(this, beginDateTime, endDateTime, this.kwhCost, this.isShowLog, filterWatts, wattsGreaterEqual, wattsLessEqual);
         this.finish();
     }
 
@@ -270,4 +276,18 @@ public class OhaEnergyUseDetailsActivity extends AppCompatActivity implements Oh
         super.onAttachFragment(fragment);
     }
 
+    @Override
+    public void onBeginLoader() {
+        this.swipeRefreshLayout.setRefreshing(true);
+    }
+
+    @Override
+    public void onEndLoader() {
+        this.swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onRefresh() {
+        this.ohaEnergyUseLogHelper.restartLoader();
+    }
 }

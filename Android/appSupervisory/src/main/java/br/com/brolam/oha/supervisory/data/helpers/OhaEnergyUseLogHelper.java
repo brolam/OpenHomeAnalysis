@@ -54,6 +54,8 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
          * @param cursor cursor com todos os logs de utilização de energia.
          */
         void onCalculationCompleted(double totalDuration, double totalWh1, double totalWh2, double totalWh3, double totalWh, ArrayList<EnergyUseWh> energyUseWhs, Cursor cursor);
+        void onBeginLoader();
+        void onEndLoader();
     }
 
     IOhaEnergyUseLogHelper iOhaEnergyUseLogHelper;
@@ -91,6 +93,9 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
         this.iOhaEnergyUseLogHelper.getSupportLoaderManager().initLoader(0, null, this);
     }
 
+    public void restartLoader(){
+        this.iOhaEnergyUseLogHelper.getSupportLoaderManager().restartLoader(0, null, this);
+    }
 
     /**
      * Ler o cursor com os logs de utilização de energia para realizar os calculos.
@@ -128,6 +133,7 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
      */
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        iOhaEnergyUseLogHelper.onBeginLoader();
         String selections;
         String[] selectionsArgs;
         switch (this.filterWatts) {
@@ -159,10 +165,14 @@ public class OhaEnergyUseLogHelper implements LoaderManager.LoaderCallbacks<Curs
      */
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (data.moveToFirst()) {
-            ContentResolver contentResolver = iOhaEnergyUseLogHelper.getContext().getContentResolver();
-            data.setNotificationUri(contentResolver, OhaEnergyUseContract.CONTENT_URI_LOG);
-            this.calculate(data);
+        try {
+            if (data.moveToFirst()) {
+                ContentResolver contentResolver = iOhaEnergyUseLogHelper.getContext().getContentResolver();
+                data.setNotificationUri(contentResolver, OhaEnergyUseContract.CONTENT_URI_LOG);
+                this.calculate(data);
+            }
+        } finally {
+            iOhaEnergyUseLogHelper.onEndLoader();
         }
     }
 

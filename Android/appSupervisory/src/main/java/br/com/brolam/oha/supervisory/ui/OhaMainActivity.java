@@ -11,6 +11,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -57,9 +58,10 @@ public class OhaMainActivity extends AppCompatActivity
         LoaderManager.LoaderCallbacks<Cursor>,
         View.OnClickListener, OhaMainHolder.IOhaMainHolder,
         OhaEnergyUseBillFragment.IOhaEnergyUseBillFragment,
-        OhaRestoreDatabaseFragment.IOhaRestoreDatabaseFragment{
+        OhaRestoreDatabaseFragment.IOhaRestoreDatabaseFragment, SwipeRefreshLayout.OnRefreshListener {
 
     GridLayoutManager gridLayoutManager;
+    SwipeRefreshLayout swipeRefreshLayout;
     RecyclerView recyclerView;
     NavigationView navigationView;
     FloatingActionButton floatingActionButton;
@@ -72,6 +74,7 @@ public class OhaMainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        this.swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         this.recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         //Informar a quantidade de colunas conforme o tamanho da tela.
         this.gridLayoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.cards_columns));
@@ -87,7 +90,7 @@ public class OhaMainActivity extends AppCompatActivity
 
         this.ohaMainAdapter = new OhaMainAdapter(this);
         this.recyclerView.setAdapter(this.ohaMainAdapter);
-
+        this.swipeRefreshLayout.setOnRefreshListener(this);
         this.navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         //Realizar o agendamento para executar o serviço de sincronização.
@@ -225,7 +228,7 @@ public class OhaMainActivity extends AppCompatActivity
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-
+        this.swipeRefreshLayout.setRefreshing(true);
         if (id == R.id.nav_energy_use_day) {
             //Carregar o cursor com o a utilização de energia por dia.
             return new CursorLoader(
@@ -253,16 +256,20 @@ public class OhaMainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        if (loader.getId() == R.id.nav_energy_use_day) {
-            data.setNotificationUri(getContentResolver(), OhaEnergyUseContract.CONTENT_URI_DAYS);
-            this.floatingActionButton.setImageResource(R.drawable.ic_add_alert_white);
-        } else if (loader.getId() == R.id.nav_energy_use_bill) {
-            data.setNotificationUri(getContentResolver(), CONTENT_URI_BILL);
-            this.floatingActionButton.setImageResource(R.drawable.ic_add_white);
+        try {
+            if (loader.getId() == R.id.nav_energy_use_day) {
+                data.setNotificationUri(getContentResolver(), OhaEnergyUseContract.CONTENT_URI_DAYS);
+                this.floatingActionButton.setImageResource(R.drawable.ic_add_alert_white);
+            } else if (loader.getId() == R.id.nav_energy_use_bill) {
+                data.setNotificationUri(getContentResolver(), CONTENT_URI_BILL);
+                this.floatingActionButton.setImageResource(R.drawable.ic_add_white);
+            }
+            this.ohaMainAdapter.swapCursor(data, loader.getId());
+            Animation animation = AnimationUtils.loadAnimation(this, R.anim.fab_button);
+            this.floatingActionButton.startAnimation(animation);
+        } finally {
+            this.swipeRefreshLayout.setRefreshing(false);
         }
-        this.ohaMainAdapter.swapCursor(data, loader.getId());
-        Animation animation = AnimationUtils.loadAnimation(this, R.anim.fab_button);
-        this.floatingActionButton.startAnimation(animation);
     }
 
     @Override
@@ -362,5 +369,13 @@ public class OhaMainActivity extends AppCompatActivity
                                 getContentResolver().delete(uriEnergyBill, null, null);
                             }
                         }).show();
+    }
+
+    @Override
+    public void onRefresh() {
+        MenuItem menuItem = parseMenuItem(navigationView);
+        //Reiniciar o carregamento do cursor para o menu selecionado:
+        getSupportLoaderManager().restartLoader(menuItem.getItemId(), null, this);
+
     }
 }
