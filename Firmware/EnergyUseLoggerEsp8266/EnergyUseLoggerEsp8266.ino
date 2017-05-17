@@ -1,16 +1,15 @@
 /*
-  EnergyUseLogEsp8266 - módulo de comunicação WiFi ESP8266 para processar as requisições e respotas HTTP
-                 Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
+  EnergyUseLoggerEsp8266 - módulo de comunicação WiFi ESP8266 para processar as requisições e respotas HTTP
+  Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.00
-
+  ATENÇÃO: Favor copiar o arquivo Config_model.h para Config.h e também configurar os parâmetros antes de instalar esse código no módulo ESP8266.
+  
   Ultima compilação:
    O sketch usa 231801 bytes (53%) de espaço de armazenamento para programas. O máximo são 434160 bytes.
    Variáveis globais usam 32232 bytes (39%) de memória dinâmica, deixando 49688 bytes para variáveis locais. O máximo são 81920 bytes.
 */
 
-//ATENÇÃO: Favor copiar o arquivo Config_model.h para Config.h e também configurar os parâmetros
-//antes de instalar esse código no módulo ESP8266.
 #include "Config.h"
 #include <ESP8266WiFi.h>
 
@@ -39,12 +38,10 @@ void debug(String title, String value) {
 #endif
 }
 
-
-
 /* Analisar as respostas durante o processamento da requisição, na comunicação serial entre o Arduino e o módulo ESP8266.
-   @param response informar a resposta do Arduino.
-   @param startedMillis informar quando o processamento da requisição foi iniciado em milisegundos
-   @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
+ * @param response informar a resposta do Arduino.
+ * @param startedMillis informar quando o processamento da requisição foi iniciado em milisegundos
+ * @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
 */
 String parseResponse(String response, unsigned long startedMillis) {
 
@@ -56,11 +53,10 @@ String parseResponse(String response, unsigned long startedMillis) {
     return OHA_REQUEST_RUNNING;
 }
 
-
 /* Analisar se a requisição HTTP é válida e extrair o tipo de requisição, POST ou GET, e a URL.
-   @param httpRequestion informar o texto da requisição HTTP.
-   @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
-*/
+ * @param httpRequestion informar o texto da requisição HTTP.
+ * @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
+ */
 String parseRequestion(String httpRequestion) {
   int first = -1;
   for (int action = 0; action < ACTIONS_COUNT; action++)
@@ -74,10 +70,10 @@ String parseRequestion(String httpRequestion) {
   return (httpRequestion.indexOf("POST") != -1 ? "POST/" : "GET/") + httpRequestion.substring(first, last);
 }
 
-/* Enviar a situação da conexão com Access Point.
-   @param client informar um WiFiClient para escrever a situação da conexão.
-*/
-
+/* 
+ * Enviar a situação da conexão com Access Point.
+ * @param client informar um WiFiClient para escrever a situação da conexão.
+ */
 void sendConnectionStatus(WiFiClient client) {
   client.print("<"); //Sinalizar o inicio do conteúdo
   client.print(String(HOME_WIFI_SSID)); //Nome da rede wifi que o ESP8266 está conectado.

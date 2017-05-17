@@ -1,5 +1,5 @@
 /*
-  EnergyUseLogEsp8266 Config model - Favor copiar esse arquivo para Config.h e também configurar os parâmetros abaixo antes de instalar esse código no módulo ESP8266. 
+  EnergyUseLoggerEsp8266 Config model - Favor copiar esse arquivo para Config.h e também configurar os parâmetros abaixo antes de instalar esse código no módulo ESP8266. 
                  Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.00

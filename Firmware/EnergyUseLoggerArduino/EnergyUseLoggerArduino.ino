@@ -1,6 +1,6 @@
 /*
-  EnergyUseLog - Ler e registrar o consumo de energia em amperes lendo os sensores SCT - 013 conectados ao circutio. 
-                 Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
+  EnergyUseLogger - Ler e registrar a utilização de energia em amperes lendo os sensores SCT - 013 conectados ao circutio. 
+  Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.00
 
@@ -8,7 +8,7 @@
   B1 - Constantes
   B2 - Variáveis Globais
   B3 - Funcionalidades para ler, escrever e excluir arquivos no cartão de memoria.
-  B4 - Funcionalidades para ler, registrar ou excluir os logs de consumo de energia no cartão de memoria.
+  B4 - Funcionalidades para ler, registrar ou excluir os logs de utilização de energia no cartão de memoria.
   B5 - Funcionalidades para realizar a comunicação como o módulo WiFi.
 
   Ultima compilação:
@@ -24,12 +24,12 @@
  Inicio do B1 - Constantes
  ****************************************************************************************************************************************************************/
 //#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
-#define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log de consumo de energia. 
+#define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log da utilização de energia. 
 
 //Constantes utilizadas na geração dos logs.
 #define AMOUNT_SCT 3                    //Quantidade de sensores SCT-013 suportado no circuito.  
-#define LOGS F("LOGS")                  //Nome do diretório no cartão de memoria onde serão armazenados os logs de consumo de energia.
-#define LOG_SEQ F("Seq")                //Nome do arquivo onde será armazenado o controle de sequência dos logs de consumo de energia.  
+#define LOGS F("LOGS")                  //Nome do diretório no cartão de memoria onde serão armazenados os logs de utilização de energia.
+#define LOG_SEQ F("Seq")                //Nome do arquivo onde será armazenado o controle de sequência dos logs de utilização de energia.  
 #define LOG_TIME_SAVE 10000             //Intervalo em Milissegundo para registrar o proximo log, {@see saveLog()}    
 
 //Constantes utilizadas na gravação dos arquivos.
@@ -49,7 +49,7 @@
 //Constantes para definir o status de execução do programa.
 #define OHA_STATUS_NOT_DATE F("OHA_STATUS_NOT_DATE")    //Sinalizar que a data do programa não está atualizada. 
 #define OHA_STATUS_NOT_SD F("OHA_STATUS_NOT_SD")        //Sinalizar que o SD Card está com problema e os registros dos logs está parado.   
-#define OHA_STATUS_OK F("OHA_STATUS_OK")                //Sinalizar que a data do programa está atualizada / registrando os logs de consumo de energia. 
+#define OHA_STATUS_OK F("OHA_STATUS_OK")                //Sinalizar que a data do programa está atualizada / registrando os logs de utilização de energia. 
 
 /*Final do B1 - Constantes*/
 
@@ -201,7 +201,7 @@ void setResource(String path, String rscName, String value) {
 
 
 /***************************************************************************************************************************************************************
-   B4 - Funcionalidades para ler, registrar ou excluir os logs de consumo de energia no cartão de memória.
+   B4 - Funcionalidades para ler, registrar ou excluir os logs de utilização de energia no cartão de memória.
    Visão geral: Nesse bloco de códigos estão as principais funcionalidades do programa para ler os sensores SCT - 013.
    Sugiro a leitura dos artigos abaixo para mais detalhes sobre o sensor SCT - 013, sendo importante destacar, que o OHA utiliza um 
    circuito diferente do circuito sugerido no OpenEnergyMonitor:
@@ -215,7 +215,7 @@ void setResource(String path, String rscName, String value) {
                    necessárias para realizar esse calculo {@see saveLog()}. 
  ***************************************************************************************************************************************************************/
 
-/* Preencher uma lista com o consumo de energia em ampères conforme a quantidade {@see AMOUNT_SCT} de SCT - 013 disponível no circuito:
+/* Preencher uma lista com a utilização de energia em ampères conforme a quantidade {@see AMOUNT_SCT} de SCT - 013 disponível no circuito:
    @param amps informar uma lista do tipo número conforme a quantidade de SCT - 013 disponível no circuito.
 */
 void fillAmps(double amps[AMOUNT_SCT])
@@ -258,7 +258,7 @@ void fillAmps(double amps[AMOUNT_SCT])
 }
 
 
-/* Recuperar um log de consumo de energía conforme parametros abaixo:
+/* Recuperar um log de utilização de energía conforme parametros abaixo:
    @param strDate informar texto com data no formato YYYYMMDD
    @param strDate informar texto com hora e minuto no formato HHmm
    @param sequence informar a sequência do log.
@@ -282,7 +282,7 @@ String getLog( String strDate, String strHour, int sequence) {
   return LOG_FILE_NOT_EXISTS;
 }
 
-/* Registrar um log de consumo de energía no cartão de memória.*/
+/* Registrar um log de utilização de energía no cartão de memória.*/
 void saveLog() {
   double amps[AMOUNT_SCT];
   fillAmps(amps);
@@ -348,7 +348,7 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
   delay(300); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
 }
 
-/* Atualizar o status do programa e também a data e hora utilizada no registro do log de consumo de energía:
+/* Atualizar o status do programa e também a data e hora utilizada no registro do log de utilização de energía:
    @param strDate informar texto com data no formato YYYYMMDD
    @param strDate informar texto com hora e minuto no formato HHmm
 */
@@ -389,8 +389,8 @@ void sendStatus(String strDate, String strHour) {
   esp8266.flush();
 } 
 
-/* Excluir logs de consumo de energía para liberar espaço no cartão de memória.
-   Excluir 5 logs por vez para impedir que essa funcionalidade interfira no registro de logs de consumo de energia. 
+/* Excluir logs de utilização de energía para liberar espaço no cartão de memória.
+   Excluir 5 logs por vez para impedir que essa funcionalidade interfira no registro de logs de utilização de energia. 
    @param pathDate informar texto com data no formato YYYYMMDD
 */
 void deleteLogs(String strDate)
@@ -442,7 +442,6 @@ double getVolts() {
 
 /* Final do B4*/
 
-
 /***************************************************************************************************************************************************************
    Inicio do B5 - Funcionalidades para realizar a comunicação como o módulo WiFi.
    Visão geral: Nesse bloco de códigos estão as funcionalidades para a comunicação com o módulo ESP8266 via serial.                    
@@ -485,7 +484,7 @@ void doUrl(String url) {
     }
     //Somente executar as funcionalidade abaixo se o Status do programa for igual a OHA_STATUS_OK 
     else if ( ohaStatus == OHA_STATUS_OK ) {
-      //Enviar logs de consumo de energia:
+      //Enviar logs de utilização de energia:
       if ( !isPost && ( params[1] == URL_LOG ) ) {
         sendLog(params[2], params[3], params[4].toInt(), params[5].toInt(), params[6]);
       //Enviar status do programa.  
@@ -517,8 +516,7 @@ void esp8266Reset() {
 }
 /*Inicio do B5*/
 
-
-/*Sinalizar via LED a gravação do log de consumo de energía.
+/*Sinalizar via LED a gravação do log de utilização de energía.
   @param flashTime informar o tempo em milissegundos para acender e apagar o LED. 
  */
 void saveLogBlink(long flashTime)
@@ -538,7 +536,7 @@ void setup()
   esp8266Reset(); //Reiniciar o módulo ESP8266 na primeira conexão para garantir que o módulo não esteja travado.
   esp8266.begin(74880);  // A velocidade 74880 foi a mais estável na comunicação com o Arduino.
   pinMode(SD_CS, OUTPUT); //The pin connected to the chip select line of the SD card, @link https://www.arduino.cc/en/Reference/SDbegin
-  pinMode(LED_LOG_SAVE, OUTPUT); //Pin do LED que sinaliza a gravação do log de consumo de energia. 
+  pinMode(LED_LOG_SAVE, OUTPUT); //Pin do LED que sinaliza a gravação do log de utilização de energia. 
 #ifdef DEBUG
   debug(F("Setup in five minuntes"));
 #endif
@@ -564,7 +562,7 @@ void loop()
     if ( currentDatePath.length() == 0 )
     {
       ohaStatus = OHA_STATUS_NOT_DATE;
-    //Salvar log de consumo de energía se a data e hora do program estiver atualizada:  
+    //Salvar log de utilização de energía se a data e hora do program estiver atualizada:  
     } else {
       saveLogBlink(500);
       saveLog();
