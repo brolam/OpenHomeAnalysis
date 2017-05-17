@@ -34,7 +34,7 @@ public class OhaEnergyUseLogTask {
     //Definir a duração máxima em segundo de um Log de utilização de energia:
     private static final int MAX_DURATION_LOG = 35;
     //Definir a duração padrão se não for possível recuperar a duração real do Log:
-    private static final double DEFAULT_DURATION =  11; // Segundos.
+    private static final double DEFAULT_DURATION =  10; // Segundos.
     //Definir a quantidade de tentativas para realizar uma requisição(GET ou POST) com sucesso
     //no Registrador de Utilização de Energiar:
     private static final int NUMBER_ATTEMPTS = 3;
@@ -75,7 +75,8 @@ public class OhaEnergyUseLogTask {
                     setNextOhaSequenceLog();
                 } if ( ohaStatusLog.getDurationBoardRunning() > ohaEnergyUseSyncHelper.getOftenLoggerResetMillisecond() ) {
                     tryResetEnergyUseLogger();
-                    delay(10 * DateUtils.SECOND_IN_MILLIS );
+                    delay(5 * DateUtils.SECOND_IN_MILLIS );
+                    setStatus();
                 } else {
                     //Executar até existir logs disponíveis para a data hora informada:
                     while (doImport(ohaStatusLog, hostName, strDate, strHour)) {
@@ -85,7 +86,7 @@ public class OhaEnergyUseLogTask {
                 //O Registrador não é multitarefas, dessa forma, e necessário executar delays
                 //no fluxo de sincronização para não parar os registros de utilização de energia/
                 // por muito tempo:
-                delay(DateUtils.SECOND_IN_MILLIS * 15);
+                delay(DateUtils.SECOND_IN_MILLIS * 30);
             } catch (EnergyUseLogSdCardFatalError e) {
                 //Reiniciar o Registrador de Utilização de Energia para tentar corrigir o problema
                 //no SD Card do Registrador.
