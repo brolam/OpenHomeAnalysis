@@ -146,6 +146,9 @@
     <string name="main_activity_request_backup_database_started">Backup has started.</string>
     <string name="main_activity_request_restore_database">Confirm backup restore %s</string>
     <string name="main_activity_request_restore_database_started">Backup Restore has started.</string>
+    <string name="main_activity_message_automatic_backup_denied">Automatic backup was disabled!</string>
+    <string name="main_activity_message_backup_denied">Backup was canceled!</string>
+    <string name="main_activity_message_restore_denied">Restore was canceled!</string>
 
     <!-- Energy Use Columns -->
     <string name="hour">Hour</string>
@@ -185,5 +188,6 @@
     <string name="fragment_energy_use_bill_begin_date">Begin date</string>
     <string name="fragment_energy_use_bill_end_date">End date</string>
     <string name="fragment_energy_use_bill_kwh_cost">Kwh cost</string>
+
 
 </resources>

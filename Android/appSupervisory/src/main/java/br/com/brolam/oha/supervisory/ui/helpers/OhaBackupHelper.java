@@ -37,7 +37,6 @@ public class OhaBackupHelper {
         return preferences.getBoolean(BACKUP_ACTIVATED, true);
     }
 
-
     public String getFrequency() {
         return preferences.getString(BACKUP_FREQUENCY, "12");
     }
@@ -67,6 +66,12 @@ public class OhaBackupHelper {
         return preferences.getString(BACKUP_RESTORE_FILE_PATH, null);
     }
 
+    public void setActivated(boolean activated) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(BACKUP_ACTIVATED, activated);
+        editor.commit();
+    }
+
     public void setLastDateTime() {
         Date date = new Date();
         SharedPreferences.Editor editor = preferences.edit();
@@ -92,8 +97,5 @@ public class OhaBackupHelper {
     public void clearBackupRestoreFilePath(){
         setBackupRestoreFilePath(null);
     }
-
-
-
 
 }

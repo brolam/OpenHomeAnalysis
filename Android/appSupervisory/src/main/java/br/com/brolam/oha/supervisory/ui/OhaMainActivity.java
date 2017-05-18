@@ -1,13 +1,17 @@
 package br.com.brolam.oha.supervisory.ui;
 
+import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -59,6 +63,10 @@ public class OhaMainActivity extends AppCompatActivity
         View.OnClickListener, OhaMainHolder.IOhaMainHolder,
         OhaEnergyUseBillFragment.IOhaEnergyUseBillFragment,
         OhaRestoreDatabaseFragment.IOhaRestoreDatabaseFragment, SwipeRefreshLayout.OnRefreshListener {
+    //Códigos de requisições para verificar a permissão necessário para executar o backup e restore:
+    public static final int RC_BACKUP_AUTOMATIC_PERMISSION = 5000;
+    public static final int RC_BACKUP_PERMISSION = 5001;
+    public static final int RC_RESTORE_PERMISSION = 5002;
 
     GridLayoutManager gridLayoutManager;
     SwipeRefreshLayout swipeRefreshLayout;
@@ -104,6 +112,7 @@ public class OhaMainActivity extends AppCompatActivity
         //Acionar o carregamento do cursor no onResume, para garantir que o status do NavigationView
         //já foi atualizar quando a tela for reconstruida.
         getSupportLoaderManager().initLoader(menuItem.getItemId(), null, this);
+        parseBackupAutomaticPermission();
     }
 
     /**
@@ -177,7 +186,9 @@ public class OhaMainActivity extends AppCompatActivity
                     requestBackup();
                     return false;
                 case R.id.nav_restore:
-                    OhaRestoreDatabaseFragment.show(this);
+                    if (parseBackupPermission(RC_RESTORE_PERMISSION)) {
+                        OhaRestoreDatabaseFragment.show(this);
+                    }
                     return false;
                 default:
                     return true;
@@ -192,18 +203,20 @@ public class OhaMainActivity extends AppCompatActivity
      * Solicitar a confirmação do backup
      */
     private void requestBackup() {
-        String message = getString(R.string.main_activity_request_backup_database);
-        Snackbar.make(this.floatingActionButton, message, Snackbar.LENGTH_LONG)
-                .setAction(
-                        getString(R.string.action_accept),
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(OhaMainActivity.this);
-                                ohaBackupHelper.setBackupTime();
-                                showSnackBar(getString(R.string.main_activity_request_backup_database_started));
-                            }
-                        }).show();
+        if (parseBackupPermission(RC_BACKUP_PERMISSION)) {
+            String message = getString(R.string.main_activity_request_backup_database);
+            Snackbar.make(this.floatingActionButton, message, Snackbar.LENGTH_LONG)
+                    .setAction(
+                            getString(R.string.action_accept),
+                            new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(OhaMainActivity.this);
+                                    ohaBackupHelper.setBackupTime();
+                                    showSnackBar(getString(R.string.main_activity_request_backup_database_started));
+                                }
+                            }).show();
+        }
     }
 
     /**
@@ -378,5 +391,61 @@ public class OhaMainActivity extends AppCompatActivity
         MenuItem menuItem = parseMenuItem(navigationView);
         //Reiniciar o carregamento do cursor para o menu selecionado:
         getSupportLoaderManager().restartLoader(menuItem.getItemId(), null, this);
+    }
+
+    /**
+     * Verificar e solicitar o acesso ao armazenamento externo para realizar o backup do banco de dados.
+     * @param requestCode codigo para identificar a solicitação: RC_BACKUP_AUTOMATIC_PERMISSION, RC_BACKUP_PERMISSION ou RC_RESTORE_PERMISSION
+     */
+    private boolean parseBackupPermission(int requestCode) {
+        int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (rc != PackageManager.PERMISSION_GRANTED) {
+            final String[] permissions = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                ActivityCompat.requestPermissions(this, permissions, requestCode);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Verificar e solicitar o acesso ao armazenamento externo para realizar o backup automático.
+     */
+    private boolean parseBackupAutomaticPermission(){
+        OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
+        //somente verficar a permissão se o backup automático estiver ativo:
+        if ( ohaBackupHelper.isActivated()){
+            return parseBackupPermission(RC_BACKUP_AUTOMATIC_PERMISSION);
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        boolean firstPermission = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        switch (requestCode) {
+            case RC_BACKUP_AUTOMATIC_PERMISSION:
+                if (!firstPermission) {
+                    OhaBackupHelper ohaBackupHelper = new OhaBackupHelper(this);
+                    ohaBackupHelper.setActivated(false);
+                    showSnackBar(getString(R.string.main_activity_message_automatic_backup_denied));
+                }
+                return;
+            case RC_BACKUP_PERMISSION:
+                if (firstPermission)
+                    requestBackup();
+                else
+                    showSnackBar(getString(R.string.main_activity_message_backup_denied));
+                return;
+            case RC_RESTORE_PERMISSION:
+                if (firstPermission)
+                    OhaRestoreDatabaseFragment.show(this);
+                else
+                    showSnackBar(getString(R.string.main_activity_message_restore_denied));
+                return;
+        }
     }
 }
