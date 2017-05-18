@@ -73,32 +73,27 @@ public class OhaEnergyUseDaysCursor extends AbstractCursor {
 
     @Override
     public short getShort(int i) {
-        String value = getString(i);
-        return !value.isEmpty()? Short.parseShort(value):0;
+        return !isEmpty(i)? Short.parseShort(getString(i)):0;
     }
 
     @Override
     public int getInt(int i) {
-        String value = getString(i);
-        return !value.isEmpty()? Integer.parseInt(value):0;
+        return !isEmpty(i)? Integer.parseInt(getString(i)):0;
     }
 
     @Override
     public long getLong(int i) {
-        String value = getString(i);
-        return !value.isEmpty()? Long.parseLong(value):0;
+        return !isEmpty(i)? Long.parseLong(getString(i)):0;
     }
 
     @Override
     public float getFloat(int i) {
-        String value = getString(i);
-        return !value.isEmpty()? Float.parseFloat(value):0;
+        return !isEmpty(i)? Float.parseFloat(getString(i)):0;
     }
 
     @Override
     public double getDouble(int i) {
-        String value = getString(i);
-        return !value.isEmpty()? Double.parseDouble(value):0;
+        return !isEmpty(i)? Double.parseDouble(getString(i)):0;
     }
 
     @Override
@@ -106,4 +101,8 @@ public class OhaEnergyUseDaysCursor extends AbstractCursor {
         return this.energyUseTotal != null;
     }
 
+    private boolean isEmpty(int i){
+        String value = getString(i);
+        return  (value == null) || value.isEmpty();
+    }
 }
