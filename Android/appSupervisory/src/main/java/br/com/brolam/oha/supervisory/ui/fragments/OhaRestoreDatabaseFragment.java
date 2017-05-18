@@ -68,8 +68,9 @@ public class OhaRestoreDatabaseFragment extends DialogFragment implements   Tool
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_restore_database, container, false);
         this.listView = (ListView) view.findViewById(R.id.listView);
-        String[] backupsName = new String[this.backups.length];
-        for(int index = 0; index < this.backups.length; index++ ){
+        int amountBackups = this.backups != null?this.backups.length:0;
+        String[] backupsName = new String[amountBackups];
+        for(int index = 0; index <amountBackups; index++ ){
             backupsName[index] = this.backups[index].getName();
         }
         this.listView.setAdapter(new ArrayAdapter<String>(this.getActivity(),  android.R.layout.simple_list_item_checked, backupsName));
