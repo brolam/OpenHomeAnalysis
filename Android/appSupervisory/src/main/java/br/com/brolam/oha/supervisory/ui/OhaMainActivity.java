@@ -352,6 +352,8 @@ public class OhaMainActivity extends AppCompatActivity
             getContentResolver().update(uriEnergyBill, contentValues, null, null);
         } else {
             getContentResolver().insert(CONTENT_URI_BILL, contentValues);
+            //Reiniciar o cursor para exibir a nova conta:
+            getSupportLoaderManager().restartLoader(R.id.nav_energy_use_bill, null, this);
             this.gridLayoutManager.scrollToPosition(0);
         }
     }
@@ -376,6 +378,5 @@ public class OhaMainActivity extends AppCompatActivity
         MenuItem menuItem = parseMenuItem(navigationView);
         //Reiniciar o carregamento do cursor para o menu selecionado:
         getSupportLoaderManager().restartLoader(menuItem.getItemId(), null, this);
-
     }
 }
