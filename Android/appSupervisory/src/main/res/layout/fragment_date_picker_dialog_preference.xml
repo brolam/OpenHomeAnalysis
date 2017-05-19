@@ -19,5 +19,6 @@ Exibir um calendario na tela de configuracoes
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:spinnersShown="false"/>
+        android:spinnersShown="false"
+        android:datePickerMode="spinner"/>
 </RelativeLayout>

@@ -23,14 +23,12 @@ import br.com.brolam.oha.supervisory.ui.helpers.OhaHelper;
  * @version 1.00
  * @since Release 01
  */
-public class OhaDatePickerDialogPreference extends DialogPreference implements DatePicker.OnDateChangedListener {
+public class OhaDatePickerDialogPreference extends DialogPreference {
     DatePicker datePicker;
 
     public OhaDatePickerDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
         setDialogLayoutResource(R.layout.fragment_date_picker_dialog_preference);
-        setPositiveButtonText(null);
-        setNegativeButtonText(null);
     }
 
     @Override
@@ -49,23 +47,22 @@ public class OhaDatePickerDialogPreference extends DialogPreference implements D
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), this);
+        datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), null);
     }
 
-    /*
-      Atualizar a preferência e fechar a caixa de dialogo.
-     */
     @Override
-    public void onDateChanged(DatePicker datePicker, int year, int month, int dayOfMonth) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, year);
-        calendar.set(Calendar.MONTH, month);
-        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-        String strDate = OhaHelper.getStrDate(calendar.getTime());
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(getKey(), strDate);
-        editor.commit();
-        this.setSummary(strDate);
-        this.getDialog().dismiss();
+    protected void onDialogClosed(boolean positiveResult) {
+        super.onDialogClosed(positiveResult);
+        if ( positiveResult){
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, datePicker.getYear());
+            calendar.set(Calendar.MONTH, datePicker.getMonth());
+            calendar.set(Calendar.DAY_OF_MONTH, datePicker.getDayOfMonth());
+            String strDate = OhaHelper.getStrDate(calendar.getTime());
+            SharedPreferences.Editor editor = getEditor();
+            editor.putString(getKey(), strDate);
+            editor.commit();
+            this.setSummary(strDate);
+        }
     }
 }
