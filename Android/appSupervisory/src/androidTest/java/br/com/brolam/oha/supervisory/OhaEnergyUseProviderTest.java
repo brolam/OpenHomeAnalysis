@@ -64,8 +64,6 @@ public class OhaEnergyUseProviderTest {
                 long id = Long.parseLong(String.format("%s%s%06d", OhaHelper.getStrDate(beginHour.getTime()), OhaHelper.getStrHour(beginHour.getTime()), index));
                 //Gerar um consuno de 1000 Watts a cada 10 segundos.
                 contentValues[index] = EnergyUseLogEntry.parse(
-                        id,
-                        index,
                         beginHour.getTime(),
                         10,
                         220.00,
@@ -81,7 +79,7 @@ public class OhaEnergyUseProviderTest {
 
         }
         //Realizar a Consulta:
-        String selection = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry.COLUMN_DATE_TIME);
+        String selection = String.format("%s BETWEEN ? AND ?", EnergyUseLogEntry._ID);
         String[] selectionArgs = new String[]{
                 String.valueOf(OhaHelper.getDateBegin(endDate.getTime()).getTime()),
                 String.valueOf(endDate.getTime().getTime())
