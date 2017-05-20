@@ -175,7 +175,7 @@
     <string name="energy_use_log_filter_fragment_WattsLessEqual_hint">Watts less or equal</string>
 
     <!-- Energy Use Day Card -->
-    <string name="energy_use_day_card_body" formatted="false">Kwh %s Avg %s per day</string>
+    <string name="energy_use_day_card_body" formatted="false">Kwh %s Avg %s per hour</string>
     <string name="energy_use_day_card_title_max_watts" >Max. Watts</string>
 
     <!-- Energy Use Bill Card -->
