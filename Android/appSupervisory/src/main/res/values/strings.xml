@@ -37,7 +37,7 @@
     <string name="pref_title_energy_use_sync_setup_mode">Enable setup mode?</string>
     <string name="pref_description_energy_use_sync_setup_mode">The setup mode will stop the synchronization for configuration!.</string>
     <string name="pref_host_name_energy_use_sync">Host Name or IP</string>
-    <string name="pref_host_name_energy_use_sync_default">192.168.0.14</string>
+    <string name="pref_host_name_energy_use_sync_default">192.168.4.1</string>
     <string name="pref_date_energy_use_sync">Current Sync Date</string>
     <string name="pref_sequence_energy_use_sync">Current Sync Sequence</string>
 

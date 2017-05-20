@@ -31,7 +31,6 @@
 
     <ListPreference
         android:dependency="energy_use_sync_setup_mode"
-        android:defaultValue="00"
         android:entries="@array/pref_titles_hour_energy_use_sync"
         android:entryValues="@array/pref_values_hour_energy_use_sync"
         android:key="energy_use_sync_hour"

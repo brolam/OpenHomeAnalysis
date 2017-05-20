@@ -140,4 +140,13 @@ public class OhaEnergyUseSyncHelper {
         editor.commit();
     }
 
+    public void parseDefaultValues(){
+        if ( preferences.getString(ENERGY_USE_SYNC_DATE, null) == null){
+            getHostName();
+            getStrDate();
+            getStrHour();
+            getSequence();
+        }
+    }
+
 }

@@ -110,6 +110,8 @@ public class OhaSettingsActivity extends AppCompatPreferenceHelper {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_energy_use);
             setHasOptionsMenu(true);
+            OhaEnergyUseSyncHelper ohaEnergyUseSyncHelper = new OhaEnergyUseSyncHelper(this.getActivity());
+            ohaEnergyUseSyncHelper.parseDefaultValues();
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
