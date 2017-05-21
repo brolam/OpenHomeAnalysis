@@ -183,9 +183,11 @@ O custo estimado considerando somente os componentes é de aproximadamente R$351
 
 ## Construindo e Instalando o Registrador de Utilização de Energia
 ### PCB
-<p>
-  <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_energy_use_logger_01.jpg" width="45%" hspace="10"/>
-  <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_energy_use_logger_02.jpg" width="45%" hspace="30"/>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_energy_use_logger_00.jpg" width="30%" hspace="6"/>
+  <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_energy_use_logger_02.jpg" width="30%" hspace="6"/>
+  <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_energy_use_logger_01.jpg" width="30%" hspace="6"/>
 </p>
 A placa pode ser construída utilizando a técnica de termotransferência do circuito impresso via impressora laser, sendo assim, o <a href="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_pcb_energy_use_logger.pdf">PDF</a> do circuito também está disponível nesse repositório para facilitar a impressão. <br>Também clique na imagem acima para ampliá-la é visualizar com mais detalhes como cada componente deve ser instalado na placa.
 
@@ -224,7 +226,7 @@ Caso seja necessário realizar alguma modificação no circuito, o arquivo .fzz 
 ## Instalando e Configurando o Aplicativo Supervisory
 
 ### Instalação através do Google Play
-O aplicativo Supervisory está disponível na loja de aplicativos, favor procurar por <a href="https://github.com/brolam/OpenHomeAnalysis/tree/master/Firmware/EnergyUseLoggerArduino">OHA - Open Home Analysis</a> e realizar a instalação.
+O aplicativo Supervisory está disponível na loja de aplicativos, favor procurar por <a href="https://play.google.com/store/apps/details?id=br.com.brolam.oha.supervisory">OHA - Open Home Analysis</a> e realizar a instalação.
 
 ### Instalação através do Android Studio
 <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_android_studio.png" />
