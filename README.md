@@ -11,8 +11,8 @@ O primeiro sensor disponível registra a utilização de energia de todos os apa
 
 Esse é um projeto Open Source / Open Hardware, sendo assim, todas as informações necessárias para desenvolve-lo estão disponíveis nesse repositório, além disso, também recomendo os vídeos abaixo disponíveis no youtube com mais detalhes do projeto: 
 
-- [Visão Geral do Projeto](https://github.com/brolam/OpenHomeAnalysis);
-- [Desenvolvendo o Registrador de Utilização de Energia](https://github.com/brolam/OpenHomeAnalysis);
+- [Visão Geral do Projeto](https://youtu.be/oC_cOZK9y08);
+- [Desenvolvendo o Registrador de Utilização de Energia](https://youtu.be/WqODX3P4kZ0);
 
 ## Registrador de Utilização de Energia
 
@@ -230,7 +230,7 @@ O aplicativo Supervisory está disponível na loja de aplicativos, favor procura
 
 ### Instalação através do Android Studio
 <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_android_studio.png" />
-O código fonte do aplicativo Supervisory também está disponível nesse repositório em <a href="https://github.com/brolam/OpenHomeAnalysis/tree/master/Documents/Fritzing/OhaEnergyUseLog.fzz">Android/</a>. Sendo assim, é possível realizar a instalação e modificações através do Android Studio.
+O código fonte do aplicativo Supervisory também está disponível nesse repositório em <a href="https://github.com/brolam/OpenHomeAnalysis/tree/master/Android">Android/</a>. Sendo assim, é possível realizar a instalação e modificações através do Android Studio.
 
 ### Configurando o Registrador de Utilização de Energia no aplicativo Supervisory
 <img src="https://raw.githubusercontent.com/brolam/OpenHomeAnalysis/master/Documents/Images/oha_supervisory_screens_03.png" />
