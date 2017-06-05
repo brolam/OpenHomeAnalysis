@@ -78,9 +78,10 @@ public class OhaEnergyUseLogTask {
                     delay(5 * DateUtils.SECOND_IN_MILLIS );
                     setStatus();
                 } else {
+                    delay(30 * DateUtils.SECOND_IN_MILLIS );
                     //Executar até existir logs disponíveis para a data hora informada:
                     while (doImport(ohaStatusLog, hostName, strDate, strHour)) {
-                        delay(15 * DateUtils.SECOND_IN_MILLIS);
+                        delay(30 * DateUtils.SECOND_IN_MILLIS);
                     }
                 }
                 //O Registrador não é multitarefas, dessa forma, e necessário executar delays
