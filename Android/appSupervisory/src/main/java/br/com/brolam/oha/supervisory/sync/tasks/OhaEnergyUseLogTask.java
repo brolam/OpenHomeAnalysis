@@ -274,9 +274,9 @@ public class OhaEnergyUseLogTask {
             InterruptedException,
             BackupAndRestoreOperation{
         //Definir a data de exclusão dos logs para liberar espaço no
-        //SD Card do Registrador de Utilização de Energia:
+        //SD Card do Registrador de Utilização de Energia considerando a preferência do usuário:
         Calendar calendar = OhaHelper.getCalendar(strDate);
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(Calendar.DATE, ohaEnergyUseSyncHelper.getDaysSdCardStored());
         String strDateLogDelete = OhaHelper.getStrDate(calendar.getTime());
         //Realizar as tentativas:
         List<String> strings = new ArrayList<>();

@@ -67,4 +67,14 @@
         android:positiveButtonText="@null"
         android:title="@string/pref_title_energy_use_sync_often_logger_reset" />
 
+    <EditTextPreference
+        android:dependency="energy_use_sync_setup_mode"
+        android:title="@string/pref_energy_use_sync_days_sd_card_stored"
+        android:inputType="numberSigned"
+        android:key="energy_use_sync_days_sd_card_stored"
+        android:maxLines="1"
+        android:defaultValue="@string/pref_energy_use_sync_days_sd_card_stored_default"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"/>
+
 </PreferenceScreen>

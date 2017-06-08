@@ -123,6 +123,7 @@ public class OhaSettingsActivity extends AppCompatPreferenceHelper {
             bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE));
             bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_VOLTS));
             bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_OFTEN_LOGGER_RESET));
+            bindPreferenceSummaryToValue(findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_DAYS_SD_CARD_STORED));
             //Registrar as Preferences para monitorar as alterações para atualizar a tela:
             upgradeablePreferences.put(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_HOUR, findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_HOUR));
             upgradeablePreferences.put(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE, findPreference(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_SEQUENCE));
