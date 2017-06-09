@@ -78,9 +78,10 @@ public class OhaEnergyUseLogTask {
                     delay(5 * DateUtils.SECOND_IN_MILLIS );
                     setStatus();
                 } else {
+                    delay(30 * DateUtils.SECOND_IN_MILLIS );
                     //Executar até existir logs disponíveis para a data hora informada:
                     while (doImport(ohaStatusLog, hostName, strDate, strHour)) {
-                        delay(15 * DateUtils.SECOND_IN_MILLIS);
+                        delay(30 * DateUtils.SECOND_IN_MILLIS);
                     }
                 }
                 //O Registrador não é multitarefas, dessa forma, e necessário executar delays
@@ -273,9 +274,9 @@ public class OhaEnergyUseLogTask {
             InterruptedException,
             BackupAndRestoreOperation{
         //Definir a data de exclusão dos logs para liberar espaço no
-        //SD Card do Registrador de Utilização de Energia:
+        //SD Card do Registrador de Utilização de Energia considerando a preferência do usuário:
         Calendar calendar = OhaHelper.getCalendar(strDate);
-        calendar.add(Calendar.DATE, -1);
+        calendar.add(Calendar.DATE, ohaEnergyUseSyncHelper.getDaysSdCardStored());
         String strDateLogDelete = OhaHelper.getStrDate(calendar.getTime());
         //Realizar as tentativas:
         List<String> strings = new ArrayList<>();

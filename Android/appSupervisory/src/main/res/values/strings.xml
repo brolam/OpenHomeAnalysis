@@ -140,6 +140,9 @@
         <item>48</item>
     </string-array>
 
+    <string name="pref_energy_use_sync_days_sd_card_stored">Number of storage days on SD Card</string>
+    <string name="pref_energy_use_sync_days_sd_card_stored_default">3</string>
+
     <!-- Tela Principal -->
     <string name="main_activity_request_delete_energy_use_bill">Energy Bill %s, Confirm the deletion?</string>
     <string name="main_activity_request_backup_database">Confirm the backup</string>
@@ -188,6 +191,5 @@
     <string name="fragment_energy_use_bill_begin_date">Begin date</string>
     <string name="fragment_energy_use_bill_end_date">End date</string>
     <string name="fragment_energy_use_bill_kwh_cost">Kwh cost</string>
-
 
 </resources>

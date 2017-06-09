@@ -327,17 +327,16 @@ void saveLog() {
 void sendLog(String strDate, String strHour, int start, int amount, String strDelDate ) {
   int sequence = start;
   String logRead;
+ #ifdef DEBUG
+  debug(F("SendLogs Begin: "), String(sequence));
+#endif
   currentDelDate = strDelDate; //Para mais detalhes, por favor, veja {@see loop()} e {@see deleteLogs()}
   do {
     //Recuperar o conteúdo do Log informando Exemplo: 1:<195338|220.00|3.36|0.38|0.44|9150>
     logRead = String(sequence) + ':' + getLog(strDate, strHour, sequence);
     esp8266.print(logRead);
     //Necessário para sincronizar a comunicação serial e evitar dados truncados.
-    byte tryCount = 10;
-    do {
-      delay(200);
-      tryCount--;
-    } while(esp8266.overflow() && (tryCount > 0) );
+    delay(300);
     sequence++;
     //Se for identificada o final da sequência de log ou a data não existir. 
     if ( (logRead.indexOf(LOG_FILE_NOT_EXISTS) != -1) || (logRead.indexOf(LOG_DATE_NOT_EXISTS)  != -1) ) {
@@ -345,7 +344,10 @@ void sendLog(String strDate, String strHour, int start, int amount, String strDe
       break;
     }
   } while (sequence < ( start + amount));
-  delay(300); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
+  //delay(300); //Necessário para sincronizar a comunicação serial e evitar dados truncados.
+#ifdef DEBUG
+  debug(F("SendLogs End: "), String(sequence));
+#endif
 }
 
 /* Atualizar o status do programa e também a data e hora utilizada no registro do log de utilização de energía:
