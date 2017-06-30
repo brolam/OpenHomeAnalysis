@@ -30,7 +30,7 @@
 #define AMOUNT_SCT 3                    //Quantidade de sensores SCT-013 suportado no circuito.  
 #define LOGS F("LOGS")                  //Nome do diretório no cartão de memoria onde serão armazenados os logs de utilização de energia.
 #define LOG_SEQ F("Seq")                //Nome do arquivo onde será armazenado o controle de sequência dos logs de utilização de energia.  
-#define LOG_TIME_SAVE 10000             //Intervalo em Milissegundo para registrar o proximo log, {@see saveLog()}    
+#define INTERVAL_TIME_SAVE_LOG 10000             //Intervalo em Milissegundo para registrar o proximo log, {@see saveLog()}    
 
 //Constantes utilizadas na gravação dos arquivos.
 #define SD_CS 10                        //The pin connected to the chip select line of the SD card, @link https://www.arduino.cc/en/Reference/SDbegin
@@ -63,7 +63,7 @@ String currentTime = String("");                       //Armazenar a hora + minu
 String currentDelDate = String("");                    //Armazenar a data para excluir os logs para liberar o espaço no cartão de memória.
 int currentSeq = 1;                                    //Armazenar a sequência atual de geração dos logs.
 unsigned long millisOnSetTime = 0;                     //Armazenar o total de Milissegundo {@see millis()}, quando a data e hora do programa foi atualizada, para mais detalhes veja {@see setDate()}
-unsigned long timeSaveLog = 0;                         //Armazenar o tempo que o ultimo log foi salvo, por favor, veja {@see saveLog()} para mais detalhes.
+unsigned long intervalSaveLog = 0;                         //Armazenar o tempo que o ultimo log foi salvo, por favor, veja {@see saveLog()} para mais detalhes.
 byte espCheck = 0;                                     //Armazenar o total de verificação do status do modulo ESP8266 {@see esp8266Reset()}.
 
 SoftwareSerial esp8266(2, 3); //Comunicação serial com o modulo ESP8266.
@@ -288,9 +288,12 @@ void saveLog() {
   fillAmps(amps);
 
   //Verifica se o tempo de intervalo para gravar o próximo log foi alcançado: 
-  while ( (millis() - timeSaveLog) < LOG_TIME_SAVE ) {
+  while ( (millis() - intervalSaveLog) < INTERVAL_TIME_SAVE_LOG ) {
     delay(100);
   }
+  //Reiniciar o intervalo do tempo que o log deve ser gavado nesse ponto, para não contabilizar o tempo 
+  //da gravação do próximo logo. 
+  intervalSaveLog = millis();
 #ifdef DEBUG
   debug(F("Amperes: "), (String(amps[0]) + String(" / ") + String(amps[1]) + String(" / ") + String(amps[2])));
 #endif
@@ -314,7 +317,6 @@ void saveLog() {
 #endif
   currentSeq++;
   setResource(path, String(LOG_SEQ), String(currentSeq)); //Registrar a próxima sequência no cartão de memória.
-  timeSaveLog = millis();
 }
 
 /* Enviar uma lista de logs para o módulo ESP8266 via comunicação serial conforme parametros abaixo:
