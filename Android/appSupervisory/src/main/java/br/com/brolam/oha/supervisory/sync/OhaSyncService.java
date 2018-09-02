@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 
+import br.com.brolam.library.helpers.OhaNetworkHelper;
 import br.com.brolam.oha.supervisory.sync.tasks.IOhaTask;
 import br.com.brolam.oha.supervisory.sync.tasks.OhaBackupTask;
 import br.com.brolam.oha.supervisory.sync.tasks.OhaEnergyUseLogTask;
@@ -27,7 +28,6 @@ public class OhaSyncService extends IntentService implements IOhaTask {
 
     public OhaSyncService() {
         super(TAG);
-
     }
 
     @Override

@@ -1,5 +1,7 @@
 package br.com.brolam.oha.supervisory.apiV1;
 
+import android.content.Context;
+
 import java.io.IOException;
 import java.util.List;
 import br.com.brolam.library.helpers.OhaNetworkHelper;
@@ -29,7 +31,7 @@ public class OhaEnergyUseApi {
      * @return uma lista de logs de consumo de energia no formato texto.
      * @throws IOException
      */
-    public static List<String> getLogs(String hostName, String strDate, String strHour, int startSequence, int amountLogs, String deleteDate) throws IOException {
+    public static List<String> getLogs(Context context, String hostName, String strDate, String strHour, int startSequence, int amountLogs, String deleteDate) throws IOException {
         String url = OhaNetworkHelper.parseUrl
                 (
                         hostName,
@@ -40,7 +42,7 @@ public class OhaEnergyUseApi {
                         String.valueOf(amountLogs),
                         deleteDate
                 );
-        return OhaNetworkHelper.requestHttp("GET", url);
+        return OhaNetworkHelper.requestHttp(context,"GET", url);
     }
 
 
@@ -52,9 +54,9 @@ public class OhaEnergyUseApi {
      * @return um OhaStatusLog {@see OhaStatusLog.OHA_ACTION_END}
      * @throws IOException
      */
-    public static OhaStatusLog setStatus(String hostName, String strDate, String strTime) throws IOException {
+    public static OhaStatusLog setStatus(Context context, String hostName, String strDate, String strTime) throws IOException {
         String url = OhaNetworkHelper.parseUrl(hostName, URL_STATUS, strDate, strTime);
-        List<String> strings = OhaNetworkHelper.requestHttp("POST", url);
+        List<String> strings = OhaNetworkHelper.requestHttp(context, "POST", url);
         for (String strLog : strings) {
             for(OhaStatusLog ohaStatus:  OhaStatusLog.values() )
                 if ( strLog.contains(ohaStatus.toString()))
@@ -71,9 +73,9 @@ public class OhaEnergyUseApi {
      * @return lista de texto com o conteúdo do status da sequência e do registrador de logs.
      * @throws IOException
      */
-    public static List<String> getStatus(String hostName, String strDate, String strHour) throws IOException {
+    public static List<String> getStatus(Context context, String hostName, String strDate, String strHour) throws IOException {
         String url = OhaNetworkHelper.parseUrl(hostName, URL_STATUS, strDate, strHour);
-        return OhaNetworkHelper.requestHttp("GET", url);
+        return OhaNetworkHelper.requestHttp(context,"GET", url);
     }
 
     /**
@@ -82,9 +84,9 @@ public class OhaEnergyUseApi {
      * @return um OhaStatusLog {@see OhaStatusLog.OHA_ACTION_END}
      * @throws IOException
      */
-    public static OhaStatusLog reset(String hostName) throws IOException {
+    public static OhaStatusLog reset(Context context, String hostName) throws IOException {
         String url = OhaNetworkHelper.parseUrl(hostName, URL_RESET);
-        List<String> strings = OhaNetworkHelper.requestHttp("POST", url);
+        List<String> strings = OhaNetworkHelper.requestHttp(context,"POST", url);
         return OhaStatusLog.getOhaStatusLog(strings);
     }
 
@@ -94,8 +96,8 @@ public class OhaEnergyUseApi {
      * @return lista de texto com o conteúdo da situação da conexão ou nulo se o conteúdo for inválido.
      * @throws IOException
      */
-    public static List<String> getConnection(String hostName) throws IOException {
+    public static List<String> getConnection(Context context, String hostName) throws IOException {
         String url = OhaNetworkHelper.parseUrl(hostName, URL_CONNECTION);
-        return OhaNetworkHelper.requestHttp("GET", url);
+        return OhaNetworkHelper.requestHttp(context, "GET", url);
     }
 }

@@ -121,7 +121,7 @@ public class OhaEnergyUseLogTask {
         Date date = new Date();
         String strDate = OhaHelper.getStrDate(date);
         String strTime = OhaHelper.getStrTime(date);
-        OhaEnergyUseApi.setStatus(ohaEnergyUseSyncHelper.getHostName(), strDate, strTime);
+        OhaEnergyUseApi.setStatus(iOhaTask.getContext(), ohaEnergyUseSyncHelper.getHostName(), strDate, strTime);
         //O Registrador não é multitarefas, dessa forma, e necessário executar delays
         //no fluxo de sincronização para não parar os registros de utilização de energia/
         // por muito tempo:
@@ -222,7 +222,7 @@ public class OhaEnergyUseLogTask {
         List<String> strings = new ArrayList<>();
         //Realizar as tentativas para recuperar o status
         for (int tryCount = 1; tryCount <= NUMBER_ATTEMPTS; tryCount++) {
-            strings = OhaEnergyUseApi.getStatus(hostName, strDate, strHour);
+            strings = OhaEnergyUseApi.getStatus(iOhaTask.getContext(), hostName, strDate, strHour);
             //Se não existir logs para a data hora informada, encerrar as tentarivas
             //e informar para o fluxo principal que não existe logs para a data hora informada:
             if ( OhaStatusLog.exists(OhaStatusLog.LOG_DATE_NOT_EXISTS, strings)){
@@ -281,7 +281,7 @@ public class OhaEnergyUseLogTask {
         //Realizar as tentativas:
         List<String> strings = new ArrayList<>();
         for (int tryCount = 1; tryCount <= NUMBER_ATTEMPTS; tryCount++) {
-            strings = OhaEnergyUseApi.getLogs(hostName, strDate, strHour, startSequence, 25, strDateLogDelete);
+            strings = OhaEnergyUseApi.getLogs(iOhaTask.getContext(), hostName, strDate, strHour, startSequence, 25, strDateLogDelete);
             //Verificar se o status retornado é válido:
             assertOhaStatusLog(strings, tryCount);
             if (OhaStatusLog.exists(OhaStatusLog.OHA_REQUEST_END, strings)) {
@@ -415,7 +415,7 @@ public class OhaEnergyUseLogTask {
     private void tryResetEnergyUseLogger() {
         try {
             for (int tryCount = 1; tryCount < NUMBER_ATTEMPTS; tryCount++) {
-                OhaStatusLog ohaStatusLog = OhaEnergyUseApi.reset(this.ohaEnergyUseSyncHelper.getHostName());
+                OhaStatusLog ohaStatusLog = OhaEnergyUseApi.reset(iOhaTask.getContext(), this.ohaEnergyUseSyncHelper.getHostName());
                 if (ohaStatusLog == OhaStatusLog.OHA_REQUEST_END) break;
             }
         } catch (IOException e) {
