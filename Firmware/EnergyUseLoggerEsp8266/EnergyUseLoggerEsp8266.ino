@@ -92,20 +92,23 @@ void setup() {
   delay(10);
   WiFi.hostname(ESP8266_NAME); //Definir o nome do ESP8266 na rede.
   WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD); //Definir o nome e senha do ESP8266.
-  WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point da casa.
+  WiFi.mode(WIFI_AP); //: set mode to WIFI_AP, WIFI_STA, WIFI_AP_STA or WIFI_OFF.
+  //WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point da casa.
   //Aguardar o conexão com o Access Point.
   debug("Try to Connect WIFI : ", HOME_WIFI_SSID);
+  /*
   while ( WiFi.status() != WL_CONNECTED ) {
     delay(500);
     debug("", ".");
   }
+  */
   delay(1);
   server.begin(); //Inicializar o serviço HTTP
   debug("WiFi connected: ", HOME_WIFI_SSID);
-  debug("Server started Local: ", String(WiFi.localIP().toString()));
-  debug("Server started    AP: ", String(WiFi.softAPIP().toString()));
+  debug("WiFi connected IP: ", String(WiFi.softAPIP().toString()));
+  debug("ESP Local IP: ", String(WiFi.localIP().toString()));
+  debug("ESP Local MAC: ", String(WiFi.macAddress()));
 }
-
 
 void loop() {
 
@@ -177,4 +180,3 @@ void loop() {
     client.flush();
   }
 }
-

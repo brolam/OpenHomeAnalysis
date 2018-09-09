@@ -36,7 +36,7 @@ public class OhaHelper {
      * @return texto no formato yyyyMMdd
      */
     public static String getStrDate(Date date) {
-        return new SimpleDateFormat("yyyyMMdd", Locale.ENGLISH).format(date);
+        return new SimpleDateFormat("yyMMdd", Locale.ENGLISH).format(date);
     }
 
     /**
@@ -79,7 +79,7 @@ public class OhaHelper {
      * @throws ParseException
      */
     public static Calendar getCalendar(String strDate, String strTime, long duration) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMddHHmmss");
         Date date = simpleDateFormat.parse(strDate + strTime);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

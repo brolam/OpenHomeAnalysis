@@ -326,12 +326,14 @@ public class OhaEnergyUseLogTask {
                 long id = ohaEnergyUseLog.getId();
                 int sequence = ohaEnergyUseLog.getSequence();
                 //Verificar se a sequencia foi quebrada:
+                /*
                 if ((previousSequence > 0) && (previousSequence + 1 != sequence)) {
                     if (allowSequenceBroken)
                         break;
                     else
                         throw new EnergyUseLogReadSequenceBroken(previousSequence, sequence);
                 }
+                */
                 //Recuperar o conteúdo do log:
                 double volts = ohaEnergyUseSyncHelper.getDefaultVolts(ohaEnergyUseLog.getAvgVolts());
                 Calendar dateTime = OhaHelper.getCalendar(ohaEnergyUseLog.getStrDate(), ohaEnergyUseLog.getStrTime(), ohaEnergyUseLog.getDuration());
