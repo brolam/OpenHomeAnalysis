@@ -2,33 +2,17 @@
   EnergyUseLogger - Ler e registrar a utilização de energia em amperes lendo os sensores SCT - 013 conectados ao circuito.
   Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
-  @version 1.00
-
-  Este programa está dividido em blocos:
-  B1 - Constantes
-  B2 - Variáveis Globais
-  B3 - Funcionalidades para ler, escrever e excluir arquivos no cartão de memoria.
-  B4 - Funcionalidades para ler, registrar ou excluir os logs de utilização de energia no cartão de memoria.
-  B5 - Funcionalidades para realizar a comunicação como o módulo WiFi.
-
-  Ultima compilação:
-   Opções de compilação alteradas, recompilando tudo
-   O sketch usa 25020 bytes (77%) de espaço de armazenamento para programas. O máximo são 32256 bytes.
-   Variáveis globais usam 1059 bytes (51%) de memória dinâmica, deixando 989 bytes para variáveis locais. O máximo são 2048 bytes.
+  @version 1.1.0
 */
 
 #include <SD.h>
 #include <SoftwareSerial.h> //Necessária para a comunicação serial com o modulo WiFi ESP8266.
-
-/****************************************************************************************************************************************************************
-  Inicio do B1 - Constantes
- ****************************************************************************************************************************************************************/
 #define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log da utilização de energia. 
 
 //Constantes utilizadas na geração dos logs.
 #define AMOUNT_SCT 3                    //Quantidade de sensores SCT-013 suportado no circuito.  
-#define INTERVAL_TIME_SAVE_LOG 10000             //Intervalo em Milissegundo para registrar o proximo log, {@see saveLog()}    
+#define INTERVAL_TIME_SAVE_LOG 10000    //Intervalo em Milissegundo para registrar o proximo log, {@see saveLog()}    
 
 //Constantes utilizadas na gravação dos arquivos.
 #define SD_CS 10                        //The pin connected to the chip select line of the SD card, @link https://www.arduino.cc/en/Reference/SDbegin
@@ -48,14 +32,8 @@
 #define OHA_STATUS_NOT_SD F("OHA_STATUS_NOT_SD")        //Sinalizar que o SD Card está com problema e os registros dos logs está parado.   
 #define OHA_STATUS_OK F("OHA_STATUS_OK")                //Sinalizar que a data do programa está atualizada / registrando os logs de utilização de energia. 
 
-/*Final do B1 - Constantes*/
-
-
-/****************************************************************************************************************************************************************
-  Inicio do B2 - Variáveis Globais
- ****************************************************************************************************************************************************************/
 String ohaStatus = String("");                         //Armazenar o status atual do programa.
-String currentDatePath = String("");                   //Armazenar a data atual para o registro dos logs no formato YYYYMMDD
+String currentDate = String("");                   //Armazenar a data atual para o registro dos logs no formato YYYYMMDD
 String currentTime = String("");                       //Armazenar a hora + minutos atual para o registro dos logs no forma HHmm
 unsigned long millisOnSetTime = 0;                     //Armazenar o total de Milissegundo {@see millis()}, quando a data e hora do programa foi atualizada, para mais detalhes veja {@see setDate()}
 unsigned long intervalSaveLog = 0;                     //Armazenar o tempo que o ultimo log foi salvo, por favor, veja {@see saveLog()} para mais detalhes.
@@ -74,19 +52,8 @@ void debug(String title) {
 }
 #endif
 
-/*Final do B2 - Variáveis Globais*/
-
-
-/***************************************************************************************************************************************************************
-  Inicio do B3 - Funcionalidades para ler, escrever e excluir arquivos no cartão de memória.
-  Visão geral: Neste bloco é centralizada todas as funcionalidades base para leitura e escrita de arquivos no cartão de memória, também é importante destacar
-              o controle simples de confirmação de escrita com sucesso realizado nos metodos {@see getResource()} e {@see setResource()} para que valores
-              inconsistentes sejam desconsiderados.
- ***************************************************************************************************************************************************************/
-
 /* Abrir um arquivo no cartão de memória conforme parametros abaixo:
    IMPORTANTE: O arquivo deve ser fechado, {@see file.close()}, no final do processo!
-   @param path informar um diretório válido.
    @param readOnly informar true para somente leitura ou false para permitir escrita no arquivo..
    @return File class @link https://www.arduino.cc/en/Tutorial/Files
 */
@@ -94,8 +61,9 @@ File getFile(String fileName, boolean readOnly) {
   return SD.open(fileName, ( readOnly ? FILE_READ : FILE_WRITE));
 }
 
-/*Final do B3*/
-
+String getLogFileName(String date, String strTime){
+  return date.substring(0,6) + strTime.substring(0,2) + String(F_TXT);
+}
 
 /***************************************************************************************************************************************************************
    B4 - Funcionalidades para ler, registrar ou excluir os logs de utilização de energia no cartão de memória.
@@ -119,8 +87,6 @@ void fillAmps(double amps[AMOUNT_SCT])
 {
   //A lista abaixo define a proporção de 0.089125 ampères para a média de conversão analogica / digital.
   //Sendo assim, a maior leitura em ampères é igual a (0.089125 * 1023) = 91.174875 ampères.
-  double calibrations[AMOUNT_SCT] {0.089125, 0.089125, 0.089125} ;
-
   int counts[AMOUNT_SCT];
   double readSum[AMOUNT_SCT];
   //Inicializa os valores das listas com zero:
@@ -146,7 +112,7 @@ void fillAmps(double amps[AMOUNT_SCT])
   //Aplicar a calibragem para converter a média das leitura em ampéres:
   for (byte a = 0; a < AMOUNT_SCT; a++)
   {
-    amps[a] =  (( counts[a]  > 100 ) ?  ((readSum[a] / counts[a]  ) * calibrations[a]) : 0.00) ;
+    amps[a] =  (( counts[a]  > 10 ) ?  (readSum[a] / counts[a]) : 0.00) ;
 #ifdef DEBUG
     debug("A" + String(a) + ": " , String((counts[a] > 0 ? ( readSum[a] / counts[a] ) : 0.00)) );
     debug("C" + String(a) + ": " , String(counts[a]) );
@@ -169,7 +135,7 @@ void saveLog() {
 #ifdef DEBUG
   debug(F("Amperes: "), (String(amps[0]) + String(" / ") + String(amps[1]) + String(" / ") + String(amps[2])));
 #endif
-  String fileName = currentDatePath + String(F_TXT); // Nome do arquivo do log.
+  String fileName = getLogFileName(currentDate, currentTime); // Nome do arquivo do log.
   File fileLog = getFile(fileName, false);
   fileLog.print(F_BEGIN); // Inicio do conteúdo do log
   fileLog.print(currentTime.substring(0, 6)); fileLog.print('|'); //Ultima hora e minuto atualizada no programa.
@@ -197,7 +163,7 @@ void saveLog() {
 */
 void sendLog(String strDate, String strHour, int startPosition, int amount ) {
   int countReadLogs = 0;
-  String pathLog = strDate + strHour + String(F_TXT);
+  String pathLog = getLogFileName(strDate, strHour);
   if ( !SD.exists(pathLog) ) {
     esp8266.print(LOG_DATE_NOT_EXISTS);
     return;
@@ -233,7 +199,7 @@ void setStatus(String strDate, String strTime) {
   //Atualizar o diretório atual para gravação de novos logs conforme a data e hora informada,
   //Ex: 20150101/00 , sendo importante destacar, que a hora também é adicionada como um subdiretório para
   //tornar mais rapido a recuperação dos logs no cartão de memória.
-  currentDatePath = strDate + strTime.substring(0, 2);
+  currentDate = strDate;
   currentTime = strTime;
   millisOnSetTime = millis(); //Reiniciar a contagem de milissegundos para a nova data e hora, para mais informações vaje B3/Obeservação 02.
   ohaStatus = OHA_STATUS_OK; //Sinalizar que a gravação dos logs estão sendo realizadas sem problemas.
@@ -244,8 +210,8 @@ void setStatus(String strDate, String strTime) {
    @param strDate informar texto com data no formato YYYYMMDD
    @param strHour informar texto com hora e minuto no formato HHmm
 */
-void sendStatus(String strDate, String strHour) {
-  String path = strDate + strHour + String(F_TXT);
+void sendStatus(String strDate, String strTime) {
+  String path = getLogFileName( strDate, strTime);
   if ( !SD.exists(path) )
   {
     esp8266.println(LOG_DATE_NOT_EXISTS);
@@ -255,7 +221,7 @@ void sendStatus(String strDate, String strHour) {
          STOPPED - Geração de logs finalizada para a data e hora informada.
     */
     esp8266.print(F_BEGIN); // Inicio do conteúdo do log
-    esp8266.print((path.indexOf(currentDatePath) > -1 ? String("OHA_STATUS_RUNNING") : String("OHA_STATUS_FINISHED")));
+    esp8266.print( (strDate == currentDate) && (strTime == currentTime) ? String("OHA_STATUS_RUNNING") : String("OHA_STATUS_FINISHED"));
     esp8266.print("|");
     esp8266.print(millis()); // Informar o tempo que o dispositivo está funcionando desde a ultima inicialização.
     esp8266.println(F_END);
@@ -402,7 +368,7 @@ void loop()
   //Se o cartão de memória estiver funcionando:
   if ( ohaStatus != OHA_STATUS_NOT_SD ) {
     //Verificar se a data e hora do sistema está atualizada.
-    if ( currentDatePath.length() == 0 )
+    if ( currentDate.length() == 0 )
     {
       ohaStatus = OHA_STATUS_NOT_DATE;
       //Salvar log de utilização de energía se a data e hora do program estiver atualizada:
