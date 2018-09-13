@@ -81,7 +81,7 @@ public class OhaEnergyUseSyncHelper {
     public int getSequence() {
         int sequence = Integer.valueOf(preferences.getString(ENERGY_USE_SYNC_SEQUENCE, "-1"));
         if (sequence < 0) {
-            setSequence(1);
+            setSequence(0);
             return getSequence();
         }
         return sequence;

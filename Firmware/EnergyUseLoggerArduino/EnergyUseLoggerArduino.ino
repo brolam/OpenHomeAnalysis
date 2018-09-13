@@ -17,15 +17,18 @@
 //Constantes utilizadas na gravação dos arquivos.
 #define SD_CS 10                        //The pin connected to the chip select line of the SD card, @link https://www.arduino.cc/en/Reference/SDbegin
 #define F_BEGIN F("<")                  //Sinalizar o inicio do arquivo, para mais detalhes {@see commitResource()} 
-#define F_END F(">")                    //Sinalizar o final do arquivo, para mais detalhes {@see commitResource()} 
-#define F_TXT F(".txt")                 //Extensão para arquivos definitivos, para mais detalhes {@see readResource()}  e {@see writeResource()} 
-
+#define F_END F(">")                    //Sinalizar o final do arquivo, para mais detalhes {@see commitResource()}
+#define LINE_END '\n'                //Sinalizar o final da linha  
+#define F_TXT F(".txt")                 //Extensão para arquivos definitivos, para mais detalhes {@see readResource()}  e {@see writeResource()}
+ 
 //Constantes utilizadas na comunicação com o modulo WiFi ESP8266
 #define URL_LOG F("log")                //Solicitação de logs
 #define URL_STATUS F("status")          //Solicitação(GET) ou alteração(POST) do Status do programa, para mais detalhes {@see setStatus()} e {@see sendStatus()} 
 #define URL_RESET F("reset")            //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
 #define LOG_DATE_NOT_EXISTS F("LOG_DATE_NOT_EXISTS") //Sinalizar que a data solicitado não existe.
-#define LOG_FILE_NOT_EXISTS F("LOG_FILE_NOT_EXISTS") //Sinalizar que o log solicitado não existe.
+#define LOG_NOT_EXISTS F("LOG_NOT_EXISTS") //Sinalizar que o log solicitado não existe.
+#define OHA_STATUS_FINISHED F("OHA_STATUS_FINISHED") // Sinalizar que a geração de  logs está finalizadas para a data e hora solicitada
+#define OHA_STATUS_RUNNING F("OHA_STATUS_RUNNING") // Sinalizar que a geração de logs esta ativa  para a data e hora solicitada
 
 //Constantes para definir o status de execução do programa.
 #define OHA_STATUS_NOT_DATE F("OHA_STATUS_NOT_DATE")    //Sinalizar que a data do programa não está atualizada. 
@@ -63,6 +66,10 @@ File getFile(String fileName, boolean readOnly) {
 
 String getLogFileName(String date, String strTime){
   return date.substring(0,6) + strTime.substring(0,2) + String(F_TXT);
+}
+
+String getStatusByDateHour(String strDate, String strHour){
+   return ((strDate == currentDate) && (currentTime.substring(0,2) == strHour.substring(0,2)) ? String(OHA_STATUS_RUNNING) : String(OHA_STATUS_FINISHED));
 }
 
 /***************************************************************************************************************************************************************
@@ -147,7 +154,7 @@ void saveLog() {
   }
   fileLog.print(millis() - millisOnSetTime); //Total de Milissegundo desde a ultima atualização da data e hora no programa, para mais detalhes, veja B4/Observação 02.
   fileLog.print(F_END); //Final do conteudo do log, somente logs com essa sinalização serão considerados válidos.
-  fileLog.print(";"); //Final do conteudo do log, somente logs com essa sinalização serão considerados válidos.
+  fileLog.print(LINE_END); //Sinaliza o final do log ou final da linha no arquivo de log.
   fileLog.close();
 #ifdef DEBUG
   debug(F("path:"), fileName);
@@ -171,23 +178,28 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
   File logFile = getFile(pathLog, true);
   logFile.seek(startPosition);
   do {
-    String nextLogContent = logFile.readStringUntil(';');
+    String nextLogContent = logFile.readStringUntil(LINE_END);
     if (nextLogContent.length() > 0) {
       esp8266.println(String(logFile.position()) + ':' + nextLogContent);
 #ifdef DEBUG
       debug(F("SendLog: "), String(logFile.position()) + ':' + nextLogContent);
 #endif
     } else {
-      esp8266.print(String(logFile.position()) + ':' + String(F("LOG_ERROR")));
+      esp8266.println(String(logFile.position()) + ':' + String(LOG_NOT_EXISTS));
 #ifdef DEBUG
-      debug(F("SendLog: "), String(logFile.position()) + ':' + String(F("LOG_ERROR")));
-#endif
+      debug(F("SendLog: "), String(logFile.position()) + ':' + String(LOG_NOT_EXISTS));
+#endif 
       break;
     }
     //Necessário para sincronizar a comunicação serial e evitar dados truncados.
     delay(300);
     countReadLogs++;
   } while (countReadLogs <= amount);
+    esp8266.println( getStatusByDateHour(strDate, strHour));
+#ifdef DEBUG
+    debug(F("SendLog: "), getStatusByDateHour(strDate, strHour));
+#endif   
+
   logFile.close();
 }
 
@@ -221,7 +233,7 @@ void sendStatus(String strDate, String strTime) {
          STOPPED - Geração de logs finalizada para a data e hora informada.
     */
     esp8266.print(F_BEGIN); // Inicio do conteúdo do log
-    esp8266.print( (strDate == currentDate) && (strTime == currentTime) ? String("OHA_STATUS_RUNNING") : String("OHA_STATUS_FINISHED"));
+    esp8266.print(getStatusByDateHour(strDate,strTime));
     esp8266.print("|");
     esp8266.print(millis()); // Informar o tempo que o dispositivo está funcionando desde a ultima inicialização.
     esp8266.println(F_END);

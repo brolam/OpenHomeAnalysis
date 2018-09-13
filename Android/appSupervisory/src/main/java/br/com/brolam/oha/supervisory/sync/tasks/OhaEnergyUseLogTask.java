@@ -184,9 +184,9 @@ public class OhaEnergyUseLogTask {
             allowSequenceBroken = tryCount == (NUMBER_ATTEMPTS - 1);
         }
         //Se a geração de logs para a data e hora informada já foi finalizada(OHA_STATUS_FINISHED)
-        //e já foi importados todos os logs(LOG_FILE_NOT_EXISTS), atualizar as preferências de sincronização
+        //e já foi importados todos os logs(LOG_NOT_EXISTS), atualizar as preferências de sincronização
         //com a próxima data e hora.
-        if (OhaStatusLog.exists(OhaStatusLog.LOG_FILE_NOT_EXISTS, energyUseLogs)) {
+        if (OhaStatusLog.exists(OhaStatusLog.LOG_NOT_EXISTS, energyUseLogs)) {
             if (ohaStatusLog == OhaStatusLog.OHA_STATUS_FINISHED) {
                 setNextOhaSequenceLog();
             }
@@ -408,7 +408,7 @@ public class OhaEnergyUseLogTask {
         }
         ohaEnergyUseSyncHelper.setDate(OhaHelper.getStrDate(calendar.getTime()));
         ohaEnergyUseSyncHelper.setHour(OhaHelper.getStrHour(calendar.getTime()));
-        ohaEnergyUseSyncHelper.setSequence(1);
+        ohaEnergyUseSyncHelper.setSequence(0);
     }
 
     /**
