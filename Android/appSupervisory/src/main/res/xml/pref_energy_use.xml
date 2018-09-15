@@ -77,4 +77,14 @@
         android:selectAllOnFocus="true"
         android:singleLine="true"/>
 
+        <EditTextPreference
+            android:dependency="energy_use_sync_setup_mode"
+            android:title="@string/pref_energy_use_sync_sensor_to_amperes"
+            android:inputType="numberDecimal"
+            android:key="energy_use_sync_sensor_to_amperes"
+            android:maxLines="1"
+            android:defaultValue="@string/pref_energy_use_sensor_to_amperes_default"
+            android:selectAllOnFocus="true"
+            android:singleLine="true"/>
+
 </PreferenceScreen>

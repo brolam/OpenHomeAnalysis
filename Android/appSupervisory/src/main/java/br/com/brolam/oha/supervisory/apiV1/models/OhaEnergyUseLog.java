@@ -1,9 +1,5 @@
 package br.com.brolam.oha.supervisory.apiV1.models;
 
-import android.content.Context;
-
-import br.com.brolam.oha.supervisory.R;
-
 
 /** OhaEnergyUseLog - Ler o conteúdo do Log de consumo de Energía, exemplo "1:<181900|220.00|0.00|0.33|2.36|1525422>",
  *  e assim faciliar o acesso ao valor de cada coluna através de atributos.
@@ -19,9 +15,9 @@ public class OhaEnergyUseLog {
      ****************************************************************************************/
     private static final byte   FIELD_STR_TIME = 0;
     private static final byte   FIELD_VOLTS = 1;
-    private static final byte   FIELD_AMPS_PER_PHASE_1 = 2;
-    private static final byte   FIELD_AMPS_PER_PHASE_2 = 3;
-    private static final byte   FIELD_AMPS_PER_PHASE_3 = 4;
+    private static final byte   FIELD_SENSOR_PHASE_1 = 2;
+    private static final byte   FIELD_SENSOR_PHASE_2 = 3;
+    private static final byte   FIELD_SENSOR_PHASE_3 = 4;
     private static final byte   FIELD_DURATION = 5;
     private static final String FLAG_LOG_COLUMN = ":";
     private static final byte   FLAG_LOG_COLUMN_AMOUNT = 2;
@@ -61,7 +57,7 @@ public class OhaEnergyUseLog {
     /**
      * Média de amperes lido por fase na duração do log {@see duration }
      */
-    private double[] avgAmpsPerPhase;
+    private double[] avgSensorPerPhase;
 
     /**
      * Duração em milisegundo da leitura do log .
@@ -87,9 +83,9 @@ public class OhaEnergyUseLog {
         this.strDate = "00000000";
         this.strTime = "000000";
         this.avgVolts = 0.00;
-        this.avgAmpsPerPhase = new double[FLAG_AMOUNT_PHASES];
+        this.avgSensorPerPhase = new double[FLAG_AMOUNT_PHASES];
         for(byte phase = 0; phase < FLAG_AMOUNT_PHASES; phase++){
-            avgAmpsPerPhase[phase] = 0.00;
+            avgSensorPerPhase[phase] = 0.00;
         }
         this.duration = 0;
         this.strLogContentWithError = "";
@@ -151,12 +147,12 @@ public class OhaEnergyUseLog {
                         ohaEnergyUseLog.setStrDate(strDate);
                         ohaEnergyUseLog.setStrTime(fields[FIELD_STR_TIME]);
                         ohaEnergyUseLog.setAvgVolts(Double.valueOf(fields[FIELD_VOLTS]));
-                        double avgAmpsPerPhase[] = new double[]{
-                                Double.valueOf(fields[FIELD_AMPS_PER_PHASE_1]),
-                                Double.valueOf(fields[FIELD_AMPS_PER_PHASE_2]),
-                                Double.valueOf(fields[FIELD_AMPS_PER_PHASE_3]),
+                        double avgSensorPerPhase[] = new double[]{
+                                Double.valueOf(fields[FIELD_SENSOR_PHASE_1]),
+                                Double.valueOf(fields[FIELD_SENSOR_PHASE_2]),
+                                Double.valueOf(fields[FIELD_SENSOR_PHASE_3]),
                         };
-                        ohaEnergyUseLog.setAvgAmpsPerPhase(avgAmpsPerPhase);
+                        ohaEnergyUseLog.setAvgSensorPerPhase(avgSensorPerPhase);
                         ohaEnergyUseLog.setDuration(Long.valueOf(fields[FIELD_DURATION]));
 
                     }
@@ -205,8 +201,8 @@ public class OhaEnergyUseLog {
         return avgVolts;
     }
 
-    public double[] getAvgAmpsPerPhase() {
-        return avgAmpsPerPhase;
+    public double[] getAvgSensorPerPhase() {
+        return avgSensorPerPhase;
     }
 
     public long getDuration() {
@@ -243,8 +239,8 @@ public class OhaEnergyUseLog {
         this.avgVolts = avgVolts;
     }
 
-    public void setAvgAmpsPerPhase(double[] avgAmpsPerPhase) {
-        this.avgAmpsPerPhase = avgAmpsPerPhase;
+    public void setAvgSensorPerPhase(double[] avgSensorPerPhase) {
+        this.avgSensorPerPhase = avgSensorPerPhase;
     }
 
 

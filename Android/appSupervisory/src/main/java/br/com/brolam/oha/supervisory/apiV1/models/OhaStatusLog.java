@@ -11,8 +11,8 @@ public enum OhaStatusLog {
     /** Sinalizar que não existe logs para a data solicitada. */
     LOG_DATE_NOT_EXISTS,
 
-    /** Sinalizar que não existe um log para a data e sequência solicitada.*/
-    LOG_NOT_EXISTS,
+    /** Sinalizar que a leitura dos logs chegou ao final.*/
+    LOG_END_OF_FILE,
 
     /** Sinalizar que o Cartão de memória do dispositivo OHA está com problema. */
     OHA_STATUS_NOT_SD,

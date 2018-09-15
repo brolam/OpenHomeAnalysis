@@ -12,7 +12,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.oha.supervisory.apiV1.OhaEnergyUseApi;
@@ -184,9 +183,9 @@ public class OhaEnergyUseLogTask {
             allowSequenceBroken = tryCount == (NUMBER_ATTEMPTS - 1);
         }
         //Se a geração de logs para a data e hora informada já foi finalizada(OHA_STATUS_FINISHED)
-        //e já foi importados todos os logs(LOG_NOT_EXISTS), atualizar as preferências de sincronização
+        //e já foi importados todos os logs(LOG_END_OF_FILE), atualizar as preferências de sincronização
         //com a próxima data e hora.
-        if (OhaStatusLog.exists(OhaStatusLog.LOG_NOT_EXISTS, energyUseLogs)) {
+        if (OhaStatusLog.exists(OhaStatusLog.LOG_END_OF_FILE, energyUseLogs)) {
             if (ohaStatusLog == OhaStatusLog.OHA_STATUS_FINISHED) {
                 setNextOhaSequenceLog();
             }
@@ -338,9 +337,10 @@ public class OhaEnergyUseLogTask {
                 double volts = ohaEnergyUseSyncHelper.getDefaultVolts(ohaEnergyUseLog.getAvgVolts());
                 Calendar dateTime = OhaHelper.getCalendar(ohaEnergyUseLog.getStrDate(), ohaEnergyUseLog.getStrTime(), ohaEnergyUseLog.getDuration());
                 double duration = getDurationBetweenLogs(previousDateTime, dateTime);
-                double watts1 = volts * ohaEnergyUseLog.getAvgAmpsPerPhase()[0];
-                double watts2 = volts * ohaEnergyUseLog.getAvgAmpsPerPhase()[1];
-                double watts3 = volts * ohaEnergyUseLog.getAvgAmpsPerPhase()[2];
+                double sensorAvgToAmperes = ohaEnergyUseSyncHelper.getSensorValueToAmperes();
+                double watts1 = volts * ( ohaEnergyUseLog.getAvgSensorPerPhase()[0] * sensorAvgToAmperes );
+                double watts2 = volts * ( ohaEnergyUseLog.getAvgSensorPerPhase()[1] * sensorAvgToAmperes );
+                double watts3 = volts * ( ohaEnergyUseLog.getAvgSensorPerPhase()[2] * sensorAvgToAmperes );
                 ContentValues values = OhaEnergyUseContract.EnergyUseLogEntry.parse(
                         dateTime.getTime(),
                         duration,

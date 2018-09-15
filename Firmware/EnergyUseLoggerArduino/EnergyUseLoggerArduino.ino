@@ -26,7 +26,7 @@
 #define URL_STATUS F("status")          //Solicitação(GET) ou alteração(POST) do Status do programa, para mais detalhes {@see setStatus()} e {@see sendStatus()} 
 #define URL_RESET F("reset")            //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
 #define LOG_DATE_NOT_EXISTS F("LOG_DATE_NOT_EXISTS") //Sinalizar que a data solicitado não existe.
-#define LOG_NOT_EXISTS F("LOG_NOT_EXISTS") //Sinalizar que o log solicitado não existe.
+#define LOG_END_OF_FILE F("LOG_END_OF_FILE") //Sinalizar que a leitura dos logs chegou ao final.
 #define OHA_STATUS_FINISHED F("OHA_STATUS_FINISHED") // Sinalizar que a geração de  logs está finalizadas para a data e hora solicitada
 #define OHA_STATUS_RUNNING F("OHA_STATUS_RUNNING") // Sinalizar que a geração de logs esta ativa  para a data e hora solicitada
 
@@ -72,25 +72,8 @@ String getStatusByDateHour(String strDate, String strHour){
    return ((strDate == currentDate) && (currentTime.substring(0,2) == strHour.substring(0,2)) ? String(OHA_STATUS_RUNNING) : String(OHA_STATUS_FINISHED));
 }
 
-/***************************************************************************************************************************************************************
-   B4 - Funcionalidades para ler, registrar ou excluir os logs de utilização de energia no cartão de memória.
-   Visão geral: Nesse bloco de códigos estão as principais funcionalidades do programa para ler os sensores SCT - 013.
-   Sugiro a leitura dos artigos abaixo para mais detalhes sobre o sensor SCT - 013, sendo importante destacar, que o OHA utiliza um
-   circuito diferente do circuito sugerido no OpenEnergyMonitor:
-   http://blog.filipeflop.com/sensores/medidor-de-corrente-sct013-com-arduino.html ou
-   https://openenergymonitor.org/emon/buildingblocks/report-yhdc-sct-013-000-current-transformer
-
-   Observação 01 - O OHA utiliza uma ponte retificadora para realizar a leitura nos SCT - 013 { @see fillAmps()).
-   Observação 02 - O circuito do OHA não tem um módulo para obter a hora atual, sendo assim, a hora do log será calculada
-                   utilizando as variaves currentTime, millisOnSetTime e o método millis() na seguinte formula: currentTime + (millis() - millisOnSetTime).
-                   Sendo importante destacar, que esse calculo da hora atual não será realizado nesse programa, mas será incluido no conteúdo do log as informações
-                   necessárias para realizar esse calculo {@see saveLog()}.
- ***************************************************************************************************************************************************************/
-
-/* Preencher uma lista com a utilização de energia em ampères conforme a quantidade {@see AMOUNT_SCT} de SCT - 013 disponível no circuito:
-   @param amps informar uma lista do tipo número conforme a quantidade de SCT - 013 disponível no circuito.
-*/
-void fillAmps(double amps[AMOUNT_SCT])
+/* Preencher uma lista com a média dos sensores SCT */
+void fillReads(double reads[AMOUNT_SCT])
 {
   //A lista abaixo define a proporção de 0.089125 ampères para a média de conversão analogica / digital.
   //Sendo assim, a maior leitura em ampères é igual a (0.089125 * 1023) = 91.174875 ampères.
@@ -119,7 +102,7 @@ void fillAmps(double amps[AMOUNT_SCT])
   //Aplicar a calibragem para converter a média das leitura em ampéres:
   for (byte a = 0; a < AMOUNT_SCT; a++)
   {
-    amps[a] =  (( counts[a]  > 10 ) ?  (readSum[a] / counts[a]) : 0.00) ;
+    reads[a] =  (( counts[a]  > 10 ) ?  (readSum[a] / counts[a]) : 0.00) ;
 #ifdef DEBUG
     debug("A" + String(a) + ": " , String((counts[a] > 0 ? ( readSum[a] / counts[a] ) : 0.00)) );
     debug("C" + String(a) + ": " , String(counts[a]) );
@@ -129,8 +112,8 @@ void fillAmps(double amps[AMOUNT_SCT])
 
 /* Registrar um log de utilização de energía no cartão de memória.*/
 void saveLog() {
-  double amps[AMOUNT_SCT];
-  fillAmps(amps);
+  double reads[AMOUNT_SCT];
+  fillReads(reads);
 
   //Verifica se o tempo de intervalo para gravar o próximo log foi alcançado:
   while ( (millis() - intervalSaveLog) < INTERVAL_TIME_SAVE_LOG ) {
@@ -140,7 +123,7 @@ void saveLog() {
   //da gravação do próximo logo.
   intervalSaveLog = millis();
 #ifdef DEBUG
-  debug(F("Amperes: "), (String(amps[0]) + String(" / ") + String(amps[1]) + String(" / ") + String(amps[2])));
+  debug(F("Amperes: "), (String(reads[0]) + String(" / ") + String(reads[1]) + String(" / ") + String(reads[2])));
 #endif
   String fileName = getLogFileName(currentDate, currentTime); // Nome do arquivo do log.
   File fileLog = getFile(fileName, false);
@@ -150,7 +133,7 @@ void saveLog() {
   //Gerar um coluna para cada leitura dos SCT 013 disponíveis no circuito:
   for (byte s = 0; s < AMOUNT_SCT; s++)
   {
-    fileLog.print((amps[s] > 0 ? amps[s] : 0.00)); fileLog.print('|');
+    fileLog.print((reads[s] > 0 ? reads[s] : 0.00)); fileLog.print('|');
   }
   fileLog.print(millis() - millisOnSetTime); //Total de Milissegundo desde a ultima atualização da data e hora no programa, para mais detalhes, veja B4/Observação 02.
   fileLog.print(F_END); //Final do conteudo do log, somente logs com essa sinalização serão considerados válidos.
@@ -172,7 +155,7 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
   int countReadLogs = 0;
   String pathLog = getLogFileName(strDate, strHour);
   if ( !SD.exists(pathLog) ) {
-    esp8266.print(LOG_DATE_NOT_EXISTS);
+    esp8266.println(LOG_DATE_NOT_EXISTS);
     return;
   }
   File logFile = getFile(pathLog, true);
@@ -185,9 +168,9 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
       debug(F("SendLog: "), String(logFile.position()) + ':' + nextLogContent);
 #endif
     } else {
-      esp8266.println(String(logFile.position()) + ':' + String(LOG_NOT_EXISTS));
+      esp8266.println(String(LOG_END_OF_FILE));
 #ifdef DEBUG
-      debug(F("SendLog: "), String(logFile.position()) + ':' + String(LOG_NOT_EXISTS));
+      debug(F("SendLog: "), String(LOG_END_OF_FILE));
 #endif 
       break;
     }

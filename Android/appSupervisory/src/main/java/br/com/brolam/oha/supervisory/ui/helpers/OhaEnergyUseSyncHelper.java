@@ -29,6 +29,7 @@ public class OhaEnergyUseSyncHelper {
     public static final String ENERGY_USE_SYNC_OFTEN_LOGGER_RESET = "energy_use_sync_often_logger_reset";
     public static final String ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING = "energy_use_sync_duration_logger_running";
     public static final String ENERGY_USE_SYNC_DAYS_SD_CARD_STORED = "energy_use_sync_days_sd_card_stored";
+    public static final String ENERGY_USE_SYNC_SENSOR_TO_AMPERES = "energy_use_sync_sensor_to_amperes";
 
     Context context;
     SharedPreferences preferences;
@@ -105,6 +106,10 @@ public class OhaEnergyUseSyncHelper {
 
     public int getDaysSdCardStored(){
         return Integer.valueOf(preferences.getString(ENERGY_USE_SYNC_DAYS_SD_CARD_STORED, context.getString(R.string.pref_energy_use_sync_days_sd_card_stored_default)));
+    }
+
+    public double getSensorValueToAmperes(){
+        return Double.valueOf(preferences.getString(ENERGY_USE_SYNC_SENSOR_TO_AMPERES, context.getString(R.string.pref_energy_use_sensor_to_amperes_default)));
     }
 
     public void setSetupModeOn() {
