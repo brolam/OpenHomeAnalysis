@@ -1,5 +1,5 @@
 /*
-  EnergyUseLogger - Ler e registrar a utilização de energia em amperes lendo os sensores SCT - 013 conectados ao circuito.
+  EnergyUseLogger - Ler e registrar a utilização de energia lendo os sensores SCT - 013 conectados ao circuito.
   Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.1.0
@@ -16,19 +16,19 @@
 
 //Constantes utilizadas na gravação dos arquivos.
 #define SD_CS 10                        //The pin connected to the chip select line of the SD card, @link https://www.arduino.cc/en/Reference/SDbegin
-#define F_BEGIN F("<")                  //Sinalizar o inicio do arquivo, para mais detalhes {@see commitResource()} 
-#define F_END F(">")                    //Sinalizar o final do arquivo, para mais detalhes {@see commitResource()}
-#define LINE_END '\n'                //Sinalizar o final da linha  
-#define F_TXT F(".txt")                 //Extensão para arquivos definitivos, para mais detalhes {@see readResource()}  e {@see writeResource()}
+#define F_BEGIN F("<")                  //Sinalizar o inicio do conteúdo de registro de utilização de entergia 
+#define F_END F(">")                    //Sinalizar o final do conteúdo de registro de utilização de entergia
+#define LINE_END '\n'                   //Sinalizar o final da linha do registro de utilização de entergia
+#define F_TXT F(".txt")                 //Extensão dos arquivos de logs de registros de energia
  
 //Constantes utilizadas na comunicação com o modulo WiFi ESP8266
-#define URL_LOG F("log")                //Solicitação de logs
-#define URL_STATUS F("status")          //Solicitação(GET) ou alteração(POST) do Status do programa, para mais detalhes {@see setStatus()} e {@see sendStatus()} 
-#define URL_RESET F("reset")            //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
-#define LOG_DATE_NOT_EXISTS F("LOG_DATE_NOT_EXISTS") //Sinalizar que a data solicitado não existe.
-#define LOG_END_OF_FILE F("LOG_END_OF_FILE") //Sinalizar que a leitura dos logs chegou ao final.
-#define OHA_STATUS_FINISHED F("OHA_STATUS_FINISHED") // Sinalizar que a geração de  logs está finalizadas para a data e hora solicitada
-#define OHA_STATUS_RUNNING F("OHA_STATUS_RUNNING") // Sinalizar que a geração de logs esta ativa  para a data e hora solicitada
+#define URL_LOG F("log")                                 //Solicitação de logs
+#define URL_STATUS F("status")                           //Solicitação(GET) ou alteração(POST) do Status do programa, para mais detalhes {@see setStatus()} e {@see sendStatus()} 
+#define URL_RESET F("reset")                             //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
+#define LOG_DATE_NOT_EXISTS F("LOG_DATE_NOT_EXISTS")     //Sinalizar que o log não existe na data e hora solicitada.
+#define LOG_END_OF_FILE F("LOG_END_OF_FILE")             //Sinalizar que a leitura dos logs chegou ao final.
+#define OHA_STATUS_FINISHED F("OHA_STATUS_FINISHED")     // Sinalizar que a geração de logs está finalizada para a data e hora solicitada
+#define OHA_STATUS_RUNNING F("OHA_STATUS_RUNNING")       // Sinalizar que a geração de logs esta ativa  para a data e hora solicitada
 
 //Constantes para definir o status de execução do programa.
 #define OHA_STATUS_NOT_DATE F("OHA_STATUS_NOT_DATE")    //Sinalizar que a data do programa não está atualizada. 
@@ -36,7 +36,7 @@
 #define OHA_STATUS_OK F("OHA_STATUS_OK")                //Sinalizar que a data do programa está atualizada / registrando os logs de utilização de energia. 
 
 String ohaStatus = String("");                         //Armazenar o status atual do programa.
-String currentDate = String("");                   //Armazenar a data atual para o registro dos logs no formato YYYYMMDD
+String currentDate = String("");                       //Armazenar a data atual para o registro dos logs no formato YYYYMMDD
 String currentTime = String("");                       //Armazenar a hora + minutos atual para o registro dos logs no forma HHmm
 unsigned long millisOnSetTime = 0;                     //Armazenar o total de Milissegundo {@see millis()}, quando a data e hora do programa foi atualizada, para mais detalhes veja {@see setDate()}
 unsigned long intervalSaveLog = 0;                     //Armazenar o tempo que o ultimo log foi salvo, por favor, veja {@see saveLog()} para mais detalhes.
@@ -57,8 +57,6 @@ void debug(String title) {
 
 /* Abrir um arquivo no cartão de memória conforme parametros abaixo:
    IMPORTANTE: O arquivo deve ser fechado, {@see file.close()}, no final do processo!
-   @param readOnly informar true para somente leitura ou false para permitir escrita no arquivo..
-   @return File class @link https://www.arduino.cc/en/Tutorial/Files
 */
 File getFile(String fileName, boolean readOnly) {
   return SD.open(fileName, ( readOnly ? FILE_READ : FILE_WRITE));
@@ -72,11 +70,9 @@ String getStatusByDateHour(String strDate, String strHour){
    return ((strDate == currentDate) && (currentTime.substring(0,2) == strHour.substring(0,2)) ? String(OHA_STATUS_RUNNING) : String(OHA_STATUS_FINISHED));
 }
 
-/* Preencher uma lista com a média dos sensores SCT */
+/* Preencher uma lista com a média da leituras dos sensores SCT 13 */
 void fillReads(double reads[AMOUNT_SCT])
 {
-  //A lista abaixo define a proporção de 0.089125 ampères para a média de conversão analogica / digital.
-  //Sendo assim, a maior leitura em ampères é igual a (0.089125 * 1023) = 91.174875 ampères.
   int counts[AMOUNT_SCT];
   double readSum[AMOUNT_SCT];
   //Inicializa os valores das listas com zero:
@@ -99,7 +95,7 @@ void fillReads(double reads[AMOUNT_SCT])
     }
   }
 
-  //Aplicar a calibragem para converter a média das leitura em ampéres:
+  //Aplicar a média das leitura nos sensores:
   for (byte a = 0; a < AMOUNT_SCT; a++)
   {
     reads[a] =  (( counts[a]  > 10 ) ?  (readSum[a] / counts[a]) : 0.00) ;
@@ -123,7 +119,7 @@ void saveLog() {
   //da gravação do próximo logo.
   intervalSaveLog = millis();
 #ifdef DEBUG
-  debug(F("Amperes: "), (String(reads[0]) + String(" / ") + String(reads[1]) + String(" / ") + String(reads[2])));
+  debug(F("Sensors Reads: "), (String(reads[0]) + String(" / ") + String(reads[1]) + String(" / ") + String(reads[2])));
 #endif
   String fileName = getLogFileName(currentDate, currentTime); // Nome do arquivo do log.
   File fileLog = getFile(fileName, false);
@@ -145,7 +141,7 @@ void saveLog() {
 }
 
 /* Enviar uma lista de logs para o módulo ESP8266 via comunicação serial conforme parametros abaixo:
-   @param strDate informar texto com data no formato YYYYMMDD
+   @param strDate informar texto com data no formato YYMMDD
    @param strHour informar texto com hora e minuto no formato HHmm
    @param start informar o inicio da sequência do log.
    @param amount informar a quantidade de logs.
@@ -182,7 +178,6 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
 #ifdef DEBUG
     debug(F("SendLog: "), getStatusByDateHour(strDate, strHour));
 #endif   
-
   logFile.close();
 }
 
@@ -224,21 +219,21 @@ void sendStatus(String strDate, String strTime) {
   esp8266.flush();
 }
 
-/* Excluir logs de utilização de energía para liberar espaço no cartão de memória.
-   Excluir 5 logs por vez para impedir que essa funcionalidade interfira no registro de logs de utilização de energia.
-   @param pathDate informar texto com data no formato YYYYMMDD
+/* 
+ Excluir logs de utilização de energía para liberar espaço no cartão de memória.
 */
 void deleteLogs(String strDate, String strHour)
 {
-
-  /*
-    if ( SD.exists("/LOGS/20180906/12/4.txt")){
-    debug("Inicio: /LOGS/20180906/12/4.txt");
-    SD.remove("/LOGS/20180906/12/4.txt");
-    debug("Fim: /LOGS/20180906/12/4.txt");
+  String deleteLog = getLogFileName(strDate, strHour);
+  if ( SD.exists(deleteLog)){
+#ifdef DEBUG
+  debug(F("Try delete: "), deleteLog);
+#endif
+    SD.remove(deleteLog);
+#ifdef DEBUG
+  debug(F("Deleted: "), deleteLog);
+#endif
     }
-  */
-  delay(3000);
 }
 
 /* Reservada para realizar a leitura da tensão, se o valor for zero, considerar o valor padrão
