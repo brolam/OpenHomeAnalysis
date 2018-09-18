@@ -23,15 +23,14 @@ public class OhaEnergyUseApi {
     /**
      * Recuperar uma sequencia de logs de consumo de energia conforme parâmetro abaixo:
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
-     * @param strDate  informar texto com data no formato YYYYMMDD
+     * @param strDate  informar texto com data no formato YYMMDD
      * @param strHour  informar texto com a hora no formato HH
      * @param startSequence informar o inicio da sequência do log.
      * @param amountLogs informar a quantidade de logs.
-     * @param deleteDate informar a data dos logs que podem ser excluidos para liberar espaço no cartão de memória do registrador de logs.
      * @return uma lista de logs de consumo de energia no formato texto.
      * @throws IOException
      */
-    public static List<String> getLogs(Context context, String hostName, String strDate, String strHour, int startSequence, int amountLogs, String deleteDate) throws IOException {
+    public static List<String> getLogs(Context context, String hostName, String strDate, String strHour, int startSequence, int amountLogs) throws IOException {
         String url = OhaNetworkHelper.parseUrl
                 (
                         hostName,
@@ -39,12 +38,31 @@ public class OhaEnergyUseApi {
                         strDate,
                         strHour,
                         String.valueOf(startSequence),
-                        String.valueOf(amountLogs),
-                        deleteDate
+                        String.valueOf(amountLogs)
                 );
         return OhaNetworkHelper.requestHttp(context,"GET", url);
     }
 
+    /**
+     * Excluir logs por para uma data é hora
+     * @param context informar um contexto válido
+     * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
+     * @param strDate informar a data no formato YYMMDD
+     * @param strHour informar a hora HH
+     * @return um OhaStatusLog {@see OhaStatusLog.OHA_DELETED}
+     * @throws IOException
+     */
+    public OhaStatusLog deleteLogs(Context context, String hostName, String strDate, String strHour ) throws IOException {
+        String url = OhaNetworkHelper.parseUrl
+                (
+                        hostName,
+                        URL_LOG,
+                        strDate,
+                        strHour
+                );
+        List<String> strings = OhaNetworkHelper.requestHttp(context,"DELETE", url);
+        return OhaStatusLog.getOhaStatusLog(strings);
+    }
 
     /**
      * Atualizar o status, data e hora do registrador de logs.

@@ -20,7 +20,7 @@
 #define F_END F(">")                    //Sinalizar o final do conteúdo de registro de utilização de entergia
 #define LINE_END '\n'                   //Sinalizar o final da linha do registro de utilização de entergia
 #define F_TXT F(".txt")                 //Extensão dos arquivos de logs de registros de energia
- 
+
 //Constantes utilizadas na comunicação com o modulo WiFi ESP8266
 #define URL_LOG F("log")                                 //Solicitação de logs
 #define URL_STATUS F("status")                           //Solicitação(GET) ou alteração(POST) do Status do programa, para mais detalhes {@see setStatus()} e {@see sendStatus()} 
@@ -62,12 +62,12 @@ File getFile(String fileName, boolean readOnly) {
   return SD.open(fileName, ( readOnly ? FILE_READ : FILE_WRITE));
 }
 
-String getLogFileName(String date, String strTime){
-  return date.substring(0,6) + strTime.substring(0,2) + String(F_TXT);
+String getLogFileName(String date, String strTime) {
+  return date.substring(0, 6) + strTime.substring(0, 2) + String(F_TXT);
 }
 
-String getStatusByDateHour(String strDate, String strHour){
-   return ((strDate == currentDate) && (currentTime.substring(0,2) == strHour.substring(0,2)) ? String(OHA_STATUS_RUNNING) : String(OHA_STATUS_FINISHED));
+String getStatusByDateHour(String strDate, String strHour) {
+  return ((strDate == currentDate) && (currentTime.substring(0, 2) == strHour.substring(0, 2)) ? String(OHA_STATUS_RUNNING) : String(OHA_STATUS_FINISHED));
 }
 
 /* Preencher uma lista com a média da leituras dos sensores SCT 13 */
@@ -167,17 +167,17 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
       esp8266.println(String(LOG_END_OF_FILE));
 #ifdef DEBUG
       debug(F("SendLog: "), String(LOG_END_OF_FILE));
-#endif 
+#endif
       break;
     }
     //Necessário para sincronizar a comunicação serial e evitar dados truncados.
     delay(300);
     countReadLogs++;
   } while (countReadLogs <= amount);
-    esp8266.println( getStatusByDateHour(strDate, strHour));
+  esp8266.println( getStatusByDateHour(strDate, strHour));
 #ifdef DEBUG
-    debug(F("SendLog: "), getStatusByDateHour(strDate, strHour));
-#endif   
+  debug(F("SendLog: "), getStatusByDateHour(strDate, strHour));
+#endif
   logFile.close();
 }
 
@@ -211,7 +211,7 @@ void sendStatus(String strDate, String strTime) {
          STOPPED - Geração de logs finalizada para a data e hora informada.
     */
     esp8266.print(F_BEGIN); // Inicio do conteúdo do log
-    esp8266.print(getStatusByDateHour(strDate,strTime));
+    esp8266.print(getStatusByDateHour(strDate, strTime));
     esp8266.print("|");
     esp8266.print(millis()); // Informar o tempo que o dispositivo está funcionando desde a ultima inicialização.
     esp8266.println(F_END);
@@ -219,21 +219,21 @@ void sendStatus(String strDate, String strTime) {
   esp8266.flush();
 }
 
-/* 
- Excluir logs de utilização de energía para liberar espaço no cartão de memória.
+/*
+  Excluir logs de utilização de energía para liberar espaço no cartão de memória.
 */
 void deleteLogs(String strDate, String strHour)
 {
   String deleteLog = getLogFileName(strDate, strHour);
-  if ( SD.exists(deleteLog)){
+  if ( SD.exists(deleteLog)) {
 #ifdef DEBUG
-  debug(F("Try delete: "), deleteLog);
+    debug(F("Try delete: "), deleteLog);
 #endif
     SD.remove(deleteLog);
 #ifdef DEBUG
-  debug(F("Deleted: "), deleteLog);
+    debug(F("Deleted: "), deleteLog);
 #endif
-    }
+  }
 }
 
 /* Reservada para realizar a leitura da tensão, se o valor for zero, considerar o valor padrão
@@ -276,6 +276,7 @@ void doUrl(String url) {
   String params[10];
   parseUrl(url, params); //Transformar a Url em uma lista de parâmtros, sendo o item 0 o tipo do Web Method, GET ou POST.
   boolean isPost = ( params[0].indexOf("POST") != -1);
+  boolean isDelete = ( params[0].indexOf("DELETE") != -1);
   //Se o cartão de memória não estiver disponível a funcionalidade nas URL abaixo não será executada.
   if ( ohaStatus != OHA_STATUS_NOT_SD) {
     //Atualizar a data do programa.
@@ -288,6 +289,8 @@ void doUrl(String url) {
       if ( !isPost && ( params[1] == URL_LOG ) ) {
         sendLog(params[2], params[3], params[4].toInt(), params[5].toInt());
         //Enviar status do programa.
+      } else if ( isDelete &&  ( params[1] == URL_LOG ) ) {
+        deleteLogs(params[2], params[3]);
       } else if (!isPost && params[1] == URL_STATUS) {
         sendStatus(params[2], params[3]);
       } else {
