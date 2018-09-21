@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.format.DateUtils;
 
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 
 import br.com.brolam.library.helpers.OhaHelper;
@@ -30,6 +32,7 @@ public class OhaEnergyUseSyncHelper {
     public static final String ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING = "energy_use_sync_duration_logger_running";
     public static final String ENERGY_USE_SYNC_DAYS_SD_CARD_STORED = "energy_use_sync_days_sd_card_stored";
     public static final String ENERGY_USE_SYNC_SENSOR_TO_AMPERES = "energy_use_sync_sensor_to_amperes";
+    public static final String ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR = "energy_use_sync_last_deleted_date_hour";
 
     Context context;
     SharedPreferences preferences;
@@ -148,6 +151,12 @@ public class OhaEnergyUseSyncHelper {
         editor.commit();
     }
 
+    private void setLastDeletedLogsDateHour(Calendar calendar) {
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putLong(ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING, calendar.getTimeInMillis());
+        editor.commit();
+    }
+
     public void parseDefaultValues(){
         if ( preferences.getString(ENERGY_USE_SYNC_DATE, null) == null){
             getHostName();
@@ -157,4 +166,20 @@ public class OhaEnergyUseSyncHelper {
         }
     }
 
+    public Calendar getLastDeletedLogsDateHour(String strDateLogsImporting) throws ParseException {
+
+        Calendar calendar = OhaHelper.getCalendar(strDateLogsImporting);
+        calendar.add(Calendar.DATE, getDaysSdCardStored() * -1);
+
+        if ( preferences.getString(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, null) == null) {
+            calendar.set(Calendar.HOUR,0);
+            setLastDeletedLogsDateHour(calendar);
+            return calendar;
+        }
+        long lastDeletedDateHour = preferences.getLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, calendar.getTimeInMillis());
+        if ( lastDeletedDateHour < calendar.getTime().getTime() ){
+            calendar.setTime(new Date(lastDeletedDateHour));
+        }
+        return calendar;
+    }
 }

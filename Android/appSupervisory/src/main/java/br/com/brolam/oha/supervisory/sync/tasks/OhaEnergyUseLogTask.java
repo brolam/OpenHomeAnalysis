@@ -272,15 +272,10 @@ public class OhaEnergyUseLogTask {
             EnergyUseRequestTimeOut,
             InterruptedException,
             BackupAndRestoreOperation{
-        //Definir a data de exclusão dos logs para liberar espaço no
-        //SD Card do Registrador de Utilização de Energia considerando a preferência do usuário:
-        Calendar calendar = OhaHelper.getCalendar(strDate);
-        calendar.add(Calendar.DATE, ohaEnergyUseSyncHelper.getDaysSdCardStored() * -1);
-        String strDateLogDelete = OhaHelper.getStrDate(calendar.getTime());
         //Realizar as tentativas:
         List<String> strings = new ArrayList<>();
         for (int tryCount = 1; tryCount <= NUMBER_ATTEMPTS; tryCount++) {
-            strings = OhaEnergyUseApi.getLogs(iOhaTask.getContext(), hostName, strDate, strHour, startSequence, 25, strDateLogDelete);
+            strings = OhaEnergyUseApi.getLogs(iOhaTask.getContext(), hostName, strDate, strHour, startSequence, 25);
             //Verificar se o status retornado é válido:
             assertOhaStatusLog(strings, tryCount);
             if (OhaStatusLog.exists(OhaStatusLog.OHA_REQUEST_END, strings)) {
@@ -294,6 +289,24 @@ public class OhaEnergyUseLogTask {
             new EnergyUseLogRead(String.format("getLogs on %s, %s and %s is empty!", strDate, strHour, startSequence));
         }
         return strings;
+    }
+
+    private void deleteLogs(String hostName, String strDateLogsImporting) throws ParseException {
+        //Definir a data de exclusão dos logs para liberar espaço no
+        //SD Card do Registrador de Utilização de Energia considerando a preferência do usuário:
+        Calendar lastDeletedLogs =  ohaEnergyUseSyncHelper.getLastDeletedLogsDateHour();
+        Calendar calendar = OhaHelper.getCalendar(strDateLogsImporting);
+        calendar.add(Calendar.DATE, ohaEnergyUseSyncHelper.getDaysSdCardStored() * -1);
+        if ( lastDeletedLogs.before(calendar)) {
+            lastDeletedLogs = calendar;
+            lastDeletedLogs.set(Calendar.HOUR, 0);
+        }
+        String strDateLogDelete = OhaHelper.getStrDate(lastDeletedLogs.getTime());
+        String strHourLogDelete = OhaHelper.getStrHour(lastDeletedLogs.getTime());
+        OhaStatusLog returnDeletedLogs = OhaEnergyUseApi.deleteLogs((iOhaTask.getContext(), strDateLogDelete, strHourLogDelete);
+        if ( returnDeletedLogs == OhaStatusLog.LOG_DELETED){
+            ohaEnergyUseSyncHelper.getLastDeletedLogsDateHour(lastDeletedLogs);
+        }
     }
 
     /**

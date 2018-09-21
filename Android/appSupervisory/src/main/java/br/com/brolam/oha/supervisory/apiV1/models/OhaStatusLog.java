@@ -14,6 +14,9 @@ public enum OhaStatusLog {
     /** Sinalizar que a leitura dos logs chegou ao final.*/
     LOG_END_OF_FILE,
 
+    /** Sinalizar que o log foi excluido */
+    LOG_DELETED,
+
     /** Sinalizar que o Cartão de memória do dispositivo OHA está com problema. */
     OHA_STATUS_NOT_SD,
 

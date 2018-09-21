@@ -52,7 +52,7 @@ public class OhaEnergyUseApi {
      * @return um OhaStatusLog {@see OhaStatusLog.OHA_DELETED}
      * @throws IOException
      */
-    public OhaStatusLog deleteLogs(Context context, String hostName, String strDate, String strHour ) throws IOException {
+    public static OhaStatusLog deleteLogs(Context context, String hostName, String strDate, String strHour ) throws IOException {
         String url = OhaNetworkHelper.parseUrl
                 (
                         hostName,

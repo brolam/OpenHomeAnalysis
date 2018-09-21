@@ -27,6 +27,7 @@
 #define URL_RESET F("reset")                             //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
 #define LOG_DATE_NOT_EXISTS F("LOG_DATE_NOT_EXISTS")     //Sinalizar que o log não existe na data e hora solicitada.
 #define LOG_END_OF_FILE F("LOG_END_OF_FILE")             //Sinalizar que a leitura dos logs chegou ao final.
+#define LOG_DELETED F("LOG_DELETED")                 //Sinalizar que o log foi excluido.
 #define OHA_STATUS_FINISHED F("OHA_STATUS_FINISHED")     // Sinalizar que a geração de logs está finalizada para a data e hora solicitada
 #define OHA_STATUS_RUNNING F("OHA_STATUS_RUNNING")       // Sinalizar que a geração de logs esta ativa  para a data e hora solicitada
 
@@ -230,6 +231,8 @@ void deleteLogs(String strDate, String strHour)
     debug(F("Try delete: "), deleteLog);
 #endif
     SD.remove(deleteLog);
+    esp8266.println(LOG_DELETED);
+    esp8266.println(F_END);
 #ifdef DEBUG
     debug(F("Deleted: "), deleteLog);
 #endif
@@ -286,12 +289,11 @@ void doUrl(String url) {
     //Somente executar as funcionalidade abaixo se o Status do programa for igual a OHA_STATUS_OK
     else if ( ohaStatus == OHA_STATUS_OK ) {
       //Enviar logs de utilização de energia:
-      if ( !isPost && ( params[1] == URL_LOG ) ) {
+      if ( !isPost && ( params[1] == URL_LOG ) ) { //Enviar logs
         sendLog(params[2], params[3], params[4].toInt(), params[5].toInt());
-        //Enviar status do programa.
-      } else if ( isDelete &&  ( params[1] == URL_LOG ) ) {
+      } else if ( isDelete &&  ( params[1] == URL_LOG ) ) { //Excluir Logs 
         deleteLogs(params[2], params[3]);
-      } else if (!isPost && params[1] == URL_STATUS) {
+      } else if (!isPost && params[1] == URL_STATUS) { //Enviar status do programa.
         sendStatus(params[2], params[3]);
       } else {
 #ifdef DEBUG
