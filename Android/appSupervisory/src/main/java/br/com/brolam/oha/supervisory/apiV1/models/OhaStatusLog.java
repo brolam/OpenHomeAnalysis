@@ -90,9 +90,10 @@ public enum OhaStatusLog {
      * @return retornar com um OhaStatusLog válido ou nulo.
      */
     public static OhaStatusLog getOhaStatusLog(List<String> strings) {
-        //Localicar o OhaStatusLog nos 3 ultimos itens da lista.
-        for (int item = 1; item <= strings.size(); item++) {
-            String ohaStatusLogContent = strings.get(strings.size() - item);
+        //Localizar o OhaStatusLog nos 3 ultimos itens da lista.
+        int initPossitionStatus = strings.size() - 3 < 0? 0 : strings.size() - 3;
+        for (int item = initPossitionStatus; item <= strings.size(); item++) {
+            String ohaStatusLogContent = strings.get(item);
             OhaStatusLog ohaStatusLog = getOhaStatusLog(ohaStatusLogContent);
             if ((ohaStatusLog != null) || item > 3) return ohaStatusLog;
         }

@@ -232,9 +232,13 @@ void deleteLogs(String strDate, String strHour)
 #endif
     SD.remove(deleteLog);
     esp8266.println(LOG_DELETED);
-    esp8266.println(F_END);
 #ifdef DEBUG
     debug(F("Deleted: "), deleteLog);
+#endif
+  } else {
+    esp8266.println(LOG_DATE_NOT_EXISTS);
+#ifdef DEBUG
+    debug(F("Delete Log - Not Exists"), deleteLog);
 #endif
   }
 }
@@ -278,6 +282,7 @@ void parseUrl(String url, String params[]) {
 void doUrl(String url) {
   String params[10];
   parseUrl(url, params); //Transformar a Url em uma lista de parâmtros, sendo o item 0 o tipo do Web Method, GET ou POST.
+  boolean isGet = ( params[0].indexOf("GET") != -1);
   boolean isPost = ( params[0].indexOf("POST") != -1);
   boolean isDelete = ( params[0].indexOf("DELETE") != -1);
   //Se o cartão de memória não estiver disponível a funcionalidade nas URL abaixo não será executada.
@@ -289,11 +294,11 @@ void doUrl(String url) {
     //Somente executar as funcionalidade abaixo se o Status do programa for igual a OHA_STATUS_OK
     else if ( ohaStatus == OHA_STATUS_OK ) {
       //Enviar logs de utilização de energia:
-      if ( !isPost && ( params[1] == URL_LOG ) ) { //Enviar logs
+      if ( isGet && ( params[1] == URL_LOG ) ) { //Enviar logs
         sendLog(params[2], params[3], params[4].toInt(), params[5].toInt());
-      } else if ( isDelete &&  ( params[1] == URL_LOG ) ) { //Excluir Logs 
+      } else if ( isDelete && ( params[1] == URL_LOG ) ) { //Excluir Logs
         deleteLogs(params[2], params[3]);
-      } else if (!isPost && params[1] == URL_STATUS) { //Enviar status do programa.
+      } else if (isGet && params[1] == URL_STATUS) { //Enviar status do programa.
         sendStatus(params[2], params[3]);
       } else {
 #ifdef DEBUG

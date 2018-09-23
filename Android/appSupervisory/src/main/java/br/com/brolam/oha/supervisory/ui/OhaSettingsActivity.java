@@ -11,6 +11,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.view.MenuItem;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import br.com.brolam.oha.supervisory.R;
 import br.com.brolam.oha.supervisory.ui.helpers.AppCompatPreferenceHelper;
 import br.com.brolam.oha.supervisory.ui.helpers.OhaBackupHelper;
 import br.com.brolam.oha.supervisory.ui.helpers.OhaEnergyUseSyncHelper;
+import br.com.brolam.oha.supervisory.ui.helpers.OhaHelper;
 
 /**
  * A {@link PreferenceActivity} that presents a set of application settings. On
@@ -46,7 +48,22 @@ public class OhaSettingsActivity extends AppCompatPreferenceHelper {
     private static void bindPreferenceSummaryToValue(Preference preference) {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+        if ( OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_DAYS_SD_CARD_STORED.equals(preference.getKey())){
+            long lastLogDeletedDateHour  = PreferenceManager
+                    .getDefaultSharedPreferences(preference.getContext())
+                    .getLong(OhaEnergyUseSyncHelper.ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR,0);
+            String daysCardStored = PreferenceManager
+                    .getDefaultSharedPreferences(preference.getContext())
+                    .getString(preference.getKey(), "");
+            String daysCardSoredSummary = preference.getContext().getString(
+                    R.string.pref_energy_use_sync_days_sd_card_stored_summary,
+                    daysCardStored,
+                    OhaHelper.formatDate(lastLogDeletedDateHour, "yyMMddHH")
+            );
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,daysCardSoredSummary);
+            return;
 
+        }
         // Trigger the listener immediately with the preference's
         // current value.
         sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,

@@ -151,9 +151,9 @@ public class OhaEnergyUseSyncHelper {
         editor.commit();
     }
 
-    private void setLastDeletedLogsDateHour(Calendar calendar) {
+    public void setLastDeletedLogsDateHour(Calendar calendar) {
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putLong(ENERGY_USE_SYNC_DURATION_LOGGER_RUNNING, calendar.getTimeInMillis());
+        editor.putLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, calendar.getTimeInMillis());
         editor.commit();
     }
 
@@ -166,20 +166,16 @@ public class OhaEnergyUseSyncHelper {
         }
     }
 
-    public Calendar getLastDeletedLogsDateHour(String strDateLogsImporting) throws ParseException {
-
-        Calendar calendar = OhaHelper.getCalendar(strDateLogsImporting);
+    public Calendar getLastDeletedLogsDateHour(String strDateImporting) throws ParseException {
+        Calendar calendar = OhaHelper.getCalendar(strDateImporting);
         calendar.add(Calendar.DATE, getDaysSdCardStored() * -1);
-
-        if ( preferences.getString(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, null) == null) {
+        if ( preferences.getLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, -1) == -1) {
             calendar.set(Calendar.HOUR,0);
             setLastDeletedLogsDateHour(calendar);
             return calendar;
         }
         long lastDeletedDateHour = preferences.getLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, calendar.getTimeInMillis());
-        if ( lastDeletedDateHour < calendar.getTime().getTime() ){
-            calendar.setTime(new Date(lastDeletedDateHour));
-        }
+        calendar.setTime(new Date(lastDeletedDateHour));
         return calendar;
     }
 }

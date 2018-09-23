@@ -142,6 +142,7 @@
 
     <string name="pref_energy_use_sync_days_sd_card_stored">Number of storage days on SD Card</string>
     <string name="pref_energy_use_sync_days_sd_card_stored_default">3</string>
+    <string name="pref_energy_use_sync_days_sd_card_stored_summary">Store up to %s day(s). Next log to be delete %s</string>
     <string name="pref_energy_use_sync_sensor_to_amperes">Set the convection of sensors average values to amperes</string>
     <string name="pref_energy_use_sensor_to_amperes_default">0.089125</string>
 

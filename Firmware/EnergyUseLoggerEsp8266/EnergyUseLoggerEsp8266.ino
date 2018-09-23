@@ -4,7 +4,7 @@
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.00
   ATENÇÃO: Favor copiar o arquivo Config_model.h para Config.h e também configurar os parâmetros antes de instalar esse código no módulo ESP8266.
-  
+
   Ultima compilação:
    O sketch usa 231801 bytes (53%) de espaço de armazenamento para programas. O máximo são 434160 bytes.
    Variáveis globais usam 32232 bytes (39%) de memória dinâmica, deixando 49688 bytes para variáveis locais. O máximo são 81920 bytes.
@@ -26,7 +26,9 @@
 #define OHA_REQUEST_INVALID F("OHA_REQUEST_INVALID") //Sinalizar que a requisição é inválida.
 #define OHA_REQUEST_END F("OHA_REQUEST_END") //Sinalizar o fim da requisição. 
 const String ACTIONS[] = {URL_LOG, URL_STATUS, URL_RESET, URL_CONNECTION};
+const String METHODS[] = {"GET", "POST", "DELETE"};
 const byte ACTIONS_COUNT = 4;
+const byte METHODS_COUNT = 3;
 
 WiFiServer server(80); //Definir a porta de comunicação HTTP
 
@@ -39,9 +41,9 @@ void debug(String title, String value) {
 }
 
 /* Analisar as respostas durante o processamento da requisição, na comunicação serial entre o Arduino e o módulo ESP8266.
- * @param response informar a resposta do Arduino.
- * @param startedMillis informar quando o processamento da requisição foi iniciado em milisegundos
- * @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
+   @param response informar a resposta do Arduino.
+   @param startedMillis informar quando o processamento da requisição foi iniciado em milisegundos
+   @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
 */
 String parseResponse(String response, unsigned long startedMillis) {
 
@@ -53,27 +55,36 @@ String parseResponse(String response, unsigned long startedMillis) {
     return OHA_REQUEST_RUNNING;
 }
 
-/* Analisar se a requisição HTTP é válida e extrair o tipo de requisição, POST ou GET, e a URL.
- * @param httpRequestion informar o texto da requisição HTTP.
- * @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
- */
+/* Analisar se a requisição HTTP é válida e extrair o tipo de requisição, POST, GET e DELETE, e a URL.
+   @param httpRequestion informar o texto da requisição HTTP.
+   @return {@see OHA_REQUEST_END} , {@see OHA_REQUEST_TIMEOUT} or {@see OHA_REQUEST_RUNNING}
+*/
 String parseRequestion(String httpRequestion) {
-  int first = -1;
-  for (int action = 0; action < ACTIONS_COUNT; action++)
+  int indexAction = -1;
+  int indexMethod = -1;
+  for (int index = 0; index < ACTIONS_COUNT; index++)
   {
-    first = httpRequestion.indexOf(ACTIONS[action]);
-    if ( first != -1 ) break;
+    indexAction = httpRequestion.indexOf(ACTIONS[index]);
+    if ( indexAction != -1 ) break;
   }
-  if ( first == -1 )
-    return OHA_REQUEST_INVALID;
-  int last = httpRequestion.indexOf(" HTTP");
-  return (httpRequestion.indexOf("POST") != -1 ? "POST/" : "GET/") + httpRequestion.substring(first, last);
+
+  for (int index = 0; index < METHODS_COUNT; index++)
+  {
+    if ( httpRequestion.indexOf(METHODS[index]) != -1) {
+      indexMethod = index;
+      break;
+    }
+  }
+
+  if ( ( indexAction == -1 ) || (indexMethod == -1) ) return OHA_REQUEST_INVALID;
+  int indexHttp = httpRequestion.indexOf(" HTTP");
+  return METHODS[indexMethod] + "/" + httpRequestion.substring(indexAction, indexHttp);
 }
 
-/* 
- * Enviar a situação da conexão com Access Point.
- * @param client informar um WiFiClient para escrever a situação da conexão.
- */
+/*
+   Enviar a situação da conexão com Access Point.
+   @param client informar um WiFiClient para escrever a situação da conexão.
+*/
 void sendConnectionStatus(WiFiClient client) {
   client.print("<"); //Sinalizar o inicio do conteúdo
   client.print(String(HOME_WIFI_SSID)); //Nome da rede wifi que o ESP8266 está conectado.
@@ -97,10 +108,10 @@ void setup() {
   //Aguardar o conexão com o Access Point.
   debug("Try to Connect WIFI : ", HOME_WIFI_SSID);
   /*
-  while ( WiFi.status() != WL_CONNECTED ) {
+    while ( WiFi.status() != WL_CONNECTED ) {
     delay(500);
     debug("", ".");
-  }
+    }
   */
   delay(1);
   server.begin(); //Inicializar o serviço HTTP
