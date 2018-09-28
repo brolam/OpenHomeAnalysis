@@ -189,10 +189,9 @@ public class OhaEnergyUseProvider extends ContentProvider implements IOhaEnergyU
                 null);
         int count = 1;
         if (cursor.moveToFirst()) {
-            count = (int) OhaHelper.getAmountDays(
-                    cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_CALC_PERIOD_BEGIN),
-                    cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_CALC_PERIOD_END)
-            );
+            long periodBegin =  OhaHelper.getDateBegin(new Date(cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_CALC_PERIOD_BEGIN))).getTime();
+            long periodEnd = OhaHelper.getDateEnd(new Date(cursor.getLong(EnergyUseLogEntry.INDEX_COLUMNS_CALC_PERIOD_END)), false).getTime();
+            count = (int) OhaHelper.getAmountDays(periodBegin, periodEnd);
         }
         return new OhaEnergyUseDaysCursor(sqLiteDatabase, endDate, count, this);
     }

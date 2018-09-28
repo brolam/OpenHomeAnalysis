@@ -41,6 +41,7 @@ String currentDate = String("");                       //Armazenar a data atual 
 String currentTime = String("");                       //Armazenar a hora + minutos atual para o registro dos logs no forma HHmm
 unsigned long millisOnSetTime = 0;                     //Armazenar o total de Milissegundo {@see millis()}, quando a data e hora do programa foi atualizada, para mais detalhes veja {@see setDate()}
 unsigned long intervalSaveLog = 0;                     //Armazenar o tempo que o ultimo log foi salvo, por favor, veja {@see saveLog()} para mais detalhes.
+byte espCheck = 0;                                     //Armazenar o total de verificação do status do modulo ESP8266 {@see esp8266Reset()}.
 
 SoftwareSerial esp8266(2, 3); //Comunicação serial com o modulo ESP8266.
 
@@ -156,10 +157,17 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
     return;
   }
   File logFile = getFile(pathLog, true);
-  logFile.seek(startPosition);
+  if ( !logFile.seek(startPosition)  )
+  { 
+    esp8266.println(String(LOG_END_OF_FILE));
+#ifdef DEBUG
+      debug(F("SendLog not seek: "), String(startPosition));
+#endif
+    return; 
+  } 
   do {
     String nextLogContent = logFile.readStringUntil(LINE_END);
-    if (nextLogContent.length() > 0) {
+    if ( nextLogContent.length() > 0  ) {
       esp8266.println(String(logFile.position()) + ':' + nextLogContent);
 #ifdef DEBUG
       debug(F("SendLog: "), String(logFile.position()) + ':' + nextLogContent);
@@ -382,9 +390,15 @@ void loop()
   //Verificar se existe requisições realizadas via o módulo ESP8266:
   if ( esp8266.available() )
   {
+    espCheck = 0; //Zerar a contagem de verificação do ESP8266 quando for realizada qualquer requisição. 
     doUrl(esp8266.readString()); //Executar a funcionalidade informada na URL.
+  //Reiniciar o módulo ESP8266 após 10 execuções do fluxo se não for identificada nenhuma requisição via ESP8266.  
+  } else if ( espCheck > 10 ) {
+    esp8266Reset();
+  } else  {
+    espCheck++; //Contar o número de verificações.
   }
-  delay(3000);
+  delay(3000); //Delay par amelhorar o tempo de fluxo para processar as requisições via ESP8266 e o tempo para gravar os registros de utilização de energia.
   if ( ohaStatus != OHA_STATUS_OK)
   {
 #ifdef DEBUG
