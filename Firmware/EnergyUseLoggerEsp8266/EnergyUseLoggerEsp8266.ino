@@ -103,16 +103,16 @@ void setup() {
   delay(10);
   WiFi.hostname(ESP8266_NAME); //Definir o nome do ESP8266 na rede.
   WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD); //Definir o nome e senha do ESP8266.
-  WiFi.mode(WIFI_AP); //: set mode to WIFI_AP, WIFI_STA, WIFI_AP_STA or WIFI_OFF.
-  //WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD); //Realizar conexão com o Access Point da casa.
-  //Aguardar o conexão com o Access Point.
-  debug("Try to Connect WIFI : ", HOME_WIFI_SSID);
-  /*
-    while ( WiFi.status() != WL_CONNECTED ) {
-    delay(500);
-    debug("", ".");
-    }
-  */
+  WiFi.mode(WIFI_MODE); //: Definir no Config.h WIFI_AP, WIFI_STA, WIFI_AP_STA or WIFI_OFF.
+  if (( WIFI_MODE == WIFI_STA ) || ( WIFI_MODE == WIFI_AP_STA )){
+    //Aguardar o conexão com o Access Point.
+    debug("Try to Connect WIFI : ", HOME_WIFI_SSID);
+    for(int tryConnect = 1; tryConnect < 10; tryConnect++){
+      if ( WiFi.status() == WL_CONNECTED ) { break; }
+      delay(500);
+      debug("", ".");
+    }  
+  }
   delay(1);
   server.begin(); //Inicializar o serviço HTTP
   debug("WiFi connected: ", HOME_WIFI_SSID);

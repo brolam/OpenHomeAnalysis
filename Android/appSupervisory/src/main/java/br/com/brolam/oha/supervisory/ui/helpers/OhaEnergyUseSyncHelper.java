@@ -169,12 +169,13 @@ public class OhaEnergyUseSyncHelper {
     public Calendar getLastDeletedLogsDateHour(String strDateImporting) throws ParseException {
         Calendar calendar = OhaHelper.getCalendar(strDateImporting);
         calendar.add(Calendar.DATE, getDaysSdCardStored() * -1);
-        if ( preferences.getLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, -1) == -1) {
+        long lastDeletedDateHour = preferences.getLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, calendar.getTimeInMillis());
+        if ( lastDeletedDateHour > calendar.getTime().getTime() ) {
             calendar.set(Calendar.HOUR,0);
+            calendar.set(Calendar.MINUTE,0);
             setLastDeletedLogsDateHour(calendar);
             return calendar;
         }
-        long lastDeletedDateHour = preferences.getLong(ENERGY_USE_SYNC_LAST_DELETED_DATE_HOUR, calendar.getTimeInMillis());
         calendar.setTime(new Date(lastDeletedDateHour));
         return calendar;
     }

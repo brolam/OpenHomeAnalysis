@@ -1,3 +1,4 @@
+#include <ESP8266WiFi.h>
 /*
   EnergyUseLoggerEsp8266 Config model - Favor copiar esse arquivo para Config.h e também configurar os parâmetros abaixo antes de instalar esse código no módulo ESP8266. 
                  Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
@@ -8,3 +9,4 @@ const char* ESP8266_NAME = "OHA_EUL_1"; //Informar o nome do ESP8266, se possív
 const char* ESP8266_PASSWORD = "INFO_ESP8266_PASSWORD"; //Informar a senha do ESP8266.
 const char* HOME_WIFI_SSID = "INFO_YOUR_WIFI_NAME"; //Informar o mesmo nome da rede WiFi onde o table ou smartphone está conectado.
 const char* HOME_WIFI_PASSWORD = "INFO_YOUR_WIFI_PASSWORD"; //Informar a senha da rede WiFi.
+const WiFiMode WIFI_MODE = WIFI_AP; //: set mode to WIFI_AP, WIFI_STA, WIFI_AP_STA or WIFI_OFF.

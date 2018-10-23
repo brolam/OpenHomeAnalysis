@@ -158,13 +158,13 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
   }
   File logFile = getFile(pathLog, true);
   if ( !logFile.seek(startPosition)  )
-  { 
+  {
     esp8266.println(String(LOG_END_OF_FILE));
 #ifdef DEBUG
-      debug(F("SendLog not seek: "), String(startPosition));
+    debug(F("SendLog not seek: "), String(startPosition));
 #endif
-    return; 
-  } 
+    return;
+  }
   do {
     String nextLogContent = logFile.readStringUntil(LINE_END);
     if ( nextLogContent.length() > 0  ) {
@@ -390,9 +390,9 @@ void loop()
   //Verificar se existe requisições realizadas via o módulo ESP8266:
   if ( esp8266.available() )
   {
-    espCheck = 0; //Zerar a contagem de verificação do ESP8266 quando for realizada qualquer requisição. 
+    espCheck = 0; //Zerar a contagem de verificação do ESP8266 quando for realizada qualquer requisição.
     doUrl(esp8266.readString()); //Executar a funcionalidade informada na URL.
-  //Reiniciar o módulo ESP8266 após 10 execuções do fluxo se não for identificada nenhuma requisição via ESP8266.  
+    //Reiniciar o módulo ESP8266 após 10 execuções do fluxo se não for identificada nenhuma requisição via ESP8266.
   } else if ( espCheck > 10 ) {
     esp8266Reset();
   } else  {

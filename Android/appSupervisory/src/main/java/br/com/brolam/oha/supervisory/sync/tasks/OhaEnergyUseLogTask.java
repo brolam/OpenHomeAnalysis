@@ -295,12 +295,12 @@ public class OhaEnergyUseLogTask {
     /**
      * Enviar uma requisição de exclusão de logs para um dia e hora;
      */
-    private void deleteLogs(String hostName, String strDateImporting, String strHourImporting) throws ParseException, IOException {
+    private void deleteLogs(String hostName, String strDateImported, String strHourImported) throws ParseException, IOException {
         //Definir a data de exclusão dos logs para liberar espaço no
         //SD Card do Registrador de Utilização de Energia considerando a preferência do usuário:
-        Calendar dateHourImporting =  OhaHelper.getCalendar(strDateImporting, strHourImporting );
-        Calendar lastDeletedLogs =  ohaEnergyUseSyncHelper.getLastDeletedLogsDateHour(strDateImporting);
-        if ( lastDeletedLogs.before(dateHourImporting) == false ) return;
+        Calendar dateHourImported =  OhaHelper.getCalendar(strDateImported, strHourImported );
+        Calendar lastDeletedLogs =  ohaEnergyUseSyncHelper.getLastDeletedLogsDateHour(strDateImported);
+        if ( lastDeletedLogs.before(dateHourImported) == false ) return;
         String strDateLogDelete = OhaHelper.getStrDate(lastDeletedLogs.getTime());
         String strHourLogDelete = OhaHelper.getStrHour(lastDeletedLogs.getTime());
         OhaStatusLog returnDeletedLogs = OhaEnergyUseApi.deleteLogs(iOhaTask.getContext(), hostName, strDateLogDelete, strHourLogDelete);
