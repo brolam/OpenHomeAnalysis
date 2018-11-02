@@ -67,7 +67,7 @@ public class OhaEnergyUseApi {
     /**
      * Atualizar o status, data e hora do registrador de logs.
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
-     * @param strDate  informar texto com data no formato YYYYMMDD
+     * @param strDate  informar texto com data no formato YYMMDD
      * @param strTime  informar texto com a Hora, Minuto e segundo no formato HHmmss
      * @return um OhaStatusLog {@see OhaStatusLog.OHA_ACTION_END}
      * @throws IOException
@@ -86,7 +86,7 @@ public class OhaEnergyUseApi {
     /**
      * Recuperar o status da sequência conforme parâmetros abaixo e do registrador de logs.
      * @param hostName informar o nome ou endereço IP do registrador de logs na rede.
-     * @param strDate  informar texto com data no formato YYYYMMDD
+     * @param strDate  informar texto com data no formato YYMMDD
      * @param strHour  informar texto com a hora no formato HH
      * @return lista de texto com o conteúdo do status da sequência e do registrador de logs.
      * @throws IOException

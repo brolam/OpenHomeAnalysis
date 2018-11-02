@@ -18,7 +18,7 @@ import br.com.brolam.oha.supervisory.ui.helpers.OhaHelper;
 
 /**
  * Exibir um calendário na tela de configurações para o usuário selecionar uma data.
- * Observação: a data será gravada no formato yyyyMMdd conforme a chave da preferência.
+ * Observação: a data será gravada no formato yyMMdd conforme a chave da preferência.
  * @author Breno Marques
  * @version 1.00
  * @since Release 01
@@ -42,7 +42,7 @@ public class OhaDatePickerDialogPreference extends DialogPreference {
         }
         Calendar calendar = Calendar.getInstance();
         try {
-            //recuperar a preferência no formato yyyyMMdd e converter para um Calendar:
+            //recuperar a preferência no formato yyMMdd e converter para um Calendar:
             calendar = OhaHelper.getCalendar(this.getPersistedString(OhaHelper.getStrDate(new Date())));
         } catch (ParseException e) {
             e.printStackTrace();

@@ -111,7 +111,7 @@ public class OhaEnergyUseLog {
 
     /**
      * Analisar o conteúdo do log para construir um {@see OhaEnergyUseLog}
-     * @param strDate informar texto com a data no formado yyyyMMdd, exemplo: "20160131".
+     * @param strDate informar texto com a data no formado yyMMdd, exemplo: "20160131".
      * @param strLogContent informar texto com o conteúdo do log, exemplo: 1:<235959|220.00|0.56|0.56|0.56|5559>
      * @return uma instância de {@see OhaEnergyUseLog} válido ou com erro {@see getExceptionLogContentWithError}.
      * @see OhaStatusLog

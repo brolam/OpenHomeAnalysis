@@ -2,7 +2,7 @@
   EnergyUseLogger - Ler e registrar a utilização de energia lendo os sensores SCT - 013 conectados ao circuito.
   Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
-  @version 1.1.0
+  @version 1.2.0
 */
 
 #include <SD.h>
@@ -27,7 +27,7 @@
 #define URL_RESET F("reset")                             //Solicitação para reiniciar o Arduino, para mais detalhes {@see reset()}
 #define LOG_DATE_NOT_EXISTS F("LOG_DATE_NOT_EXISTS")     //Sinalizar que o log não existe na data e hora solicitada.
 #define LOG_END_OF_FILE F("LOG_END_OF_FILE")             //Sinalizar que a leitura dos logs chegou ao final.
-#define LOG_DELETED F("LOG_DELETED")                 //Sinalizar que o log foi excluido.
+#define LOG_DELETED F("LOG_DELETED")                     //Sinalizar que o log foi excluido.
 #define OHA_STATUS_FINISHED F("OHA_STATUS_FINISHED")     // Sinalizar que a geração de logs está finalizada para a data e hora solicitada
 #define OHA_STATUS_RUNNING F("OHA_STATUS_RUNNING")       // Sinalizar que a geração de logs esta ativa  para a data e hora solicitada
 
@@ -147,7 +147,6 @@ void saveLog() {
    @param strHour informar texto com hora e minuto no formato HHmm
    @param start informar o inicio da sequência do log.
    @param amount informar a quantidade de logs.
-   @param strDelDate informar a data dos logs que podem ser excluidos para liberar espaço no cartão de memória.
 */
 void sendLog(String strDate, String strHour, int startPosition, int amount ) {
   int countReadLogs = 0;
@@ -191,13 +190,10 @@ void sendLog(String strDate, String strHour, int startPosition, int amount ) {
 }
 
 /* Atualizar o status do programa e também a data e hora utilizada no registro do log de utilização de energía:
-   @param strDate informar texto com data no formato YYYYMMDD
+   @param strDate informar texto com data no formato YYMMDD
    @param strDate informar texto com hora e minuto no formato HHmm
 */
 void setStatus(String strDate, String strTime) {
-  //Atualizar o diretório atual para gravação de novos logs conforme a data e hora informada,
-  //Ex: 20150101/00 , sendo importante destacar, que a hora também é adicionada como um subdiretório para
-  //tornar mais rapido a recuperação dos logs no cartão de memória.
   currentDate = strDate;
   currentTime = strTime;
   millisOnSetTime = millis(); //Reiniciar a contagem de milissegundos para a nova data e hora, para mais informações vaje B3/Obeservação 02.
@@ -206,7 +202,7 @@ void setStatus(String strDate, String strTime) {
 }
 
 /* Evniar para o módulo ES8266 vai comunicação serial as informações do status do programa.
-   @param strDate informar texto com data no formato YYYYMMDD
+   @param strDate informar texto com data no formato YYMMDD
    @param strHour informar texto com hora e minuto no formato HHmm
 */
 void sendStatus(String strDate, String strTime) {

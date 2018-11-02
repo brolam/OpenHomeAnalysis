@@ -2,7 +2,7 @@
   EnergyUseLoggerEsp8266 - módulo de comunicação WiFi ESP8266 para processar as requisições e respotas HTTP
   Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
-  @version 1.00
+  @version 1.2.0
   ATENÇÃO: Favor copiar o arquivo Config_model.h para Config.h e também configurar os parâmetros antes de instalar esse código no módulo ESP8266.
 
   Ultima compilação:
