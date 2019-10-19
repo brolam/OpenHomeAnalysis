@@ -105,6 +105,7 @@ void setup() {
   WiFi.softAP(ESP8266_NAME, ESP8266_PASSWORD); //Definir o nome e senha do ESP8266.
   WiFi.mode(WIFI_MODE); //: Definir no Config.h WIFI_AP, WIFI_STA, WIFI_AP_STA or WIFI_OFF.
   if (( WIFI_MODE == WIFI_STA ) || ( WIFI_MODE == WIFI_AP_STA )){
+    WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD);
     //Aguardar o conexão com o Access Point.
     debug("Try to Connect WIFI : ", HOME_WIFI_SSID);
     for(int tryConnect = 1; tryConnect < 10; tryConnect++){
