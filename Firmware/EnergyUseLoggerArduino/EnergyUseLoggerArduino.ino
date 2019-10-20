@@ -7,7 +7,7 @@
 
 #include <SD.h>
 #include <SoftwareSerial.h> //Necessária para a comunicação serial com o modulo WiFi ESP8266.
-//#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
+#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log da utilização de energia. 
 
 //Constantes utilizadas na geração dos logs.
