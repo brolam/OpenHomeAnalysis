@@ -7,7 +7,7 @@
 
 #include <SD.h>
 #include <SoftwareSerial.h> //Necessária para a comunicação serial com o modulo WiFi ESP8266.
-#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
+//#define DEBUG 1 //Escrever no Monitor serial quando ativado, {@see debug()},
 #define LED_LOG_SAVE 5                  //Informar a porta do LED, para sinalizar a gravação do log da utilização de energia. 
 
 //Constantes utilizadas na geração dos logs.
@@ -292,7 +292,10 @@ void doUrl(String url) {
   //Se o cartão de memória não estiver disponível a funcionalidade nas URL abaixo não será executada.
   if ( ohaStatus != OHA_STATUS_NOT_SD) {
     //Atualizar a data do programa.
-    if (isPost && ( params[1] == URL_STATUS ) ) {
+    //Reiniciar o programa 
+    if (isPost && ( params[1] == URL_RESET ) ) {
+      software_Reset();    
+    } else if (isPost && ( params[1] == URL_STATUS ) ) {
       setStatus(params[2], params[3]);
     }
     //Somente executar as funcionalidade abaixo se o Status do programa for igual a OHA_STATUS_OK
@@ -327,7 +330,12 @@ void esp8266Reset() {
   delay(300);
   digitalWrite(PIN_ESP8255_RST, HIGH);
 }
-/*Inicio do B5*/
+
+/*Reiniciar a placa Arduino*/
+void software_Reset()
+{
+  asm volatile ("  jmp 0");
+}
 
 /*Sinalizar via LED a gravação do log de utilização de energía.
   @param flashTime informar o tempo em milissegundos para acender e apagar o LED.
