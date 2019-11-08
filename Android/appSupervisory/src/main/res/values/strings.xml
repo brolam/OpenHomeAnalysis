@@ -8,6 +8,7 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_user_sep">User</string>
 
     <string name="action_energy">Energy</string>
     <string name="action_bill">Bill</string>
@@ -20,9 +21,11 @@
     <string name="action_restore">Restore</string>
     <string name="action_details">MORE DETAILS</string>
     <string name="action_accept">ACCEPT</string>
-    <string name="action_save">SAVE</string>
-    <string name="action_cancel">CANCEL</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
     <string name="action_restore_database">Restore Database</string>
+    <string name="action_login">Login</string>
+    <string name="action_logout">Logout</string>
 
     <!--Mensagens de erro referente ao processo leitura do log de consumo de energia-->
     <string name="exception_on_parse_content_invalid">Content of the power consumption log is invalid!</string>
