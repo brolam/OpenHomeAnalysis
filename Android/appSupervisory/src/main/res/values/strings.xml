@@ -158,6 +158,9 @@
     <string name="main_activity_message_automatic_backup_denied">Automatic backup was disabled!</string>
     <string name="main_activity_message_backup_denied">Backup was canceled!</string>
     <string name="main_activity_message_restore_denied">Restore was canceled!</string>
+    <string name="main_activity_message_login_success">Welcome!</string>
+    <string name="main_activity_message_login_fail">Something went wrong!</string>
+    <string name="main_activity_message_logout_success">Goodbye</string>
 
     <!-- Energy Use Columns -->
     <string name="hour">Hour</string>

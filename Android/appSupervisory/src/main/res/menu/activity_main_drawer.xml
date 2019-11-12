@@ -45,12 +45,12 @@
 
             <item
                 android:id="@+id/nav_login"
-                android:icon="@drawable/ic_settings_black"
+                android:icon="@drawable/ic_login_black"
                 android:title="@string/action_login" />
 
             <item
                 android:id="@+id/nav_logout"
-                android:icon="@drawable/ic_backup_black"
+                android:icon="@drawable/ic_logout_black"
                 android:title="@string/action_logout" />
         </menu>
     </item>

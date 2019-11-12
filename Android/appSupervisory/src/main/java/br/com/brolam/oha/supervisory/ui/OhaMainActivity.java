@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -18,6 +19,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -29,13 +31,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.firebase.ui.auth.IdpResponse;
+import com.google.firebase.auth.FirebaseUser;
 import java.io.File;
 import java.util.Date;
-
 import br.com.brolam.library.helpers.OhaHelper;
 import br.com.brolam.oha.supervisory.OhaBroadcast;
 import br.com.brolam.oha.supervisory.R;
+import br.com.brolam.oha.supervisory.cloudV1.OhaAuth;
 import br.com.brolam.oha.supervisory.data.OhaEnergyUseContract;
 import br.com.brolam.oha.supervisory.ui.adapters.OhaMainAdapter;
 import br.com.brolam.oha.supervisory.ui.adapters.holders.OhaEnergyUseBillHolder;
@@ -67,6 +73,7 @@ public class OhaMainActivity extends AppCompatActivity
     public static final int RC_BACKUP_AUTOMATIC_PERMISSION = 5000;
     public static final int RC_BACKUP_PERMISSION = 5001;
     public static final int RC_RESTORE_PERMISSION = 5002;
+    public static final int RC_CLOUD_OHA_AUTH_SIGN_IN = 5003;
 
     GridLayoutManager gridLayoutManager;
     SwipeRefreshLayout swipeRefreshLayout;
@@ -75,6 +82,7 @@ public class OhaMainActivity extends AppCompatActivity
     FloatingActionButton floatingActionButton;
     //Adaptador para exibir os cartões no RecyclerView conforme o menu selecionado no NavigationView
     OhaMainAdapter ohaMainAdapter;
+    OhaAuth ohaAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +90,7 @@ public class OhaMainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        this.ohaAuth = new OhaAuth();
         this.swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         this.recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         //Informar a quantidade de colunas conforme o tamanho da tela.
@@ -99,11 +108,14 @@ public class OhaMainActivity extends AppCompatActivity
         this.ohaMainAdapter = new OhaMainAdapter(this);
         this.recyclerView.setAdapter(this.ohaMainAdapter);
         this.swipeRefreshLayout.setOnRefreshListener(this);
-        this.navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        this.navigationView = findViewById(R.id.nav_view);
+        this.navigationView.setNavigationItemSelectedListener(this);
+        this.updateUserInfo();
         //Realizar o agendamento para executar o serviço de sincronização.
         OhaBroadcast.registerSyncAlarm(this);
     }
+
+
 
     @Override
     protected void onResume() {
@@ -189,6 +201,12 @@ public class OhaMainActivity extends AppCompatActivity
                     if (parseBackupPermission(RC_RESTORE_PERMISSION)) {
                         OhaRestoreDatabaseFragment.show(this);
                     }
+                    return false;
+                case R.id.nav_login:
+                    this.ohaAuth.doSignIn(this, RC_CLOUD_OHA_AUTH_SIGN_IN);
+                    return false;
+                case R.id.nav_logout:
+                    this.doLogOut();
                     return false;
                 default:
                     return true;
@@ -447,5 +465,46 @@ public class OhaMainActivity extends AppCompatActivity
                     showSnackBar(getString(R.string.main_activity_message_restore_denied));
                 return;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_CLOUD_OHA_AUTH_SIGN_IN) {
+            updateUserInfo();
+            if (resultCode == RESULT_OK) {
+                // Successfully signed in
+                showSnackBar(getString(R.string.main_activity_message_login_success));
+            } else {
+                // Sign in failed. If response is null the user canceled the
+                // sign-in flow using the back button. Otherwise check
+                // response.getError().getErrorCode() and handle the error.
+                // ...
+                showSnackBar(getString(R.string.main_activity_message_login_fail));
+            }
+        }
+    }
+
+    private void updateUserInfo() {
+        FirebaseUser user = this.ohaAuth.getUser();
+        View header = this.navigationView.getHeaderView(0);
+        ImageView imageViewUserPhoto = header.findViewById(R.id.imageViewUserPhoto);
+        TextView textViewUserName = header.findViewById(R.id.textViewUserName);
+        TextView textViewUserEmail = header.findViewById(R.id.textViewUserEmail);
+        if ( user != null ){
+            imageViewUserPhoto.setImageURI(user.getPhotoUrl());
+            textViewUserName.setText(user.getDisplayName());
+            textViewUserEmail.setText(user.getEmail());
+        } else {
+            imageViewUserPhoto.setImageBitmap(null);
+            textViewUserName.setText("");
+            textViewUserEmail.setText("");
+        }
+    }
+
+    private void doLogOut() {
+        this.ohaAuth.doSingOut();
+        this.updateUserInfo();
+        this.showSnackBar(getString(R.string.main_activity_message_logout_success));
     }
 }
