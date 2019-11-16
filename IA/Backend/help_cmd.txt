@@ -1,0 +1,11 @@
+docker build .
+docker-compose build
+docker-compose run app sh -c "django-admin.py startproject app . "
+docker-compose run app sh -c "python manage.py migrate"
+docker-compose run app sh -c "python manage.py runserver 0:8000"
+Clean Docker image and containers:
+https://www.tecmint.com/remove-docker-images-containers-and-volumes/
+This will remove all dangling image:
+docker image prune 
+docker image prune -a
+docker rm $(docker ps -qa --filter "status=exited")
