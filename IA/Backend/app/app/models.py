@@ -14,8 +14,8 @@ class OhaDevice(models.Model):
 
 
 class OhaEnergyLog(models.Model):
+    id = models.BigIntegerField(primary_key=True)
     ohaDeviceId = models.ForeignKey(OhaDevice, on_delete=models.CASCADE)
-    ohaEnergyLogId = models.BigIntegerField()
     duration = models.BigIntegerField()
     voltage = models.IntegerField()
     watts1 = models.FloatField()
