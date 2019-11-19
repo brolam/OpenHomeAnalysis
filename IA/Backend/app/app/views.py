@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
-from app.models import OhaDevice, OhaEnergyLog
+from .models import OhaDevice, OhaEnergyLog
 from rest_framework import viewsets, serializers
-from app.serializers import UserSerializer, OhaDeviceSerializer, OhaEnergyLogSerializer
+from .serializers import UserSerializer, OhaDeviceSerializer, OhaEnergyLogSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
