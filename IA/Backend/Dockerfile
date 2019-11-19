@@ -5,6 +5,4 @@ EXPOSE 8000
 COPY ./requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
-RUN mkdir /app
-WORKDIR /app
-COPY ./app /app
+WORKDIR /IA
