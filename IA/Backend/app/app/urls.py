@@ -16,12 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
-from .views import UserViewSet, OhaDeviceViewSet, OhaEnergyLogViewSet
+from .views import UserViewSet, OhaDeviceViewSet, OhaEnergyLogViewSet, OhaEnergyLogBatchViewSet
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'device', OhaDeviceViewSet)
 router.register(r'energyLog', OhaEnergyLogViewSet)
+router.register(r'energyLogBatch', OhaEnergyLogBatchViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

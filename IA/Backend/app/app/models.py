@@ -22,3 +22,8 @@ class OhaEnergyLog(models.Model):
     watts2 = models.FloatField()
     watts3 = models.FloatField()
     wattsTotal = models.FloatField()
+
+class OhaEnergyLogBatch(models.Model):
+    ohaDeviceId = models.ForeignKey(OhaDevice, on_delete=models.CASCADE)
+    content = models.TextField(blank=False)
+    
