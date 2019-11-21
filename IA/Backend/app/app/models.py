@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import constants
 import uuid
+import threading
 
 
 class OhaDevice(models.Model):
@@ -26,4 +27,14 @@ class OhaEnergyLog(models.Model):
 class OhaEnergyLogBatch(models.Model):
     ohaDeviceId = models.ForeignKey(OhaDevice, on_delete=models.CASCADE)
     content = models.TextField(blank=False)
+    
+    def doOhaEnergyLogBulkInsert(self):
+        print("OhaEnergyLogBatch Content: {}".format( self.content))
+    
+    def save(self, *args, **kwargs):
+        #super().save(*args, **kwargs)
+        print("OhaEnergyLogBatch id: {}".format(self.id))
+        doBulkInsert = threading.Thread(target=self.doOhaEnergyLogBulkInsert)
+        doBulkInsert.start()
+    
     
