@@ -12,15 +12,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 class OhaDeviceSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OhaDevice
-        fields = ['id', 'owner', 'name']
+        fields = ['id', 'owner', 'name',]
 
 
 class OhaEnergyLogSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OhaEnergyLog
-        fields = ['id', 'ohaDeviceId', 'duration', 'voltage', 'watts1', 'watts2', 'watts3', 'wattsTotal']
+        fields = ['id', 'oha_device_id', 'date_time_id', 'duration', 'voltage', 'watts1', 'watts2', 'watts3', 'watts_total']
 
 class OhaEnergyLogBatchSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OhaEnergyLogBatch
-        fields = ['id', 'ohaDeviceId', 'content']
+        fields = ['id', 'oha_device_id', 'content']
