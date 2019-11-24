@@ -25,7 +25,34 @@ SECRET_KEY = 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s-%(module)s-%(levelname)s :: %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s :: %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': False,
+            'level': 'DEBUG'
+        },
+    }
+}
+
+ALLOWED_HOSTS = ["192.168.0.11"]
 
 
 # Application definition
