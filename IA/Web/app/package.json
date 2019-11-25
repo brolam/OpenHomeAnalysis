@@ -1,0 +1,38 @@
+{
+  "name": "br.com.brolam",
+  "version": "1.0.0",
+  "description": "Open Home Analysis",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/webpack --config webpack.config.js",
+    "watch": "npm run start -- --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brolam/OpenHomeAnalysis.git"
+  },
+  "keywords": [
+    "IA",
+    "IOT"
+  ],
+  "author": "Breno Marques",
+  "license": "AWS",
+  "bugs": {
+    "url": "https://github.com/brolam/OpenHomeAnalysis/issues"
+  },
+  "homepage": "https://github.com/brolam/OpenHomeAnalysis#readme",
+  "dependencies": {
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-react": "^7.7.4",
+    "@babel/runtime": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.2",
+    "webpack-bundle-tracker": "^0.4.3",
+    "webpack-cli": "^3.3.10"
+  }
+}
