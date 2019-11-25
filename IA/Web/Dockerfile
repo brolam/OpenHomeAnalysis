@@ -7,5 +7,5 @@ RUN pip install --upgrade pip
 RUN pip install -r /requirements.txt
 RUN curl -sL https://deb.nodesource.com/setup_13.x | bash -
 RUN apt-get install -y nodejs
-RUN chown root:staff $USER ~/.npm
+RUN chown root:staff $USER ./*
 WORKDIR /IA
