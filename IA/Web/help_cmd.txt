@@ -9,3 +9,5 @@ This will remove all dangling image:
 docker image prune 
 docker image prune -a
 docker rm $(docker ps -qa --filter "status=exited")
+
+chown root:staff $USER ./*
