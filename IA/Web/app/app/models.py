@@ -50,6 +50,7 @@ class OhaEnergyLog(models.Model):
         FLAG_QTD_COLUMN = 7
         log_columns = log.split(FLAG_SEP_COLUMN)
         log_last_synced_sequence = -1
+        print("Log:", log)
         if (len(log_columns) == FLAG_QTD_COLUMN):
             self.oha_device = oha_device
             self.unix_time = log_columns[UNIX_TIME]
@@ -75,7 +76,7 @@ class OhaEnergyLogBatch(models.Model):
     def do_oha_energy_log_bulk_insert(self):
         oha_device = self.oha_device
         log_last_synced_sequence = -1
-        for log in self.content.splitlines():
+        for log in self.content.split(";"):
             oha_energy_log = OhaEnergyLog()
             log_last_synced_sequence = oha_energy_log.parser(oha_device, log)
             OhaEnergyLog.objects.filter(
