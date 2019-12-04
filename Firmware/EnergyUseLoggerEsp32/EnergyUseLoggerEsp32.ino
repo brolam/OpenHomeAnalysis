@@ -4,10 +4,19 @@
 #include <WiFiUdp.h>
 #include <HTTPClient.h>
 
+//SD Card
+// Libraries for SD card
+#include "FS.h"
+#include "SD.h"
+#include <SPI.h>
+
 // Replace with your network credentials
 const char* ssid     = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 long mockLastSequence = 0;
+
+// Define CS pin for the SD card module
+#define SD_CS 5
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
@@ -15,8 +24,27 @@ NTPClient timeClient(ntpUDP);
 HTTPClient http;
 
 void setup() {
+  
   // Start serial communication for debugging purposes
   Serial.begin(115200);
+  
+  // Initialize SD card
+  SD.begin(SD_CS);  
+  if(!SD.begin(SD_CS)) {
+    Serial.println("Card Mount Failed");
+    return;
+  }
+  uint8_t cardType = SD.cardType();
+  if(cardType == CARD_NONE) {
+    Serial.println("No SD card attached");
+    return;
+  }
+  Serial.println("Initializing SD card...");
+  if (!SD.begin(SD_CS)) {
+    Serial.println("ERROR - SD card initialization failed!");
+    return;    // init failed
+  }
+  
   // Connect to Wi-Fi network with SSID and password
   Serial.print("Connecting to ");
   Serial.println(ssid);
@@ -27,6 +55,7 @@ void setup() {
   }
   Serial.println("");
   Serial.println("WiFi connected.");
+
 
   // Initialize a NTPClient to get time
   timeClient.begin();
