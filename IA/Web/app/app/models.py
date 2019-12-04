@@ -3,7 +3,6 @@ from django.db import models
 import uuid
 import threading
 
-
 class OhaDevice(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey(
@@ -24,7 +23,6 @@ class OhaDevice(models.Model):
     def get_sensor_converted_value(self, sensor_value):
         sensor_value = float(sensor_value)
         return self.default_sensor_convection * sensor_value
-
 
 class OhaEnergyLog(models.Model):
     oha_device = models.ForeignKey(OhaDevice, on_delete=models.CASCADE)
@@ -96,3 +94,9 @@ class OhaEnergyLogBatch(models.Model):
         doBulkInsert = threading.Thread(
             target=self.do_oha_energy_log_bulk_insert)
         doBulkInsert.start()
+
+class OhaEnergyBill(models.Model):
+    oha_device = models.ForeignKey(OhaDevice, on_delete=models.CASCADE)
+    period_from = models.BigIntegerField()
+    period_to = models.BigIntegerField()	
+    kwh_cost = models.FloatField()
