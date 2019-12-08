@@ -4,7 +4,10 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import  OhaPrompt from './Components/OhaPrompt'
+import OpenSenorsSelect from './Components/OhaSensorsSelect'
+import IconButton from '@material-ui/core/IconButton'
+import MoreIcon from '@material-ui/icons/MoreVert';
+import OhaSensoresStatus from './Components/OhaSensorsStatus'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -17,15 +20,36 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(2),
   },
   footer: {
-    padding: theme.spacing(3, 3),
+    padding: theme.spacing(1, 1),
     marginTop: 'auto',
     backgroundColor:
       theme.palette.type === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
   },
+  sensorRoot: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+
+  },
+  sensorMenu: {
+    flex: 1
+  },
+
+  sensorStatus: {
+    flex: 1
+  },
+
+  sensorOptions: {
+    margin: theme.spacing(2),
+    width: theme.spacing(7),
+    height: theme.spacing(7),
+  },
+
 }));
 
 function App() {
   const classes = useStyles();
+
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -35,9 +59,13 @@ function App() {
         <Typography variant="body1">What I can do for you?</Typography>
       </Container>
       <footer className={classes.footer}>
-        <Container maxWidth="sm">
-          <OhaPrompt />
-        </Container>
+        <div className={classes.sensorRoot}>
+          <OpenSenorsSelect className={classes.sensorMenu} />
+          <OhaSensoresStatus className={classes.sensorStatus} />
+          <IconButton className={classes.sensorOptions} color="inherit">
+            <MoreIcon />
+          </IconButton>
+        </div>
       </footer>
     </div>
   )
