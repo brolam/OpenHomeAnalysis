@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
-import OpenSenorsSelect from './Components/OhaSensorsSelect'
 import IconButton from '@material-ui/core/IconButton'
 import MoreIcon from '@material-ui/icons/MoreVert';
+import OhaTagCloud from './Components/OhaTagCloud'
+import OpenSenorsSelect from './Components/OhaSensorsSelect'
 import OhaSensoresStatus from './Components/OhaSensorsStatus'
 
 const useStyles = makeStyles(theme => ({
@@ -18,6 +18,7 @@ const useStyles = makeStyles(theme => ({
   main: {
     marginTop: theme.spacing(8),
     marginBottom: theme.spacing(2),
+    alignItems: 'center',
   },
   footer: {
     padding: theme.spacing(1, 1),
@@ -54,9 +55,7 @@ function App() {
     <div className={classes.root}>
       <CssBaseline />
       <Container component="main" className={classes.main} >
-        <Typography variant="h2" component="h1" gutterBottom>Open Home Analysis</Typography>
-        <Typography variant="h5" component="h2" gutterBottom>Tell me.</Typography>
-        <Typography variant="body1">What I can do for you?</Typography>
+        <OhaTagCloud />
       </Container>
       <footer className={classes.footer}>
         <div className={classes.sensorRoot}>
