@@ -25,50 +25,6 @@ NTPClient::NTPClient(UDP& udp) {
   this->_udp            = &udp;
 }
 
-NTPClient::NTPClient(UDP& udp, long timeOffset) {
-  this->_udp            = &udp;
-  this->_timeOffset     = timeOffset;
-}
-
-NTPClient::NTPClient(UDP& udp, const char* poolServerName) {
-  this->_udp            = &udp;
-  this->_poolServerName = poolServerName;
-}
-
-NTPClient::NTPClient(UDP& udp, IPAddress poolServerIP) {
-  this->_udp            = &udp;
-  this->_poolServerIP   = poolServerIP;
-  this->_poolServerName = NULL;
-}
-
-NTPClient::NTPClient(UDP& udp, const char* poolServerName, long timeOffset) {
-  this->_udp            = &udp;
-  this->_timeOffset     = timeOffset;
-  this->_poolServerName = poolServerName;
-}
-
-NTPClient::NTPClient(UDP& udp, IPAddress poolServerIP, long timeOffset){
-  this->_udp            = &udp;
-  this->_timeOffset     = timeOffset;
-  this->_poolServerIP   = poolServerIP;
-  this->_poolServerName = NULL;
-}
-
-NTPClient::NTPClient(UDP& udp, const char* poolServerName, long timeOffset, unsigned long updateInterval) {
-  this->_udp            = &udp;
-  this->_timeOffset     = timeOffset;
-  this->_poolServerName = poolServerName;
-  this->_updateInterval = updateInterval;
-}
-
-NTPClient::NTPClient(UDP& udp, IPAddress poolServerIP, long timeOffset, unsigned long updateInterval) {
-  this->_udp            = &udp;
-  this->_timeOffset     = timeOffset;
-  this->_poolServerIP   = poolServerIP;
-  this->_poolServerName = NULL;
-  this->_updateInterval = updateInterval;
-}
-
 void NTPClient::begin() {
   this->begin(NTP_DEFAULT_LOCAL_PORT);
 }
@@ -132,31 +88,12 @@ unsigned long NTPClient::getEpochTime() const {
          ((millis() - this->_lastUpdate) / 1000); // Time since last update
 }
 
-int NTPClient::getDay() const {
-  return (((this->getEpochTime()  / 86400L) + 4 ) % 7); //0 is Sunday
-}
-int NTPClient::getHours() const {
-  return ((this->getEpochTime()  % 86400L) / 3600);
-}
-int NTPClient::getMinutes() const {
-  return ((this->getEpochTime() % 3600) / 60);
-}
-int NTPClient::getSeconds() const {
-  return (this->getEpochTime() % 60);
-}
-
 String NTPClient::getFormattedTime() const {
   unsigned long rawTime = this->getEpochTime();
+  unsigned long day = (((rawTime  / 86400L) + 4 ) % 7); //0 is Sunday
   unsigned long hours = (rawTime % 86400L) / 3600;
   String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
-
-  unsigned long minutes = (rawTime % 3600) / 60;
-  String minuteStr = minutes < 10 ? "0" + String(minutes) : String(minutes);
-
-  unsigned long seconds = rawTime % 60;
-  String secondStr = seconds < 10 ? "0" + String(seconds) : String(seconds);
-
-  return hoursStr + ":" + minuteStr + ":" + secondStr;
+  return String(day) +  hoursStr;
 }
 
 void NTPClient::end() {

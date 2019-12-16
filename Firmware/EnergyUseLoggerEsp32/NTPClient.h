@@ -29,13 +29,6 @@ class NTPClient {
 
   public:
     NTPClient(UDP& udp);
-    NTPClient(UDP& udp, long timeOffset);
-    NTPClient(UDP& udp, const char* poolServerName);
-    NTPClient(UDP& udp, const char* poolServerName, long timeOffset);
-    NTPClient(UDP& udp, const char* poolServerName, long timeOffset, unsigned long updateInterval);
-    NTPClient(UDP& udp, IPAddress poolServerIP);
-    NTPClient(UDP& udp, IPAddress poolServerIP, long timeOffset);
-    NTPClient(UDP& udp, IPAddress poolServerIP, long timeOffset, unsigned long updateInterval);
 
     /**
      * Set time server name
@@ -69,10 +62,6 @@ class NTPClient {
      */
     bool forceUpdate();
 
-    int getDay() const;
-    int getHours() const;
-    int getMinutes() const;
-    int getSeconds() const;
 
     /**
      * Changes the time offset. Useful for changing timezones dynamically
