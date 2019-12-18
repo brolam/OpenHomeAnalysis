@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import OhaDevice, OhaEnergyLog, OhaEnergyLogBatch
+from .models import OhaSensor, OhaEnergyLog, OhaSensorLogBatch
 from rest_framework import serializers
 
 
@@ -9,9 +9,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'username', 'email', 'groups']
 
 
-class OhaDeviceSerializer(serializers.HyperlinkedModelSerializer):
+class OhaSensorSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = OhaDevice
+        model = OhaSensor
         fields = '__all__'
 
 
@@ -21,7 +21,7 @@ class OhaEnergyLogSerializer(serializers.HyperlinkedModelSerializer):
         fields = '__all__'
 
 
-class OhaEnergyLogBatchSerializer(serializers.HyperlinkedModelSerializer):
+class OhaSensorLogBatchSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = OhaEnergyLogBatch
+        model = OhaSensorLogBatch
         fields = '__all__'

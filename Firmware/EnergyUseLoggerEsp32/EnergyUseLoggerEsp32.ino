@@ -8,7 +8,7 @@
 
 #define DEBUG 1
 
-#define INTERVAL_TIME_SAVE_LOG 10000
+const int INTERVAL_TIME_SAVE_LOG = 10000;
 #define LINE_END '\n'
 #define SD_CS 5
 #define pinsAmount 3
@@ -19,6 +19,8 @@ WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 HTTPClient http;
 long lastLogRegistered = 0;
+int syncedLogFile =  0;
+long syncedPosition = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -73,9 +75,10 @@ void loop() {
 }
 
 void registerLog() {
-  if ( isTimetoRegisterLog(0) ) {
+  if ( !isTimeToRegisterLog(0) ) {
     return;
   }
+
   int pinsValues[pinsAmount];
   int pinsCount[pinsAmount];
   for (int p = 0; p < pinsAmount; p++) {
@@ -94,10 +97,11 @@ void registerLog() {
   }
 
   String logFileName = "/" + timeClient.getFormattedTime() + ".txt";
-  String logContent = String(timeClient.getEpochTime()) + "000|" +
-                      String((millis() - lastLogRegistered) / 1000.00) + "|" +
-                      String( ( pinsCount[0] == 0 ) ? 0 : pinsValues[0] / pinsCount[0]) + "|" +
-                      String( ( pinsCount[1] == 0 ) ? 0 : pinsValues[1] / pinsCount[1]) + "|" +
+  String logContent = String(timeClient.getEpochTime()) + "000;" +
+                      String((millis() - lastLogRegistered) / 1000.00) + ";" +
+                      "0;" +
+                      String( ( pinsCount[0] == 0 ) ? 0 : pinsValues[0] / pinsCount[0]) + ";" +
+                      String( ( pinsCount[1] == 0 ) ? 0 : pinsValues[1] / pinsCount[1]) + ";" +
                       String( ( pinsCount[2] == 0 ) ? 0 : pinsValues[2] / pinsCount[2]);
   File logFile = SD.open(logFileName, FILE_APPEND);
   logFile.print(logContent);
@@ -110,32 +114,73 @@ void registerLog() {
 }
 
 void sendLogs() {
-  String logFileName = "/" + timeClient.getFormattedTime() + ".txt";
+  String logFileName = "/" + String(syncedLogFile) + ".txt";
+  String batchContent = "";
+  long lastSyncedPosition = 0;
   File logFile = SD.open(logFileName, FILE_READ);
-  if ( logFile.seek(0)  ) {
+  if ( logFile.seek(syncedPosition)  ) {
     for (int i = 0; i < 100; i++) {
-      if ( isTimetoRegisterLog(1000) ) {
+      if ( isTimeToRegisterLog(1000) ) {
         break;
+        return;
       }
       String nextLogContent = logFile.readStringUntil(LINE_END);
       if ( nextLogContent.length() > 0  ) {
-        Serial.print(i);
-        Serial.print(" -> ");
-        Serial.print(String(logFile.position()));
-        Serial.print("|");
-        Serial.println(nextLogContent);
-        delay(1000);
+        batchContent += nextLogContent + "|";
+        lastSyncedPosition = logFile.position();
       } else {
         break;
       }
     }
     logFile.close();
-
   }
+  
+  if ( (syncedLogFile > 0) && (batchContent == "" ) ){
+    return;
+  }
+
+  Serial.println(batchContent);
+  
+  http.begin(String(END_POINT_URL));
+  http.addHeader("Content-Type", "application/json");
+  int httpResponseCode = http.POST(
+                           "{\"secret_api_token\":\"" + String(SECRET_API_TOKEN) +
+                           "\", \"synced_log_file\":" + String(syncedLogFile) +
+                           ",\"synced_position\":" + String(lastSyncedPosition) +
+                           ",\"content\":\"" + batchContent +
+                           "\",\"oha_sensor\":\"" + String(SENSOR_ID) + "\" }"
+                         );
+  if (httpResponseCode == 201) {
+    String dataReturn = http.getString(); //Get the response to the request
+    dataReturn.replace("\"","");
+    dataReturn = dataReturn + ";";
+    Serial.println(httpResponseCode);   //Print return code
+    Serial.println(dataReturn);           //Print request answer
+    
+    int lastSyncedValues[3], r = 0, t = 0;
+    for (int i = 0; i < dataReturn.length(); i++)
+    {
+      if (dataReturn.charAt(i) == ';')
+      {
+        lastSyncedValues[t] = dataReturn.substring(r, i).toInt();
+        r = (i + 1);
+        t++;
+      }
+    }
+    syncedLogFile =  lastSyncedValues[0];
+    syncedPosition = lastSyncedValues[1];
+    Serial.print("syncedLogFile");
+    Serial.println(syncedLogFile);
+    Serial.println(syncedPosition);
+  } else {
+    Serial.print("Error on sending POST: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
 }
 
-bool isTimetoRegisterLog(int anyLess){
-  return  (( millis() - lastLogRegistered ) > int(INTERVAL_TIME_SAVE_LOG) - anyLess ); 
+bool isTimeToRegisterLog(int anyLess) {
+  return  (( millis() - lastLogRegistered ) > (INTERVAL_TIME_SAVE_LOG - anyLess) );
 }
 
 void espReset() {
