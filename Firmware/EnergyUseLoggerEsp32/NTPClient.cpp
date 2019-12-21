@@ -90,7 +90,7 @@ unsigned long NTPClient::getEpochTime() const {
 
 String NTPClient::getFormattedTime() const {
   unsigned long rawTime = this->getEpochTime();
-  unsigned long day = (((rawTime  / 86400L) + 4 ) % 7); //0 is Sunday
+  unsigned long day = (((rawTime  / 86400L) + 4 ) % 7) + 1; //1 is Sunday
   unsigned long hours = (rawTime % 86400L) / 3600;
   String hoursStr = hours < 10 ? "0" + String(hours) : String(hours);
   return String(day) +  hoursStr;

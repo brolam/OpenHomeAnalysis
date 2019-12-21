@@ -23,6 +23,7 @@ int syncedLogFile =  0;
 long syncedPosition = 0;
 
 void setup() {
+ 
   Serial.begin(115200);
   analogSetAttenuation(ADC_2_5db);
   for (int p = 0; p < pinsAmount ; p++) {
@@ -86,7 +87,7 @@ void registerLog() {
     pinsCount[p] = 0;
   }
 
-  for (int t = 0; t < 20000; t++) {
+  for (int t = 0; t < 1000; t++) {
     for (int p = 0; p < pinsAmount; p++) {
       int readValue = analogRead(pins[p]);
       if ( readValue > 0 ) {
@@ -111,73 +112,91 @@ void registerLog() {
 #ifdef DEBUG
   Serial.print(logFileName); Serial.print(" -> "); Serial.println(logContent);
 #endif
+  Serial.print("registerLog - syncedLogFile");
+  Serial.println(syncedLogFile);
+  Serial.println(syncedPosition);
 }
 
 void sendLogs() {
-  String logFileName = "/" + String(syncedLogFile) + ".txt";
+  if ( isTimeToRegisterLog(INTERVAL_TIME_SAVE_LOG / 2) ) {
+    return;
+  }
   String batchContent = "";
   long lastSyncedPosition = 0;
-  File logFile = SD.open(logFileName, FILE_READ);
-  if ( logFile.seek(syncedPosition)  ) {
-    for (int i = 0; i < 100; i++) {
-      if ( isTimeToRegisterLog(1000) ) {
-        break;
-        return;
-      }
-      String nextLogContent = logFile.readStringUntil(LINE_END);
-      if ( nextLogContent.length() > 0  ) {
-        batchContent += nextLogContent + "|";
-        lastSyncedPosition = logFile.position();
-      } else {
-        break;
+
+  if ( syncedLogFile > 0 ) {
+    String logFileName = "/" + String(syncedLogFile) + ".txt";
+    File logFile = SD.open(logFileName, FILE_READ);
+    if ( logFile.seek(syncedPosition)  ) {
+      for (int i = 0; i < 100; i++) {
+        if ( isTimeToRegisterLog(1000) ) {
+          break;
+        }
+        String nextLogContent = logFile.readStringUntil(LINE_END);
+        if ( nextLogContent.length() > 0  ) {
+          batchContent += nextLogContent + "|";
+          lastSyncedPosition = logFile.position();
+        } else {
+          break;
+        }
       }
     }
     logFile.close();
-  }
-  
-  if ( (syncedLogFile > 0) && (batchContent == "" ) ){
-    return;
+
+    if ( (batchContent.length() == 0) && (syncedLogFile < timeClient.getFormattedTime().toInt() )) {
+      setNextSyncedLog();
+    }
   }
 
-  Serial.println(batchContent);
-  
-  http.begin(String(END_POINT_URL));
-  http.addHeader("Content-Type", "application/json");
-  int httpResponseCode = http.POST(
-                           "{\"secret_api_token\":\"" + String(SECRET_API_TOKEN) +
-                           "\", \"synced_log_file\":" + String(syncedLogFile) +
-                           ",\"synced_position\":" + String(lastSyncedPosition) +
-                           ",\"content\":\"" + batchContent +
-                           "\",\"oha_sensor\":\"" + String(SENSOR_ID) + "\" }"
-                         );
-  if (httpResponseCode == 201) {
-    String dataReturn = http.getString(); //Get the response to the request
-    dataReturn.replace("\"","");
-    dataReturn = dataReturn + ";";
-    Serial.println(httpResponseCode);   //Print return code
-    Serial.println(dataReturn);           //Print request answer
-    
-    int lastSyncedValues[3], r = 0, t = 0;
-    for (int i = 0; i < dataReturn.length(); i++)
-    {
-      if (dataReturn.charAt(i) == ';')
+  if (( syncedLogFile == 0 ) || ( batchContent.length() > 0 )) {
+    Serial.print("batchContent:");
+    Serial.println(batchContent);
+
+    http.begin(String(END_POINT_URL));
+    http.addHeader("Content-Type", "application/json");
+    int httpResponseCode = http.POST(
+                             "{\"secret_api_token\":\"" + String(SECRET_API_TOKEN) +
+                             "\", \"synced_log_file\":" + String(syncedLogFile) +
+                             ",\"synced_position\":" + String(lastSyncedPosition) +
+                             ",\"content\":\"" + batchContent +
+                             "\",\"oha_sensor\":\"" + String(SENSOR_ID) + "\" }"
+                           );
+    if (httpResponseCode == 201) {
+      String dataReturn = http.getString(); //Get the response to the request
+      dataReturn.replace("\"", "");
+      dataReturn = dataReturn + ";";
+      Serial.println(httpResponseCode);   //Print return code
+      Serial.println(dataReturn);           //Print request answer
+
+      int lastSyncedValues[3], r = 0, t = 0;
+      for (int i = 0; i < dataReturn.length(); i++)
       {
-        lastSyncedValues[t] = dataReturn.substring(r, i).toInt();
-        r = (i + 1);
-        t++;
+        if (dataReturn.charAt(i) == ';')
+        {
+          lastSyncedValues[t] = dataReturn.substring(r, i).toInt();
+          r = (i + 1);
+          t++;
+        }
       }
+      syncedLogFile =  lastSyncedValues[0];
+      syncedPosition = lastSyncedValues[1];
+      Serial.print("syncedLogFile");
+      Serial.println(syncedLogFile);
+      Serial.println(syncedPosition);
+    } else {
+      Serial.print("Error on sending POST: ");
+      Serial.println(httpResponseCode);
     }
-    syncedLogFile =  lastSyncedValues[0];
-    syncedPosition = lastSyncedValues[1];
-    Serial.print("syncedLogFile");
-    Serial.println(syncedLogFile);
-    Serial.println(syncedPosition);
-  } else {
-    Serial.print("Error on sending POST: ");
-    Serial.println(httpResponseCode);
+    http.end();
   }
-  http.end();
+  
+  long waitNextLog =  ( lastLogRegistered + INTERVAL_TIME_SAVE_LOG) -  millis();
+  Serial.print("waitNextLog: ");
+  Serial.println(waitNextLog);
+  delay(waitNextLog > 0 ? waitNextLog : 0);
+
 }
+
 
 bool isTimeToRegisterLog(int anyLess) {
   return  (( millis() - lastLogRegistered ) > (INTERVAL_TIME_SAVE_LOG - anyLess) );
@@ -187,6 +206,28 @@ void espReset() {
   Serial.println("Restarting in 5 seconds");
   delay(5000);
   ESP.restart();
+}
+
+void setNextSyncedLog() {
+  int hourSyncedLog  = int(((syncedLogFile * 0.01) - int((syncedLogFile * 0.01))) * 100);
+  if ( hourSyncedLog < 23 ) {
+    syncedLogFile++;
+    syncedPosition = 0;
+    Serial.print("syncedLogFile++: ");
+    Serial.println(syncedLogFile);
+    return;
+  }
+
+  int daySyncedLog  = int(syncedLogFile * 0.01);
+  if ( daySyncedLog < 7 ) {
+    syncedLogFile = (daySyncedLog + 1) * 100 + 1;
+  } else {
+    syncedLogFile = 801;
+  }
+  syncedPosition = 0;
+
+  Serial.print("daySyncedLog: ");
+  Serial.println(syncedLogFile);
 }
 
 /*
