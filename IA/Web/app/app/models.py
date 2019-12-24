@@ -18,8 +18,6 @@ class OhaSensor(models.Model):
     sensor_type = models.IntegerField(choices=Types.choices())
     name = models.CharField(max_length=50)
     time_zone = models.TextField(max_length=200, default="America/Recife")
-    last_synced_log_file = models.IntegerField(default=0)
-    last_synced_position = models.BigIntegerField(default=0)
     default_volts = models.IntegerField(default=220)
     default_convection = models.FloatField(default=0.089125)
     secret_api_token = models.UUIDField(default=uuid.uuid4)
@@ -35,9 +33,7 @@ class OhaSensor(models.Model):
 class OhaSensorLogBatch(models.Model):
     oha_sensor = models.ForeignKey(OhaSensor, on_delete=models.CASCADE)
     secret_api_token = models.UUIDField()
-    synced_log_file = models.IntegerField(default=0)
-    synced_position = models.BigIntegerField(default=0)
-    content = models.TextField(default="1574608324;10;0;1;2;3", blank=True)
+    content = models.TextField(default="1574608324;10;1;2;3", blank=True)
 
     def do_oha_energy_log_bulk_insert(self):
         oha_sensor = self.oha_sensor
@@ -51,10 +47,6 @@ class OhaSensorLogBatch(models.Model):
     def save(self, *args, **kwargs):
         # super().save(*args, **kwargs)
         oha_sensor = self.oha_sensor
-        if(self.synced_log_file > 0):
-            oha_sensor.last_synced_log_file = self.synced_log_file
-            oha_sensor.last_synced_position = self.synced_position
-            oha_sensor.save()
 
         if (oha_sensor.sensor_type == OhaSensor.Types.ENERGY_LOG):
             doBulkInsert = threading.Thread(
@@ -80,19 +72,18 @@ class OhaEnergyLog(models.Model):
     def parser(self, oha_sensor, log):
         UNIX_TIME = 0
         DURATION = 1
-        VOLTS = 2
-        SENSOR_PHASE_1 = 3
-        SENSOR_PHASE_2 = 4
-        SENSOR_PHASE_3 = 5
+        SENSOR_PHASE_1 = 2
+        SENSOR_PHASE_2 = 3
+        SENSOR_PHASE_3 = 4
         FLAG_SEP_COLUMN = ";"
-        FLAG_QTD_COLUMN = 6
+        FLAG_QTD_COLUMN = 5
         log_columns = log.split(FLAG_SEP_COLUMN)
         print("Log:", log)
         if (len(log_columns) == FLAG_QTD_COLUMN):
             self.oha_sensor = oha_sensor
             self.unix_time = log_columns[UNIX_TIME]
             self.duration = log_columns[DURATION]
-            self.voltage = oha_sensor.get_default_volts(log_columns[VOLTS])
+            self.voltage = oha_sensor.get_default_volts(0)
             self.watts1 = oha_sensor.get_sensor_converted_value(
                 log_columns[SENSOR_PHASE_1])
             self.watts2 = oha_sensor.get_sensor_converted_value(

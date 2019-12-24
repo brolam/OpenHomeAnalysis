@@ -27,10 +27,7 @@ class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        oha_sensor = serializer.instance.oha_sensor
-        last_synced_data = '{};{}'.format(
-            oha_sensor.last_synced_log_file, oha_sensor.last_synced_position)
-        return Response(data=last_synced_data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
 
 
 class OhaEnergyLogViewSet(viewsets.ModelViewSet):

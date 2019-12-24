@@ -8,7 +8,7 @@
 
 #define DEBUG 1
 
-const int INTERVAL_TIME_SAVE_LOG = 10000;
+const int INTERVAL_TIME_SAVE_LOG = 3000;
 #define LINE_END '\n'
 #define SD_CS 5
 #define pinsAmount 3
@@ -25,7 +25,7 @@ long syncedPosition = 0;
 void setup() {
  
   Serial.begin(115200);
-  analogSetAttenuation(ADC_2_5db);
+  //analogSetAttenuation(ADC_2_5db);
   for (int p = 0; p < pinsAmount ; p++) {
     pinMode(pins[p], INPUT);
   }
@@ -87,7 +87,7 @@ void registerLog() {
     pinsCount[p] = 0;
   }
 
-  for (int t = 0; t < 1000; t++) {
+  for (int t = 0; t < 15000; t++) {
     for (int p = 0; p < pinsAmount; p++) {
       int readValue = analogRead(pins[p]);
       if ( readValue > 0 ) {
@@ -148,6 +148,7 @@ void sendLogs() {
     }
   }
 
+  return;
   if (( syncedLogFile == 0 ) || ( batchContent.length() > 0 )) {
     Serial.print("batchContent:");
     Serial.println(batchContent);
