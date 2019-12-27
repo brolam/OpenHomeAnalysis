@@ -25,6 +25,7 @@ SECRET_KEY = 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+"""
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -51,8 +52,9 @@ LOGGING = {
         },
     }
 }
+"""
 
-ALLOWED_HOSTS = ["192.168.0.11", "localhost"]
+ALLOWED_HOSTS = ["*"]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -69,7 +71,6 @@ WEBPACK_LOADER = {
         'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
     }
 }
-
 
 
 # Application definition
