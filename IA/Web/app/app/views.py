@@ -22,6 +22,7 @@ class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
     queryset = OhaSensorLogBatch.objects
     serializer_class = OhaSensorLogBatchSerializer
     permission_classes = (SensorPermissions,)
+    authentication_classes = []
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
