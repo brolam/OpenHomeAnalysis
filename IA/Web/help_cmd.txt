@@ -3,6 +3,9 @@ docker-compose build
 docker-compose run app sh -c "django-admin.py startproject app . "
 docker-compose run app sh -c "python manage.py migrate"
 docker-compose run app sh -c "python manage.py runserver 0:8000"
+
+docker-compose up -d
+
 Clean Docker image and containers:
 https://www.tecmint.com/remove-docker-images-containers-and-volumes/
 This will remove all dangling image:
@@ -14,3 +17,7 @@ chown root:staff $USER ./*
 
 Pip: 
 pip freeze > requirements.txt
+
+docker commit -m "OHA-Dev" -a "brenomar" db992ef30a2d python3-oha-dev
+docker tag python3-oha-dev brenomar/python3-oha-dev:latest
+docker push brenomar/python3-oha-dev:latest

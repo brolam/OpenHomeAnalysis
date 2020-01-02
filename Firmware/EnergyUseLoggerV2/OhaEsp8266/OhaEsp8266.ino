@@ -1,19 +1,34 @@
-#include "Config.h"
+//#define DEBUG 1
+//#define ENV_PROD 1
+
+# if ENV_PROD
+#include "Config_prod.h"
+#else
+#include "Config_Dev.h"
+#endif
+
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include "NTPClient.h"
 #include <WiFiUdp.h>
 #include "FS.h"
 
-//#define DEBUG 1
-
 const char* ssid     = WIFI_SSID;
 const char* password = WIFI_PASSWORD;
 const int INTERVAL_TIME_SAVE_LOG = 10;
+
 long lastLogRegistered = 0;
+long lastPositionFileLogSent = 0;
+
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP);
 HTTPClient http;
+FSInfo fs_info;
+
+struct GetSavedLogs {
+  String logs = "";
+  long lastPosition = 0;
+};
 
 void setup() {
 
@@ -31,7 +46,6 @@ void setup() {
   WiFi.hostname(ESP8266_NAME);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
 #ifdef DEBUG
@@ -73,10 +87,10 @@ void setup() {
     Serial.println("File System Formatting Error");
     }
   */
+  SPIFFS.info(fs_info);
 
 #ifdef DEBUG
-  FSInfo fs_info;
-  SPIFFS.info(fs_info);
+
 
   Serial.print("totalBytes: ");
   Serial.println(fs_info.totalBytes);
@@ -93,15 +107,13 @@ void setup() {
   Serial.print("maxOpenFiles: ");
   Serial.println(fs_info.maxOpenFiles);
 #endif
-  timeClient.begin();
-  timeClient.forceUpdate();
-  lastLogRegistered = ( timeClient.getEpochTime() - INTERVAL_TIME_SAVE_LOG) ;
+  initTimeClient();
 }
 
 void loop() {
   sendLogs();
 #ifdef DEBUG
-  Serial.print("timeClient: ");
+  Serial.print("timeClient.getEpochTime(): ");
   Serial.println(timeClient.getEpochTime());
   delay(2000);
 #endif
@@ -112,12 +124,14 @@ void sendLogs() {
 
   if ( !isTimeToRegisterLog(0)) {
 #ifdef DEBUG
-    Serial.println("not isTimeToRegisterLog");
+    Serial.println("Not isTimeToRegisterLog");
 #endif
     return;
   }
 
-  String batchContent = getLogs(); //"1576807563000;10.99;0;1201;1202;1203";
+  struct GetSavedLogs savedLogs = getSavedLogs();
+  String readLog = getReadLog();
+  String batchContent = readLog + (savedLogs.logs.length() > 0 ?  "|" + savedLogs.logs : ""); //"1576807563000;10.99;0;1201;1202;1203";
   batchContent.replace("\n", "");
   batchContent.replace("\r", "");
   lastLogRegistered = timeClient.getEpochTime() ;
@@ -140,62 +154,112 @@ void sendLogs() {
       Serial.print("httpResponseCode: ");
       Serial.println(httpResponseCode);   //Print return code
 #endif
+      if ( savedLogs.logs.length() > 0 ) {
+        lastPositionFileLogSent = savedLogs.lastPosition;
+      }
+      deleteLogs();
     } else {
 #ifdef DEBUG
       Serial.print("Error on sending POST: ");
       Serial.println(httpResponseCode);
 #endif
-      /*
-        File file = SPIFFS.open("/logs.txt", "a");
-        if (!file) {
-        Serial.println("Erro ao abrir arquivo!");
-        } else {
-        file.println(batchContent);
-        Serial.print("file.size(): ");
-        Serial.println(file.size());
-        }
-        file.close();
-      */
+      saveLog(readLog);
     }
     http.end();
   }
 
 }
 
-String getLogs() {
+String getReadLog() {
   Serial.print("READ");
   while (!Serial.available()) {
   }
   return String(lastLogRegistered) + ";" + String(timeClient.getEpochTime() - lastLogRegistered ) + ";" + Serial.readString();
-
-  /*
-    File file = SPIFFS.open("/logs.txt", "r");
-    if (!file) {
-    Serial.println("Erro ao abrir arquivo!");
-    } else {
-    file.seek(0);
-    int count = 0;
-    while (true ) {
-      String nextLogContent = file.readStringUntil('\r');
-      if (nextLogContent.length() > 0 ) {
-        Serial.println(nextLogContent);
-        count++;
-      } else {
-        Serial.print("Total Logs:");
-        Serial.println(count);
-        Serial.print("file.size(): ");
-        Serial.println(file.size());
-        break;
-      }
-    }
-
-    }
-    file.close();
-  */
 }
 
 bool isTimeToRegisterLog(int anyLess) {
   return  (( timeClient.getEpochTime() - lastLogRegistered ) > (INTERVAL_TIME_SAVE_LOG - anyLess) );
+}
+
+void initTimeClient() {
+  timeClient.begin();
+  timeClient.forceUpdate();
+  for (int attempt = 0; attempt < 10; attempt++) {
+    if ( timeClient.getEpochTime() > 1577711219 ) {
+#if DEBUG
+      Serial.print("Attempt: "); Serial.println(attempt);
+      Serial.print("EpochTime: "); Serial.println(timeClient.getEpochTime());
+#endif
+      delay(1000);
+      break;
+    }
+  }
+  lastLogRegistered = ( timeClient.getEpochTime() - INTERVAL_TIME_SAVE_LOG) ;
+}
+
+void saveLog(String readLog) {
+
+  File file = SPIFFS.open("/logs.txt", "a");
+  if (!file) {
+#if DEBUG
+    Serial.println("Erro ao abrir arquivo!");
+#endif
+  } else {
+    if ( fs_info.totalBytes > (file.size() + readLog.length()) ) {
+      file.print(readLog + "|");
+      if ( lastPositionFileLogSent == -1 ) {
+        lastPositionFileLogSent = 0;
+      }
+    }
+#if DEBUG
+    Serial.print("file.size(): "); Serial.println(file.size());
+    Serial.print("fs_info.totalBytes: "); Serial.println(fs_info.totalBytes);
+    Serial.print("readLog.length(): "); Serial.println(readLog.length());
+#endif
+  }
+  file.close();
+}
+
+struct GetSavedLogs getSavedLogs() {
+  struct GetSavedLogs  savedLogs;
+  if ( lastPositionFileLogSent == -1 ) {
+    return savedLogs;
+  }
+
+  File file = SPIFFS.open("/logs.txt", "r");
+  if (!file) {
+#if DEBUG
+    Serial.println("/logs.txt not found!");
+#endif
+  } else {
+    file.seek(lastPositionFileLogSent);
+    for (int iBatch = 0; iBatch < 20; iBatch++) {
+      String nextLogContent = file.readStringUntil('|');
+      if (nextLogContent.length() > 0 ) {
+        savedLogs.logs +=  (iBatch > 0 ? "|" : "")  + nextLogContent;
+        savedLogs.lastPosition = file.position() ;
+      } else {
+        if ( iBatch < 20 ) {
+          savedLogs.lastPosition = -1;
+        }
+        break;
+      }
+    }
+
+  }
+  file.close();
+  return savedLogs;
+}
+
+void deleteLogs() {
+  if ( lastPositionFileLogSent == -1 ) {
+    SPIFFS.remove("/logs.txt");
+    lastPositionFileLogSent = 0;
+#if DEBUG
+    Serial.println("SPIFFS.remove(/logs.txt)");
+#endif
+  }
+
 }
 
 void espReset() {

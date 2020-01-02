@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:latest-gpu-py3
+FROM python:3.7
 ENV PYTHONUNBUFFERD = 1
 ENV LISTEN_PORT=8000
 EXPOSE 8000
