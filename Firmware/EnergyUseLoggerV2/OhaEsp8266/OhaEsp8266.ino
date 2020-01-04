@@ -189,10 +189,15 @@ void initTimeClient() {
 #if DEBUG
       Serial.print("Attempt: "); Serial.println(attempt);
       Serial.print("EpochTime: "); Serial.println(timeClient.getEpochTime());
-#endif
       delay(1000);
+#endif
       break;
+    } else {
+      timeClient.forceUpdate();
     }
+  }
+  if ( timeClient.getEpochTime() < 1577711219 ) {
+    espReset();
   }
   lastLogRegistered = ( timeClient.getEpochTime() - INTERVAL_TIME_SAVE_LOG) ;
 }
@@ -263,7 +268,9 @@ void deleteLogs() {
 }
 
 void espReset() {
+#if DEBUG
   Serial.println("Restarting in 5 seconds");
   delay(5000);
+#endif
   ESP.restart();
 }
