@@ -4,16 +4,16 @@ var BundleTracker = require('webpack-bundle-tracker');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 module.exports = {
     mode: 'development',
-    entry: path.join(__dirname, 'assets/src/js/index'),
+    entry: path.join(__dirname, './src/js/index'),
     output: {
-        path: path.join(__dirname, 'assets/dist'),
+        path: path.join(__dirname, '../backend/assets/dist'),
         filename: '[name]-[hash].js'
     },
     plugins: [
         new CleanWebpackPlugin(),
         new BundleTracker({
             path: __dirname,
-            filename: 'webpack-stats.json'
+            filename: '../backend/webpack-stats.json'
         }),
     ],
     module: {

@@ -16,7 +16,7 @@ const data = [
   { value: 'Jantar', count: 23.94 },
   { value: 'Banho', count: 38.94 },
   { value: 'Almoço', count: 12.94 },
-  { value: 'Café', count: 11.94 },
+  { value: 'Café', count: 11.95 },
   { value: 'Escritório', count: 33.94 },
   { value: 'Ar Condicionado do Escritório', count: 20.94 },
   { value: 'Geladeria', count: 22.94 },
