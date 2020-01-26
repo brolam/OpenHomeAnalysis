@@ -1,18 +1,6 @@
-import React, { useState, useEffect } from 'react';
+//import { useState, useEffect } from 'react';
+import { getToken } from './OhaLocalStore'
 
-export function useLoingIn(token) {
-  const [isLogin, setOsLogin] = useState(false);
-
-  useEffect(() => {
-    function handleStatusChange(status) {
-      setOsLogin(status);
-    }
-
-    handleStatusChange(false);
-    return () => {
-
-    };
-  });
-
-  return isLogin;
+export function isUserLoginIn() {
+  return getToken() != null;
 }

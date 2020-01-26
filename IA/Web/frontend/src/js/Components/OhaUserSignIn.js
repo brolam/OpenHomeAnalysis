@@ -12,6 +12,11 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import ApiAuths from '../OhaApiAuth'
+import { saveToken } from '../OhaLocalStore'
+import { withRouter } from "react-router-dom";
+
+
 
 function Copyright() {
   return (
@@ -46,8 +51,17 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function SignIn() {
+function OhaUserSignIn(props) {
   const classes = useStyles();
+
+  function submitHandler(event) {
+    event.preventDefault();
+    ApiAuths.login(event.target.username.value, event.target.password.value).then(resp => {
+      saveToken(resp.token)
+      props.history.push("/");
+    });
+    return false;
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -59,16 +73,15 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} noValidate onSubmit={submitHandler}>
           <TextField
             variant="outlined"
             margin="normal"
             required
             fullWidth
-            id="email"
+            id="username"
             label="Email Address"
-            name="email"
-            autoComplete="email"
+            name="username"
             autoFocus
           />
           <TextField
@@ -115,3 +128,5 @@ export default function SignIn() {
     </Container>
   );
 }
+
+export default withRouter(OhaUserSignIn);
