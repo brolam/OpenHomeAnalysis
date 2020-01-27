@@ -7,6 +7,7 @@ import MoreIcon from '@material-ui/icons/MoreVert';
 import OhaTagCloud from './OhaTagCloud'
 import OpenSenorsSelect from './OhaSensorsSelect'
 import OhaSensoresStatus from './OhaSensorsStatus'
+import {AppConsoleStatus} from '../OhaAppStatus'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,8 +48,9 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-export default function App() {
+export default function App(props) {
   const classes = useStyles();
+  const appConsoleStatus = AppConsoleStatus(props.token)
 
   return (
     <div className={classes.root}>
@@ -58,7 +60,7 @@ export default function App() {
       </Container>
       <footer className={classes.footer}>
         <div className={classes.sensorRoot}>
-          <OpenSenorsSelect className={classes.sensorMenu} />
+          <OpenSenorsSelect className={classes.sensorMenu} sensorListData={appConsoleStatus.sensorListData} />
           <OhaSensoresStatus className={classes.sensorStatus} />
           <IconButton className={classes.sensorOptions} color="inherit">
             <MoreIcon />

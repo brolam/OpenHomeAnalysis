@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './Components/OhaApp'
 import UserSingIn from './Components/OhaUserSignIn'
-import { isUserLoginIn } from './OhaAppStatus'
+import { UserLoginStatus } from './OhaAppStatus'
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 
 
@@ -12,8 +12,8 @@ function Index(props) {
     <Route
       {...rest}
       render={props =>
-        isUserLoginIn() ? (
-          <Component {...props} />
+        UserLoginStatus.isLogin() ? (
+          <Component {...props} token={UserLoginStatus.getToken()}  />
         ) : (
             <Redirect to={{ pathname: "/app/login", state: { from: props.location } }} />
           )

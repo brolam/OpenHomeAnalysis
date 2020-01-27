@@ -21,17 +21,14 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const options = [
-  'New',
-  'Energy Log',
-  'Energy Log Dev',
-  'Test',
-];
 
-export default function SimpleListMenu() {
+export default function OhaSensorsSelect(props) {
   const classes = useStyles();
+  const {sensorListData} = props 
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
+  const [selectedIndex, setSelectedIndex] = React.useState(null);
+
+  const sensorSelectName = selectedIndex == null? "": sensorListData[selectedIndex].name
 
   const handleClickListItem = event => {
     setAnchorEl(event.currentTarget);
@@ -53,7 +50,7 @@ export default function SimpleListMenu() {
       </IconButton>
       <div className={classes.item}>
         <Typography variant="body1">Sensor</Typography>
-        <Typography variant="h5" component="h2" gutterBottom >{options[selectedIndex]} </Typography>
+        <Typography variant="h5" component="h2" gutterBottom >{sensorSelectName} </Typography>
       </div>
       <Menu
         id="lock-menu"
@@ -62,13 +59,13 @@ export default function SimpleListMenu() {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        {options.map((option, index) => (
+        {sensorListData.map((sensor, index) => (
           <MenuItem
-            key={option}
+            key={sensor.url}
             selected={index === selectedIndex}
             onClick={event => handleMenuItemClick(event, index)}
           >
-            {option}
+            {sensor.name}
           </MenuItem>
         ))}
       </Menu>

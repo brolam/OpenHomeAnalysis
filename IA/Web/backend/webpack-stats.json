@@ -1,1 +1,1 @@
-{"status":"done","chunks":{"main":[{"name":"main-351fa595752816a7c52c.js","path":"/IA/Web/backend/assets/dist/main-351fa595752816a7c52c.js"}]},"error":"ModuleNotFoundError","message":"Module not found: Error: Can't resolve '../OhaLocalStore' in '/IA/Web/frontend/src/js'"}
+{"status":"done","chunks":{"main":[{"name":"main-f749050a0e419e7ac08b.js","path":"/IA/Web/backend/assets/dist/main-f749050a0e419e7ac08b.js"}]}}
