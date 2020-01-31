@@ -3,25 +3,30 @@ from .models import OhaSensor, OhaEnergyLog, OhaSensorLogBatch
 from rest_framework import serializers
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['url', 'username', 'email', 'groups']
 
 
-class OhaSensorSerializer(serializers.HyperlinkedModelSerializer):
+class OhaSensorSerializer(serializers.ModelSerializer):
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
     class Meta:
         model = OhaSensor
         fields = '__all__'
 
+class OhaSensorListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OhaSensor
+        fields = ['id', 'name']
 
-class OhaEnergyLogSerializer(serializers.HyperlinkedModelSerializer):
+class OhaEnergyLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = OhaEnergyLog
         fields = '__all__'
 
 
-class OhaSensorLogBatchSerializer(serializers.HyperlinkedModelSerializer):
+class OhaSensorLogBatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = OhaSensorLogBatch
         fields = '__all__'

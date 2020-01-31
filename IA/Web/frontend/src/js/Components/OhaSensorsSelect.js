@@ -5,6 +5,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
+import PropTypes from 'prop-types'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -27,7 +28,6 @@ export default function OhaSensorsSelect(props) {
   const {sensorListData} = props 
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedIndex, setSelectedIndex] = React.useState(null);
-
   const sensorSelectName = selectedIndex == null? "": sensorListData[selectedIndex].name
 
   const handleClickListItem = event => {
@@ -71,4 +71,8 @@ export default function OhaSensorsSelect(props) {
       </Menu>
     </div>
   );
+}
+
+OhaSensorsSelect.propTypes = {
+  sensorListData: PropTypes.array.isRequired
 }

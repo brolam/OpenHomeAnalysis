@@ -4,7 +4,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import IconButton from '@material-ui/core/IconButton'
 import MoreIcon from '@material-ui/icons/MoreVert';
-import OhaTagCloud from './OhaTagCloud'
 import OpenSenorsSelect from './OhaSensorsSelect'
 import OhaSensoresStatus from './OhaSensorsStatus'
 import {AppConsoleStatus} from '../OhaAppStatus'
@@ -56,7 +55,7 @@ export default function App(props) {
     <div className={classes.root}>
       <CssBaseline />
       <Container component="main" className={classes.main} >
-        <OhaTagCloud />
+       
       </Container>
       <footer className={classes.footer}>
         <div className={classes.sensorRoot}>

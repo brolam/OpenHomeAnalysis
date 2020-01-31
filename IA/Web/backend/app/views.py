@@ -4,11 +4,11 @@ from rest_framework import viewsets, serializers, status, permissions
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.views import View
-from .serializers import UserSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSensorLogBatchSerializer
+from .serializers import UserSerializer, OhaSensorListSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSensorLogBatchSerializer
 import csv
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects
     serializer_class = UserSerializer
     def get_queryset(self):
@@ -23,6 +23,16 @@ class OhaSensorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return OhaSensor.objects.filter(owner=user)
+
+class OhaSensorListViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = OhaSensor.objects
+    serializer_class = OhaSensorListSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        return OhaSensor.objects.filter(owner=user)
+
+
 
 
 class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
