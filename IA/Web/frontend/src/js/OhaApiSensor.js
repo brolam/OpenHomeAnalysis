@@ -21,7 +21,7 @@ function encodeJson(data) {
 }
 
 apiSensor.getSensorList = (token) =>
-  fetch(`${url}sensorList/`, fetchOption('GET', token)
+  fetch(`${url}sensor/simple_list/`, fetchOption('GET', token)
   ).then(res => res.json())
 
 export default apiSensor;

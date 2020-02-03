@@ -29,6 +29,13 @@ class OhaSensor(models.Model):
         sensor_value = float(sensor_value)
         return self.default_convection * sensor_value
 
+    def get_recent_log(self):
+        if (self.sensor_type == self.Types.ENERGY_LOG):
+            lastEnergyLog = OhaEnergyLog.objects.filter(
+                oha_sensor=self).last()
+            return lastEnergyLog
+        return None
+
 
 class OhaSensorLogBatch(models.Model):
     oha_sensor = models.ForeignKey(OhaSensor, on_delete=models.CASCADE)

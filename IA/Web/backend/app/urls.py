@@ -1,16 +1,15 @@
 from django.contrib import admin
+from django.conf.urls import url
 from django.urls import path, include, re_path
 from rest_framework import routers
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 from django.views.generic import TemplateView
-from .views import UserViewSet, OhaSensorViewSet, OhaSensorListViewSet, OhaEnergyLogViewSet, OhaSensorLogBatchViewSet, OhaEnergyLogCSVviewSet
+from .views import UserViewSet, OhaSensorViewSet, OhaSensorLogBatchViewSet, OhaEnergyLogCSVviewSet
 
 router = routers.DefaultRouter()
 router.register(r'user', UserViewSet)
 router.register(r'sensor', OhaSensorViewSet)
-router.register(r'sensorList', OhaSensorListViewSet)
 router.register(r'sensorLogBatch', OhaSensorLogBatchViewSet)
-router.register(r'energyLog', OhaEnergyLogViewSet)
 
 urlpatterns = [
     path('', TemplateView.as_view(
