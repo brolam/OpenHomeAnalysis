@@ -3,6 +3,7 @@ from django.db import models
 import uuid
 import threading
 from enum import IntEnum
+import csv
 
 
 class OhaSensor(models.Model):
@@ -35,6 +36,16 @@ class OhaSensor(models.Model):
                 oha_sensor=self).last()
             return lastEnergyLog
         return None
+    
+    def import_csv(self, csv_file_path):
+        with open(csv_file_path) as csvfile:
+            csvReader = csv.DictReader(csvfile)
+            for row in csvReader:
+                energy_log = OhaEnergyLog(oha_sensor=self,  unix_time=row['unix_time'], duration=row['duration'], voltage=self.default_volts, watts1=row['watts1'], watts2=row['watts2'], watts3=row['watts3'], watts_total=row['watts_total'], sensor_convection=row['sensor_convection'])
+                OhaEnergyLog.objects.filter(oha_sensor=self, unix_time=row['unix_time']).delete()
+                energy_log.save()
+                print("Saved:",row['unix_time'])
+            print("import_csv finished")
 
 
 class OhaSensorLogBatch(models.Model):
