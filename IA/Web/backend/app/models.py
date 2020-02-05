@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 import threading
 from enum import IntEnum
@@ -47,6 +48,29 @@ class OhaSensor(models.Model):
                 print("Saved:",row['unix_time'])
             print("import_csv finished")
 
+class OhaSensorDimDate(models.Model):
+    oha_sensor = models.ForeignKey(OhaSensor, on_delete=models.CASCADE)
+    year = models.PositiveIntegerField(validators=[MinValueValidator(1900)])
+    month = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(12)])
+    day = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(31)])
+    hour = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(23)])
+    day_of_week = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(6)])
+    date_time = models.DateTimeField()
+    
+    class Meta:
+        indexes = [models.Index(
+            fields=['oha_sensor', 'date_time', ], name="idx_dim_date_sensor_date_time"), ]
+        unique_together = ('oha_sensor', 'year','month','day','hour')
+
+    def get_or_create(oha_sensor, unix_time):
+        unix_time_to_date = datetime.datetime.utcfromtimestamp(unix_time)
+        dt_as_tz = unix_time_to_date.astimezone(pytz.timezone(oha_sensor.time_zone))
+        year, month, day, hour = [dt_as_tz.year, dt_as_tz.month, dt_as_tz.day, dt_as_tz.hour]
+        dim_date = OhaSensorDimDate.objects.get(oha_sensor=oha_sensor,year=year, month=month, day=day, hour=hour )
+        if not dim_date.pk:
+            dim_date = OhaSensorDimDate(oha_sensor=oha_sensor, year=year, month=month, day=day, hour=hour, dat)
+            dim_date.save()
+        return dim_date
 
 class OhaSensorLogBatch(models.Model):
     oha_sensor = models.ForeignKey(OhaSensor, on_delete=models.CASCADE)
@@ -58,8 +82,6 @@ class OhaSensorLogBatch(models.Model):
         for log in self.content.split('|'):
             oha_energy_log = OhaEnergyLog()
             if oha_energy_log.parser(oha_sensor, log):
-                OhaEnergyLog.objects.filter(
-                    oha_sensor=oha_sensor, unix_time=oha_energy_log.unix_time).delete()
                 oha_energy_log.save()
 
     def save(self, *args, **kwargs):
@@ -75,6 +97,7 @@ class OhaSensorLogBatch(models.Model):
 class OhaEnergyLog(models.Model):
     oha_sensor = models.ForeignKey(OhaSensor, on_delete=models.CASCADE)
     unix_time = models.BigIntegerField()
+    dim_date = models.ForeignKey(OhaSensorDimDate, on_delete=models.DO_NOTHING)
     duration = models.FloatField()
     voltage = models.IntegerField()
     watts1 = models.FloatField()
@@ -84,9 +107,13 @@ class OhaEnergyLog(models.Model):
     sensor_convection = models.FloatField()
 
     class Meta:
-        indexes = [models.Index(
-            fields=['oha_sensor', 'unix_time', ], name="unique_key_oha_energy_log"), ]
+        unique_together = ('oha_sensor', 'unix_time')
 
+    def save(self, *args, **kwargs):
+        if not self.pk :
+             OhaEnergyLog.objects.filter(oha_sensor=self.oha_sensor, unix_time=self.unix_time).delete()
+        super(OhaEnergyLog , self).save()
+        
     def parser(self, oha_sensor, log):
         UNIX_TIME = 0
         DURATION = 1
