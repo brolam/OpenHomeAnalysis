@@ -8,7 +8,6 @@ from django.views import View
 from .serializers import UserSerializer, OhaSensorListSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSensorLogBatchSerializer
 import csv
 
-
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects
     serializer_class = UserSerializer
@@ -16,7 +15,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(id=user.id)
-
 
 class OhaSensorViewSet(viewsets.ModelViewSet):
     queryset = OhaSensor.objects
@@ -44,8 +42,7 @@ class OhaSensorViewSet(viewsets.ModelViewSet):
         start_unix_time = request.query_params.get('start_unix_time')
         end_unix_time = request.query_params.get('end_unix_time')
         sensor = OhaSensor.objects.get(pk=pk)
-        energy_logs = OhaEnergyLog.objects.filter(
-            oha_sensor=sensor, unix_time__range=(start_unix_time, end_unix_time))
+        energy_logs = OhaEnergyLog.objects.filter(oha_sensor=sensor)
         serializer = OhaEnergyLogSerializer(energy_logs, many=True)
         return Response(serializer.data)
 
@@ -58,7 +55,6 @@ class OhaSensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
         sensor = self.request.sensor
         return sensor.get_last_log()
 
-
 class OhaSensorListViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = OhaSensor.objects
     serializer_class = OhaSensorListSerializer
@@ -66,7 +62,6 @@ class OhaSensorListViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return OhaSensor.objects.filter(owner=user)
-
 
 class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
     class SensorPermissions(permissions.BasePermission):
@@ -81,7 +76,6 @@ class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(status=status.HTTP_201_CREATED)
-
 
 class OhaEnergyLogCSVviewSet(View):
 
