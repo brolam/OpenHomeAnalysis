@@ -25,10 +25,10 @@ const useStyles = makeStyles(theme => ({
 
 export default function OhaSensorsSelect(props) {
   const classes = useStyles();
-  const {sensorListData} = props 
+  const { sensorListData } = props
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectedIndex, setSelectedIndex] = React.useState(null);
-  const sensorSelectName = selectedIndex == null? "": sensorListData[selectedIndex].name
+  const sensorSelectName = selectedIndex == null ? "" : sensorListData[selectedIndex].name
 
   const handleClickListItem = event => {
     setAnchorEl(event.currentTarget);
@@ -61,7 +61,7 @@ export default function OhaSensorsSelect(props) {
       >
         {sensorListData.map((sensor, index) => (
           <MenuItem
-            key={sensor.url}
+            key={sensor.id}
             selected={index === selectedIndex}
             onClick={event => handleMenuItemClick(event, index)}
           >

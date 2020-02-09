@@ -1,12 +1,14 @@
 from django.contrib.auth.models import User
-from .models import OhaSensor, OhaEnergyLog, OhaEnergyLog, OhaSensorLogBatch
+from .models import OhaSensor, OhaEnergyLog, OhaEnergyLog, OhaSensorLogBatch, OhaSensorDimDate
+from django.db.models import Sum
 from rest_framework import viewsets, serializers, status, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.http import HttpResponse
 from django.views import View
-from .serializers import UserSerializer, OhaSensorListSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSensorLogBatchSerializer
+from .serializers import UserSerializer, OhaSensorListSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSeriesSerializer, OhaSensorLogBatchSerializer
 import csv
+
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects
@@ -15,6 +17,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(id=user.id)
+
 
 class OhaSensorViewSet(viewsets.ModelViewSet):
     queryset = OhaSensor.objects
@@ -46,6 +49,20 @@ class OhaSensorViewSet(viewsets.ModelViewSet):
         serializer = OhaEnergyLogSerializer(energy_logs, many=True)
         return Response(serializer.data)
 
+    @action(detail=True,  methods=['get'])
+    def serie_per_day(self, request, pk):
+        year = request.query_params.get('year')
+        month = request.query_params.get('month')
+        sensor = OhaSensor.objects.get(pk=pk)
+        duration = Sum('ohaenergylog__duration')
+        kwh1 = (duration * Sum('ohaenergylog__watts1') / 3600) / 1000
+        kwh2 = (duration * Sum('ohaenergylog__watts2') / 3600) / 1000
+        kwh3 = (duration * Sum('ohaenergylog__watts3') / 3600) / 1000
+        serie_by_day = OhaSensorDimDate.objects.filter(
+            oha_sensor=sensor, year=year, month=month).values('day').annotate(duration=duration,  kwh1=kwh1, kwh2=kwh2, kwh3=kwh3, total=kwh1 + kwh2 + kwh3)
+        serializer = OhaSeriesSerializer(serie_by_day, many=True)
+        return Response(serializer.data)
+
 
 class OhaSensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = OhaEnergyLog.objects
@@ -55,6 +72,7 @@ class OhaSensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
         sensor = self.request.sensor
         return sensor.get_last_log()
 
+
 class OhaSensorListViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = OhaSensor.objects
     serializer_class = OhaSensorListSerializer
@@ -62,6 +80,7 @@ class OhaSensorListViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return OhaSensor.objects.filter(owner=user)
+
 
 class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
     class SensorPermissions(permissions.BasePermission):
@@ -76,6 +95,7 @@ class OhaSensorLogBatchViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(status=status.HTTP_201_CREATED)
+
 
 class OhaEnergyLogCSVviewSet(View):
 

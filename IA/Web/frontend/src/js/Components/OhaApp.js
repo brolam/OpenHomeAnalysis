@@ -6,7 +6,10 @@ import IconButton from '@material-ui/core/IconButton'
 import MoreIcon from '@material-ui/icons/MoreVert';
 import OpenSenorsSelect from './OhaSensorsSelect'
 import OhaSensoresStatus from './OhaSensorsStatus'
-import {AppConsoleStatus} from '../OhaAppStatus'
+import { AppConsoleStatus } from '../OhaAppStatus'
+import {
+  ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+} from 'recharts';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -18,6 +21,8 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(8),
     marginBottom: theme.spacing(2),
     alignItems: 'center',
+    width: '100%',
+    height: '100%'
   },
   footer: {
     padding: theme.spacing(1, 1),
@@ -51,11 +56,34 @@ export default function App(props) {
   const classes = useStyles();
   const appConsoleStatus = AppConsoleStatus(props.token)
 
+
   return (
     <div className={classes.root}>
       <CssBaseline />
       <Container component="main" className={classes.main} >
-       
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <BarChart
+              width={500}
+              height={300}
+              data={appConsoleStatus.sensorSeriesData}
+              margin={{
+                top: 20, right: 30, left: 20, bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="kwh1" stackId="a" fill="#8884d8" />
+              <Bar dataKey="kwh2" stackId="a" fill="#82ca9d" />
+              <Bar dataKey="kwh3" stackId="a" fill="#82rf8d" />
+
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
       </Container>
       <footer className={classes.footer}>
         <div className={classes.sensorRoot}>

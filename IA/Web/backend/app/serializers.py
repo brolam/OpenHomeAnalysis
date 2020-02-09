@@ -11,14 +11,17 @@ class UserSerializer(serializers.ModelSerializer):
 
 class OhaSensorSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = OhaSensor
         fields = '__all__'
+
 
 class OhaSensorListSerializer(serializers.ModelSerializer):
     class Meta:
         model = OhaSensor
         fields = ['id', 'name']
+
 
 class OhaEnergyLogSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,3 +33,12 @@ class OhaSensorLogBatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = OhaSensorLogBatch
         fields = '__all__'
+
+
+class OhaSeriesSerializer(serializers.Serializer):
+    day = serializers.IntegerField()
+    duration = serializers.DecimalField(max_digits=20, decimal_places=2)
+    kwh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    kwh2 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    kwh3 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total = serializers.DecimalField(max_digits=20, decimal_places=2)
