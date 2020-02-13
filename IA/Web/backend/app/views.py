@@ -6,8 +6,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.http import HttpResponse
 from django.views import View
-from .serializers import UserSerializer, OhaSensorListSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSeriesSerializer, OhaSensorLogBatchSerializer
+from .serializers import UserSerializer, OhaSensorListSerializer, OhaSensorSerializer, OhaEnergyLogSerializer, OhaSeriesDaySerializer, OhaSeriesHourSerializer, OhaSensorLogBatchSerializer
 import csv
+from datetime import timedelta, datetime
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
@@ -50,7 +51,7 @@ class OhaSensorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=True,  methods=['get'])
-    def serie_per_day(self, request, pk):
+    def series_per_day(self, request, pk):
         year = request.query_params.get('year')
         month = request.query_params.get('month')
         sensor = OhaSensor.objects.get(pk=pk)
@@ -61,6 +62,23 @@ class OhaSensorViewSet(viewsets.ModelViewSet):
         serie_by_day = OhaSensorDimDate.objects.filter(
             oha_sensor=sensor, year=year, month=month).values('day').annotate(duration=duration,  kwh1=kwh1, kwh2=kwh2, kwh3=kwh3, total=kwh1 + kwh2 + kwh3)
         serializer = OhaSeriesSerializer(serie_by_day, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True,  methods=['get'])
+    def series_per_hour(self, request, pk):
+        date_int = request.query_params.get('date')
+        start_date = datetime.strptime(date_int, '%Y%m%d')
+        end_date = start_date + timedelta(hours=23, minutes=59, seconds=59)
+        print('start_date', start_date)
+        print('end_date', end_date)
+        sensor = OhaSensor.objects.get(pk=pk)
+        duration = Sum('ohaenergylog__duration')
+        wh1 = (duration * Sum('ohaenergylog__watts1') / 3600)
+        wh2 = (duration * Sum('ohaenergylog__watts2') / 3600)
+        wh3 = (duration * Sum('ohaenergylog__watts3') / 3600)
+        serie_by_hour = OhaSensorDimDate.objects.filter(
+            oha_sensor=sensor, date_time__range=(start_date, end_date)).values('hour').annotate(duration=duration,  wh1=wh1, wh2=wh2, wh3=wh3, total=wh1 + wh2 + wh3)
+        serializer = OhaSeriesHourSerializer(serie_by_hour, many=True)
         return Response(serializer.data)
 
 

@@ -35,10 +35,19 @@ class OhaSensorLogBatchSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OhaSeriesSerializer(serializers.Serializer):
+class OhaSeriesDaySerializer(serializers.Serializer):
     day = serializers.IntegerField()
     duration = serializers.DecimalField(max_digits=20, decimal_places=2)
     kwh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
     kwh2 = serializers.DecimalField(max_digits=20, decimal_places=2)
     kwh3 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total = serializers.DecimalField(max_digits=20, decimal_places=2)
+
+
+class OhaSeriesHourSerializer(serializers.Serializer):
+    hour = serializers.IntegerField()
+    duration = serializers.DecimalField(max_digits=20, decimal_places=2)
+    wh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    wh2 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    wh3 = serializers.DecimalField(max_digits=20, decimal_places=2)
     total = serializers.DecimalField(max_digits=20, decimal_places=2)
