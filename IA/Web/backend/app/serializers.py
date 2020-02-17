@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import OhaSensor, OhaEnergyLog, OhaSensorLogBatch
+from .models import Sensor, EnergyLog, SensorLogBatch
 from rest_framework import serializers
 
 
@@ -9,33 +9,33 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['url', 'username', 'email', 'groups']
 
 
-class OhaSensorSerializer(serializers.ModelSerializer):
+class SensorSerializer(serializers.ModelSerializer):
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
-        model = OhaSensor
+        model = Sensor
         fields = '__all__'
 
 
-class OhaSensorListSerializer(serializers.ModelSerializer):
+class SensorListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OhaSensor
+        model = Sensor
         fields = ['id', 'name']
 
 
-class OhaEnergyLogSerializer(serializers.ModelSerializer):
+class EnergyLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OhaEnergyLog
+        model = EnergyLog
         fields = '__all__'
 
 
-class OhaSensorLogBatchSerializer(serializers.ModelSerializer):
+class SensorLogBatchSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OhaSensorLogBatch
+        model = SensorLogBatch
         fields = '__all__'
 
 
-class OhaSeriesDaySerializer(serializers.Serializer):
+class SeriesDaySerializer(serializers.Serializer):
     day = serializers.IntegerField()
     duration = serializers.DecimalField(max_digits=20, decimal_places=2)
     kwh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
@@ -44,7 +44,7 @@ class OhaSeriesDaySerializer(serializers.Serializer):
     total = serializers.DecimalField(max_digits=20, decimal_places=2)
 
 
-class OhaSeriesHourSerializer(serializers.Serializer):
+class SeriesHourSerializer(serializers.Serializer):
     hour = serializers.IntegerField()
     duration = serializers.DecimalField(max_digits=20, decimal_places=2)
     wh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
