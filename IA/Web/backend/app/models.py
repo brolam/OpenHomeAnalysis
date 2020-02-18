@@ -33,6 +33,12 @@ class Sensor(models.Model):
         sensor_value = float(sensor_value)
         return self.default_convection * sensor_value
 
+    def unix_time_to_datetime(self, unix_time):
+        unix_time_as_date = datetime.utcfromtimestamp(unix_time)
+        sensor_time_zone = pytz.timezone(self.time_zone)
+        dt_as_tz = unix_time_as_date.astimezone(sensor_time_zone)
+        return dt_as_tz
+
     def get_recent_logs(self, amount):
         if (self.sensor_type == self.Types.ENERGY_LOG):
             return EnergyLog.objects.filter(sensor=self).order_by('-unix_time')[:amount]
@@ -107,9 +113,7 @@ class DimTime(models.Model):
 
     @staticmethod
     def get_or_create(sensor, unix_time):
-        unix_time_as_date = datetime.utcfromtimestamp(unix_time)
-        sensor_time_zone = pytz.timezone(sensor.time_zone)
-        dt_as_tz = unix_time_as_date.astimezone(sensor_time_zone)
+        dt_as_tz = sensor.unix_time_to_datetime(unix_time)
         year, month, day, hour, day_of_week = [
             dt_as_tz.year, dt_as_tz.month, dt_as_tz.day, dt_as_tz.hour, dt_as_tz.weekday()]
         date_time = datetime(year, month, day, hour, 0, 0, 0)
@@ -156,6 +160,10 @@ class EnergyLog(models.Model):
     watts3 = models.FloatField()
     watts_total = models.FloatField()
     sensor_convection = models.FloatField()
+
+    @property
+    def datetime(self):
+        return self.sensor.unix_time_to_datetime(self.unix_time)
 
     class Meta:
         unique_together = ('sensor', 'unix_time')

@@ -23,10 +23,18 @@ class SensorListSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 
-class EnergyLogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EnergyLog
-        fields = '__all__'
+class EnergyLogSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    datetime = serializers.DateTimeField()
+    duration = serializers.DecimalField(max_digits=20, decimal_places=2)
+    phase1 = serializers.DecimalField(
+        max_digits=20, decimal_places=2, source="watts1")
+    phase2 = serializers.DecimalField(
+        max_digits=20, decimal_places=2, source="watts2")
+    phase3 = serializers.DecimalField(
+        max_digits=20, decimal_places=2, source="watts3")
+    total = serializers.DecimalField(
+        max_digits=20, decimal_places=2, source="watts_total")
 
 
 class SensorLogBatchSerializer(serializers.ModelSerializer):
