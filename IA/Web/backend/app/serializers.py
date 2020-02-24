@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from .models import Sensor, EnergyLog, SensorLogBatch
+from .models import Sensor, EnergyLog, Cost, SensorLogBatch
 from rest_framework import serializers
 
 
@@ -14,6 +14,13 @@ class SensorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sensor
+        fields = '__all__'
+
+
+class CostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Cost
         fields = '__all__'
 
 
@@ -43,19 +50,8 @@ class SensorLogBatchSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SeriesDaySerializer(serializers.Serializer):
-    day = serializers.IntegerField()
-    duration = serializers.DecimalField(max_digits=20, decimal_places=2)
-    kwh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    kwh2 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    kwh3 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    total = serializers.DecimalField(max_digits=20, decimal_places=2)
-
-
-class SeriesHourSerializer(serializers.Serializer):
-    hour = serializers.IntegerField()
-    duration = serializers.DecimalField(max_digits=20, decimal_places=2)
-    wh1 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    wh2 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    wh3 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    total = serializers.DecimalField(max_digits=20, decimal_places=2)
+class SeriesEnergyLogSerializer(serializers.Serializer):
+    x = serializers.IntegerField()
+    y1 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    y2 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    y3 = serializers.DecimalField(max_digits=20, decimal_places=2)

@@ -1,12 +1,14 @@
-from django.contrib.auth import get_user_model
-from django.db import models, IntegrityError
-from django.core.validators import MinValueValidator, MaxValueValidator
-import uuid
-from enum import IntEnum
-from datetime import datetime
-import pytz
-import threading
 import csv
+import threading
+import uuid
+from datetime import datetime
+from enum import IntEnum
+
+import pytz
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import IntegrityError, models
+from django.db.models import F, Sum
 
 
 class Sensor(models.Model):
@@ -22,14 +24,10 @@ class Sensor(models.Model):
     sensor_type = models.IntegerField(choices=Types.choices())
     name = models.CharField(max_length=50)
     time_zone = models.TextField(max_length=200, default="America/Recife")
-    default_volts = models.IntegerField(default=220)
-    default_convection = models.FloatField(default=0.089125)
+    default_convection = models.FloatField(default=13.31229)
     secret_api_token = models.UUIDField(default=uuid.uuid4)
 
-    def get_default_volts(self, read_volts):
-        return self.default_volts if int(read_volts) == 0 else read_volts
-
-    def get_converted_value(self, sensor_value):
+    def get_converted(self, sensor_value):
         sensor_value = float(sensor_value)
         return self.default_convection * sensor_value
 
@@ -44,28 +42,44 @@ class Sensor(models.Model):
             return EnergyLog.objects.filter(sensor=self).order_by('-unix_time')[:amount]
         return None
 
-    def get_between_unix_time_logs(self, start, end):
+    def get_series_by_hour(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            return EnergyLog.objects.filter(sensor=self, unix_time__range=(start, end))
+            duration = Sum('energylog__duration')
+            y1 = (duration * Sum('energylog__watts1') / 3600)
+            y2 = (duration * Sum('energylog__watts2') / 3600)
+            y3 = (duration * Sum('energylog__watts3') / 3600)
+            return DimTime.objects.filter(
+                sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y1=y1, y2=y2, y3=y3)
+        return None
+
+    def get_logs(self, year, month):
+        if (self.sensor_type == self.Types.ENERGY_LOG):
+            return EnergyLog.objects.filter(sensor=self, dim_time__year=year, dim_time__month=month)
         return None
 
     def import_csv(self, csv_file_path):
         with open(csv_file_path) as csvfile:
             csvReader = csv.DictReader(csvfile)
             for row in csvReader:
-                energy_log = EnergyLog(sensor=self,  unix_time=row['unix_time'], duration=row['duration'], voltage=self.default_volts, watts1=row['watts1'],
+                energy_log = EnergyLog(sensor=self,  unix_time=row['unix_time'], duration=row['duration'], watts1=row['watts1'],
                                        watts2=row['watts2'], watts3=row['watts3'], watts_total=row['watts_total'], sensor_convection=row['sensor_convection'])
                 energy_log.save()
                 print("Saved:", row['unix_time'])
             print("import_csv finished")
 
-    def update_logs_dim_time(self):
-        logs_to_update = EnergyLog.filter(
-            sensor=self).values('pk', 'unix_time')
-        for log in logs_to_update:
-            print('Log dim_time update:', log)
-            EnergyLog.filter(pk=log.pk).update(
-                dim_time=DimTime.get_or_create(self, log.unix_time))
+
+class Cost(models.Model):
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
+    title = models.CharField(max_length=15)
+    value = models.FloatField()
+
+    @staticmethod
+    def get_or_create(sensor):
+        cost = Cost.objects.filter(sensor=sensor).last()
+        if not cost:
+            cost = Cost(sensor=sensor, title='$', value=0.687429)
+            cost.save()
+        return cost
 
 
 class DimTime(models.Model):
@@ -92,6 +106,7 @@ class DimTime(models.Model):
     day_of_week = models.PositiveIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(6)])
     period_of_day = models.IntegerField(choices=PeriodOfDayTypes.choices())
+    cost = models.ForeignKey(Cost, on_delete=models.DO_NOTHING)
 
     class Meta:
         unique_together = ('sensor', 'date_time')
@@ -99,17 +114,17 @@ class DimTime(models.Model):
     @staticmethod
     def get_period_of_day(hour):
         if (hour > 4) and (hour <= 8):
-            return 0  # 'Early Morning'
+            return DimTime.PeriodOfDayTypes.EARLY_MORNING  # 'Early Morning'
         elif (hour > 8) and (hour <= 12):
-            return 1  # 'Morning'
+            return DimTime.PeriodOfDayTypes.MORNING  # 'Morning'
         elif (hour > 12) and (hour <= 16):
-            return 2  # 'Noon'
+            return DimTime.PeriodOfDayTypes.NOON  # 'Noon'
         elif (hour > 16) and (hour <= 20):
-            return 3  # 'Eve'
+            return DimTime.PeriodOfDayTypes.EVE  # 'Eve'
         elif (hour > 20) and (hour <= 24):
-            return 4  # 'Night'
+            return DimTime.PeriodOfDayTypes.NIGHT  # 'Night'
         elif (hour <= 4):
-            return 4  # 'Late Night'
+            return DimTime.PeriodOfDayTypes.LATE_NIGHT  # 'Late Night'
 
     @staticmethod
     def get_or_create(sensor, unix_time):
@@ -121,8 +136,9 @@ class DimTime(models.Model):
             sensor=sensor, date_time=date_time).first()
         if not dim_time:
             period_of_day = DimTime.get_period_of_day(hour)
+            cost = Cost.get_or_create(sensor)
             dim_time = DimTime(sensor=sensor, date_time=date_time, year=year, month=month,
-                               day=day, hour=hour, day_of_week=day_of_week, period_of_day=period_of_day)
+                               day=day, hour=hour, day_of_week=day_of_week, period_of_day=period_of_day, cost=cost)
             dim_time.save()
         return dim_time
 
@@ -154,7 +170,6 @@ class EnergyLog(models.Model):
     unix_time = models.BigIntegerField()
     dim_time = models.ForeignKey(DimTime, on_delete=models.DO_NOTHING)
     duration = models.FloatField()
-    voltage = models.IntegerField()
     watts1 = models.FloatField()
     watts2 = models.FloatField()
     watts3 = models.FloatField()
@@ -187,27 +202,15 @@ class EnergyLog(models.Model):
         SENSOR_PHASE_3 = 4
         FLAG_SEP_COLUMN = ";"
         FLAG_QTD_COLUMN = 5
-        log_columns = log.split(FLAG_SEP_COLUMN)
-        print("Log parser:", log)
-        if (len(log_columns) == FLAG_QTD_COLUMN):
+        values = log.split(FLAG_SEP_COLUMN)
+        if (len(values) == FLAG_QTD_COLUMN):
             self.sensor = sensor
-            self.unix_time = log_columns[UNIX_TIME]
-            self.duration = log_columns[DURATION]
-            self.voltage = sensor.get_default_volts(0)
-            self.watts1 = sensor.get_sensor_converted_value(
-                log_columns[SENSOR_PHASE_1])
-            self.watts2 = sensor.get_sensor_converted_value(
-                log_columns[SENSOR_PHASE_2])
-            self.watts3 = sensor.get_sensor_converted_value(
-                log_columns[SENSOR_PHASE_3])
+            self.unix_time = values[UNIX_TIME]
+            self.duration = values[DURATION]
+            self.watts1 = sensor.get_converted(values[SENSOR_PHASE_1])
+            self.watts2 = sensor.get_converted(values[SENSOR_PHASE_2])
+            self.watts3 = sensor.get_converted(values[SENSOR_PHASE_3])
             self.watts_total = (self.watts1 + self.watts2 + self.watts3)
             self.sensor_convection = sensor.default_convection
             return True
         return False
-
-
-class EnergyBill(models.Model):
-    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
-    period_from = models.BigIntegerField()
-    period_to = models.BigIntegerField()
-    kwh_cost = models.FloatField()
