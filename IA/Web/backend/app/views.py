@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, detail_route
 from django.http import HttpResponse
 from django.views import View
-from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, CostSerializer, EnergyLogSerializer, SeriesEnergyLogSerializer, SensorLogBatchSerializer
+from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, CostSerializer, EnergyLogSerializer, SeriesEnergyLogSerializer, CostSummarySerializer, SensorLogBatchSerializer
 import csv
 from datetime import timedelta, datetime
 
@@ -47,13 +47,13 @@ class SensorViewSet(viewsets.ModelViewSet):
             sensor.get_recent_logs(amount), many=True)
         return Response(serializer.data)
 
-    @action(detail=True,  methods=['get'])
-    def between_unix_time_logs(self, request, pk):
-        start = request.query_params.get('start')
-        end = request.query_params.get('end')
+    @action(detail=True)
+    def recent_cost(self, request, pk=None):
         sensor = self.get_queryset().get(pk=pk)
-        energy_logs = sensor.get_between_unix_time_logs(start, end)
-        serializer = EnergyLogSerializer(energy_logs, many=True)
+        cost_last = Cost.objects.filter(sensor=sensor).last()
+        cost_summary = sensor.get_summary_cost(cost=cost_last)
+        print('cost_summary', cost_summary)
+        serializer = CostSummarySerializer(cost_summary)
         return Response(serializer.data)
 
     @action(detail=True,  methods=['get'], url_path="series_per_hour(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?(?:/(?P<day>[0-9]+))?")

@@ -55,3 +55,8 @@ class SeriesEnergyLogSerializer(serializers.Serializer):
     y1 = serializers.DecimalField(max_digits=20, decimal_places=2)
     y2 = serializers.DecimalField(max_digits=20, decimal_places=2)
     y3 = serializers.DecimalField(max_digits=20, decimal_places=2)
+
+
+class CostSummarySerializer(serializers.Serializer):
+    title = serializers.CharField()
+    cost_total = serializers.FloatField()
