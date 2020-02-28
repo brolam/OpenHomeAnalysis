@@ -50,13 +50,10 @@ class SensorLogBatchSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SeriesEnergyLogSerializer(serializers.Serializer):
+class SeriesSerializer(serializers.Serializer):
     x = serializers.IntegerField()
-    y1 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    y2 = serializers.DecimalField(max_digits=20, decimal_places=2)
-    y3 = serializers.DecimalField(max_digits=20, decimal_places=2)
+    y = serializers.DecimalField(max_digits=20, decimal_places=2)
 
 
-class CostSummarySerializer(serializers.Serializer):
-    title = serializers.CharField()
-    cost_total = serializers.FloatField()
+class SummaryCostDaySerializer(serializers.Serializer):
+    cost_total = serializers.DecimalField(max_digits=20, decimal_places=2)

@@ -8,7 +8,7 @@ import pytz
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Avg
 
 
 class Sensor(models.Model):
@@ -42,25 +42,21 @@ class Sensor(models.Model):
             return EnergyLog.objects.filter(sensor=self).order_by('-unix_time')[:amount]
         return None
 
-    def get_summary_cost(self, cost):
+    def get_summary_cost_day(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
             hours = Sum('energylog__duration') / 3600.00
-            kwh_total = (Sum('energylog__watts_total') * hours) / pow(10, 8)
+            kwh_total = (Sum('energylog__watts_total') * hours) / pow(10, 6)
+            cost_total = kwh_total * Avg('cost__value')
             values = DimTime.objects.filter(
-                sensor=self, cost=cost).aggregate(kwh_total=kwh_total)
-            print('values', values, DimTime.objects.filter(
-                sensor=self, cost=cost).count())
-            return {'title': cost.title, 'cost_total': values['kwh_total'] * cost.value, }
+                sensor=self, year=year, month=month, day=day).aggregate(cost_total=cost_total)
+            return {'cost_total': values['cost_total']}
         return None
 
     def get_series_by_hour(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
             hours = Sum('energylog__duration') / 3600.00
-            y1 = Sum('energylog__watts1') * hours
-            y2 = Sum('energylog__watts2') * hours
-            y3 = Sum('energylog__watts3') * hours
-            return DimTime.objects.filter(
-                sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y1=y1, y2=y2, y3=y3)
+            y = Sum('energylog__watts_total') * hours / pow(10, 6)
+            return DimTime.objects.filter(sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y=y)
         return None
 
     def get_logs(self, year, month):
@@ -77,6 +73,19 @@ class Sensor(models.Model):
                 energy_log.save()
                 print("Saved:", row['unix_time'])
             print("import_csv finished")
+
+    def update_logs_from_default_convection(self):
+        last_conv = F('sensor_convection')
+        watts1 = F('watts1')
+        watts2 = F('watts2')
+        watts3 = F('watts3')
+        watts_total = F('watts_total')
+        EnergyLog.objects.filter(sensor=self).update(
+            watts1=watts1 / last_conv * self.default_convection,
+            watts2=watts2 / last_conv * self.default_convection,
+            watts3=watts3 / last_conv * self.default_convection,
+            watts_total=watts_total / last_conv * self.default_convection
+        )
 
 
 class Cost(models.Model):

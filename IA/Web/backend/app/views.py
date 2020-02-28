@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, detail_route
 from django.http import HttpResponse
 from django.views import View
-from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, CostSerializer, EnergyLogSerializer, SeriesEnergyLogSerializer, CostSummarySerializer, SensorLogBatchSerializer
+from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, EnergyLogSerializer, CostSerializer, SeriesSerializer,  SummaryCostDaySerializer, SensorLogBatchSerializer
 import csv
 from datetime import timedelta, datetime
 
@@ -47,20 +47,19 @@ class SensorViewSet(viewsets.ModelViewSet):
             sensor.get_recent_logs(amount), many=True)
         return Response(serializer.data)
 
-    @action(detail=True)
-    def recent_cost(self, request, pk=None):
+    @action(detail=True, methods=['get'], url_path="summary_cost_day(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?(?:/(?P<day>[0-9]+))?")
+    def summary_cost_day(self, request, pk=None, year=None, month=None, day=None):
         sensor = self.get_queryset().get(pk=pk)
-        cost_last = Cost.objects.filter(sensor=sensor).last()
-        cost_summary = sensor.get_summary_cost(cost=cost_last)
-        print('cost_summary', cost_summary)
-        serializer = CostSummarySerializer(cost_summary)
+        summary_cost_day = sensor.get_summary_cost_day(year, month, day)
+        print('summary_cost_day', summary_cost_day)
+        serializer = SummaryCostDaySerializer(summary_cost_day)
         return Response(serializer.data)
 
     @action(detail=True,  methods=['get'], url_path="series_per_hour(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?(?:/(?P<day>[0-9]+))?")
     def series_per_hour(self, request, pk=None, year=None, month=None, day=None):
         sensor = Sensor.objects.get(pk=pk)
         serie_by_hour = sensor.get_series_by_hour(year, month, day)
-        serializer = SeriesEnergyLogSerializer(serie_by_hour, many=True)
+        serializer = SeriesSerializer(serie_by_hour, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=['get'])
