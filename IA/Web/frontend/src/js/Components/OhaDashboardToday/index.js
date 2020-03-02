@@ -7,7 +7,7 @@ import Bill from './Bill';
 import Logs from './Logs';
 
 const useStyles = makeStyles(theme => ({
-  
+
   paper: {
     padding: theme.spacing(2),
     display: 'flex',
@@ -25,19 +25,19 @@ export default function Index(props) {
       {/* Chart */}
       <Grid item xs={12} md={8} lg={9}>
         <Paper className={fixedHeightPaper}>
-          <Chart /> 
+          <Chart {...props} />
         </Paper>
       </Grid>
       {/* Recent Bill */}
       <Grid item xs={12} md={4} lg={3}>
         <Paper className={fixedHeightPaper}>
-          <Bill />
+          <Bill {...props} />
         </Paper>
       </Grid>
       {/* Recent Logs */}
       <Grid item xs={12}>
         <Paper className={classes.paper}>
-          <Logs />
+          <Logs {...props} />
         </Paper>
       </Grid>
     </Grid>

@@ -16,7 +16,7 @@ import Link from '@material-ui/core/Link';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-//import { AppConsoleStatus } from '../OhaAppStatus'
+import { AppConsoleStatus } from '../OhaAppStatus'
 import Dashboard from './OhaDashboardToday'
 import { mainListItems, secondaryListItems } from './OhaMenuItens'
 
@@ -115,7 +115,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App(props) {
-  //const appConsoleStatus = AppConsoleStatus(props.token)
+  const appConsoleStatus = AppConsoleStatus(props.token)
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -170,7 +170,7 @@ export default function App(props) {
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
         <Container maxWidth="lg" className={classes.container}>
-          <Dashboard fixedHeightPaper={fixedHeightPaper} />
+          <Dashboard fixedHeightPaper={fixedHeightPaper} {...appConsoleStatus} />
           <Box pt={4}>
             <Copyright />
           </Box>

@@ -14,13 +14,14 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Bill() {
+export default function Bill(props) {
   const classes = useStyles();
+  const { summaryCostDay } = props
   return (
     <React.Fragment>
       <Title>Today cost</Title>
       <Typography component="p" variant="h4">
-        $12,99
+        ${summaryCostDay.cost_total}
       </Typography>
       <Typography color="textSecondary" className={classes.depositContext}>
         on 15 March, 2019

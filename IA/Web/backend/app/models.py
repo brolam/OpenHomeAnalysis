@@ -39,23 +39,23 @@ class Sensor(models.Model):
 
     def get_recent_logs(self, amount):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            return EnergyLog.objects.filter(sensor=self).order_by('-unix_time')[:amount]
+            return EnergyLog.objects.filter(sensor=self, dim_time__day=1).order_by('-unix_time')[:amount]
         return None
 
     def get_summary_cost_day(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            hours = Sum('energylog__duration') / 3600.00
-            kwh_total = (Sum('energylog__watts_total') * hours) / pow(10, 6)
-            cost_total = kwh_total * Avg('cost__value')
+            hours = Sum('energylog__duration') / 100
+            kwh_total = Sum('energylog__watts_total')
+            cost_value = Avg('cost__value')
             values = DimTime.objects.filter(
-                sensor=self, year=year, month=month, day=day).aggregate(cost_total=cost_total)
-            return {'cost_total': values['cost_total']}
+                sensor=self, year=year, month=month, day=day).aggregate(cost_value=cost_value, kwh_total=kwh_total, hours=hours)
+            return {'cost_total': values['kwh_total']}
         return None
 
     def get_series_by_hour(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            hours = Sum('energylog__duration') / 3600.00
-            y = Sum('energylog__watts_total') * hours / pow(10, 6)
+            hours = Sum('energylog__duration') / 100.00 / 3600.00
+            y = Sum('energylog__watts_total') * hours / 1000.00
             return DimTime.objects.filter(sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y=y)
         return None
 
@@ -80,11 +80,12 @@ class Sensor(models.Model):
         watts2 = F('watts2')
         watts3 = F('watts3')
         watts_total = F('watts_total')
-        EnergyLog.objects.filter(sensor=self).update(
+        EnergyLog.objects.filter(sensor=self).exclude(sensor_convection=self.default_convection).update(
             watts1=watts1 / last_conv * self.default_convection,
             watts2=watts2 / last_conv * self.default_convection,
             watts3=watts3 / last_conv * self.default_convection,
-            watts_total=watts_total / last_conv * self.default_convection
+            watts_total=watts_total / last_conv * self.default_convection,
+            sensor_convection=self.default_convection
         )
 
 

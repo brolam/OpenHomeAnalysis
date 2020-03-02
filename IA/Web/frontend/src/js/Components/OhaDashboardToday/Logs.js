@@ -8,19 +8,6 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Title from './Title';
 
-// Generate Order Data
-function createData(id, hour, phase1, phase2, phase3, amount) {
-  return { id, hour, phase1, phase2, phase3, amount };
-}
-
-const rows = [
-  createData(0, '22:52:10', 312.44, 312.44, 312.44, 312.44),
-  createData(1, '22:52:20', 866.99, 312.44, 312.44, 312.44),
-  createData(2, '22:52:30', 100.81, 312.44, 312.44, 312.44),
-  createData(3, '22:52:40', 654.39, 312.44, 312.44, 312.44),
-  createData(4, '22:52:50', 212.79, 312.44, 312.44, 312.44),
-];
-
 function preventDefault(event) {
   event.preventDefault();
 }
@@ -31,29 +18,32 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Logs() {
+export default function Logs(props) {
   const classes = useStyles();
+  const { sensorRecentLogsData } = props
   return (
     <React.Fragment>
       <Title>Latest Logs</Title>
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Hour</TableCell>
+            <TableCell>When</TableCell>
+            <TableCell>Duration</TableCell>
             <TableCell>Phase 01</TableCell>
             <TableCell>Phase 02</TableCell>
             <TableCell>Phase 03</TableCell>
-            <TableCell align="right">Amount</TableCell>
+            <TableCell align="right">Total Watts</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => (
+          {sensorRecentLogsData.map(row => (
             <TableRow key={row.id}>
-              <TableCell>{row.hour}</TableCell>
+              <TableCell>{row.datetime}</TableCell>
+              <TableCell>{row.duration}</TableCell>
               <TableCell>{row.phase1}</TableCell>
               <TableCell>{row.phase2}</TableCell>
               <TableCell>{row.phase3}</TableCell>
-              <TableCell align="right">{row.amount}</TableCell>
+              <TableCell align="right">{row.total}</TableCell>
             </TableRow>
           ))}
         </TableBody>

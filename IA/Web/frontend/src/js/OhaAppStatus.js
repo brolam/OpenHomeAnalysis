@@ -14,10 +14,14 @@ UserLoginStatus.getToken = function () {
 
 export function AppConsoleStatus(token) {
   const [sensorListData, setSensorListData] = useState([]);
+  const [summaryCostDay, setSummaryCostDay] = useState({});
   const [sensorSeriesData, setSensorSeriesData] = useState([]);
+  const [sensorRecentLogsData, setSensorRecentLogsData] = useState([]);
+  const [seconds, setSeconds] = useState(0);
+
+  setTimeout(() => setSeconds(seconds + 1), 15000);
 
   useEffect(() => {
-
     apiSensor.getSensorList(token).then(res => {
       setSensorListData(res);
       console.log('Sensores :', res);
@@ -26,11 +30,21 @@ export function AppConsoleStatus(token) {
 
   useEffect(() => {
 
-    apiSensor.getSensorSeries(token).then(res => {
+    apiSensor.getSensorSeriesPerHour(token, '96c9286b-7c30-42a9-863e-b60965845a66', 2020, 2, 1).then(res => {
       setSensorSeriesData(res);
       console.log('Sensores :', res);
     });
-  }, [token]);
 
-  return { sensorListData, sensorSeriesData };
+    apiSensor.getSensorSummaryCostDay(token, '96c9286b-7c30-42a9-863e-b60965845a66', 2020, 2, 1).then(res => {
+      setSummaryCostDay(res);
+      console.log('summaryCostDay :', res);
+    });
+
+    apiSensor.getSensorRecentLogs(token, '96c9286b-7c30-42a9-863e-b60965845a66').then(res => {
+      setSensorRecentLogsData(res);
+      console.log('sensorRecentLogsData :', res);
+    });
+  }, [token, seconds]);
+
+  return { sensorListData, summaryCostDay, sensorSeriesData, sensorRecentLogsData };
 }
