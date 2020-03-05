@@ -44,18 +44,18 @@ class Sensor(models.Model):
 
     def get_summary_cost_day(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            hours = Sum('energylog__duration') / 100
-            kwh_total = Sum('energylog__watts_total')
-            cost_value = Avg('cost__value')
+            kwh = Sum(F('energylog__watts_total') *
+                      F('energylog__duration') / 3600 / 1000)
+            cost = Avg('cost__value')
             values = DimTime.objects.filter(
-                sensor=self, year=year, month=month, day=day).aggregate(cost_value=cost_value, kwh_total=kwh_total, hours=hours)
-            return {'cost_total': values['kwh_total']}
+                sensor=self, year=year, month=month, day=day).aggregate(cost=cost, kwh=kwh)
+            return {'cost_total': values['kwh'] * values['cost']}
         return None
 
     def get_series_by_hour(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            hours = Sum('energylog__duration') / 100.00 / 3600.00
-            y = Sum('energylog__watts_total') * hours / 1000.00
+            y = Sum(F('energylog__watts_total') *
+                    F('energylog__duration') / 3600 / 1000)
             return DimTime.objects.filter(sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y=y)
         return None
 
