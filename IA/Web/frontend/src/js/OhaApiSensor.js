@@ -6,7 +6,7 @@ const fetchOption = (method, token) => ({
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'X-CSRFToken': '{{csrf_token}}',
-    'Authorization': `Token ${token}`
+    'Authorization': ` jwt ${token}`
   }
 })
 
