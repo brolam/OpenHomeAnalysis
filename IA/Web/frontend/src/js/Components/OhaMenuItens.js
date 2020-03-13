@@ -10,7 +10,6 @@ import Logs from '@material-ui/icons/Update';
 import LayersIcon from '@material-ui/icons/Layers';
 import HistoryIcon from '@material-ui/icons/History';
 
-
 export const mainListItems = (
   <div>
     <ListItem button>
@@ -18,12 +17,6 @@ export const mainListItems = (
         <DashboardIcon />
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
-    </ListItem>
-    <ListItem button>
-      <ListItemIcon>
-        <Sensor/>
-      </ListItemIcon>
-      <ListItemText primary="Sensor" />
     </ListItem>
     <ListItem button>
       <ListItemIcon>
@@ -46,26 +39,29 @@ export const mainListItems = (
   </div>
 );
 
-export const secondaryListItems = (
-  <div>
-    <ListSubheader inset>Bills History</ListSubheader>
-    <ListItem button>
-      <ListItemIcon>
-        <HistoryIcon />
-      </ListItemIcon>
-      <ListItemText primary="Current month" />
-    </ListItem>
-    <ListItem button>
-      <ListItemIcon>
-        <HistoryIcon />
-      </ListItemIcon>
-      <ListItemText primary="Last month" />
-    </ListItem>
-    <ListItem button>
-      <ListItemIcon>
-        <HistoryIcon />
-      </ListItemIcon>
-      <ListItemText primary="Last Year" />
-    </ListItem>
+export function SensorListItems(props) {
+  return (
+    <div>
+      <ListSubheader inset>Sensors</ListSubheader>
+      <ListItem button>
+        <ListItemIcon>
+          <Sensor />
+        </ListItemIcon>
+        <ListItemText primary="Current month" />
+      </ListItem>
+      <ListItem button>
+        <ListItemIcon>
+          <HistoryIcon />
+        </ListItemIcon>
+        <ListItemText primary="Last month" />
+      </ListItem>
+      <ListItem button>
+        <ListItemIcon>
+          <HistoryIcon />
+        </ListItemIcon>
+        <ListItemText primary="Last Year" />
+      </ListItem>
+      )
   </div>
-);
+  )
+};

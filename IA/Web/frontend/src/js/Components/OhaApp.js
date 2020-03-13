@@ -18,7 +18,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { AppConsoleStatus } from '../OhaAppStatus'
 import Dashboard from './OhaDashboardToday'
-import { mainListItems, secondaryListItems } from './OhaMenuItens'
+import { mainListItems, SensorListItems } from './OhaMenuItens'
 
 function Copyright() {
   return (
@@ -165,7 +165,7 @@ export default function App(props) {
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
-        <List>{secondaryListItems}</List>
+        <List><SensorListItems {...props} /></List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />
