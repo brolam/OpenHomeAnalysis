@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getToken } from './OhaLocalStore'
+import { getToken, removeToken } from './OhaLocalStore'
 import apiSensor from './OhaApiSensor'
+import apiAuth from './OhaApiAuth'
 
 export const UserLoginStatus = {};
 
@@ -12,38 +13,48 @@ UserLoginStatus.getToken = function () {
   return getToken();
 }
 
-export function AppConsoleStatus(token) {
+export function AppConsoleStatus(token, sensorId) {
   const [sensorListData, setSensorListData] = useState([]);
   const [summaryCostDay, setSummaryCostDay] = useState({});
   const [sensorSeriesData, setSensorSeriesData] = useState([]);
   const [sensorRecentLogsData, setSensorRecentLogsData] = useState([]);
   const [seconds, setSeconds] = useState(0);
 
+  function JsonOrLogoff(response, then) { 
+    if ( response.status >=400){
+      removeToken();
+      return
+    }
+
+    response.json().then((json) =>{
+      then(json);
+    }) 
+  };
+
   setTimeout(() => setSeconds(seconds + 1), 15000);
 
   useEffect(() => {
-    apiSensor.getSensorList(token).then(res => {
-      setSensorListData(res);
-      console.log('Sensores :', res);
-    });
-  }, [token]);
+    if (  !UserLoginStatus.isLogin()){
+      document.location.reload(true);
+      return;
+    }
 
-  useEffect(() => {
+    apiSensor.getSensorList(token).then(res => JsonOrLogoff(res, (json) =>{
+        setSensorListData(json);
+    }));
+    
+    apiSensor.getSensorSeriesPerHour(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) =>{
+      setSensorSeriesData(json);
+    }));
 
-    apiSensor.getSensorSeriesPerHour(token, '96c9286b-7c30-42a9-863e-b60965845a66', 2020, 2, 1).then(res => {
-      setSensorSeriesData(res);
-      console.log('Sensores :', res);
-    });
+    apiSensor.getSensorSummaryCostDay(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) =>{
+      setSummaryCostDay(json);
+    }));
 
-    apiSensor.getSensorSummaryCostDay(token, '96c9286b-7c30-42a9-863e-b60965845a66', 2020, 2, 1).then(res => {
-      setSummaryCostDay(res);
-      console.log('summaryCostDay :', res);
-    });
+    apiSensor.getSensorRecentLogs(token, sensorId).then(res => JsonOrLogoff(res, (json) =>{
+      setSensorRecentLogsData(json);
+    }));
 
-    apiSensor.getSensorRecentLogs(token, '96c9286b-7c30-42a9-863e-b60965845a66').then(res => {
-      setSensorRecentLogsData(res);
-      console.log('sensorRecentLogsData :', res);
-    });
   }, [token, seconds]);
 
   return { sensorListData, summaryCostDay, sensorSeriesData, sensorRecentLogsData };

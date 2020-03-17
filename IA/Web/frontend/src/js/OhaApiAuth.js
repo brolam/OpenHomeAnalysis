@@ -30,7 +30,7 @@ apiAuth.tokenRefresh = (token) =>
   fetch(`${url}token-auth-refresh/`, fetchOption(
     'POST',
     encodeJson({ token: token }))
-  ).then(res => res.json())
+  )
 
 
 export default apiAuth;
