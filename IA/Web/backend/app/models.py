@@ -24,12 +24,12 @@ class Sensor(models.Model):
     sensor_type = models.IntegerField(choices=Types.choices())
     name = models.CharField(max_length=50)
     time_zone = models.TextField(max_length=200, default="America/Recife")
-    default_convection = models.FloatField(default=13.31229)
+    default_to_convert = models.FloatField(default=26.378)
     secret_api_token = models.UUIDField(default=uuid.uuid4)
 
     def get_converted(self, sensor_value):
         sensor_value = float(sensor_value)
-        return self.default_convection * sensor_value
+        return self.default_to_convert * sensor_value
 
     def unix_time_to_datetime(self, unix_time):
         unix_time_as_date = datetime.utcfromtimestamp(unix_time)
@@ -69,23 +69,23 @@ class Sensor(models.Model):
             csvReader = csv.DictReader(csvfile)
             for row in csvReader:
                 energy_log = EnergyLog(sensor=self,  unix_time=row['unix_time'], duration=row['duration'], watts1=row['watts1'],
-                                       watts2=row['watts2'], watts3=row['watts3'], watts_total=row['watts_total'], sensor_convection=row['sensor_convection'])
+                                       watts2=row['watts2'], watts3=row['watts3'], watts_total=row['watts_total'], sensor_to_convert=row['sensor_to_convert'])
                 energy_log.save()
                 print("Saved:", row['unix_time'])
             print("import_csv finished")
 
-    def update_logs_from_default_convection(self):
-        last_conv = F('sensor_convection')
+    def update_logs_from_default_to_convert(self):
+        last_conv = F('sensor_to_convert')
         watts1 = F('watts1')
         watts2 = F('watts2')
         watts3 = F('watts3')
         watts_total = F('watts_total')
-        EnergyLog.objects.filter(sensor=self).exclude(sensor_convection=self.default_convection).update(
-            watts1=watts1 / last_conv * self.default_convection,
-            watts2=watts2 / last_conv * self.default_convection,
-            watts3=watts3 / last_conv * self.default_convection,
-            watts_total=watts_total / last_conv * self.default_convection,
-            sensor_convection=self.default_convection
+        EnergyLog.objects.filter(sensor=self).exclude(sensor_to_convert=self.default_to_convert).update(
+            watts1=watts1 / last_conv * self.default_to_convert,
+            watts2=watts2 / last_conv * self.default_to_convert,
+            watts3=watts3 / last_conv * self.default_to_convert,
+            watts_total=watts_total / last_conv * self.default_to_convert,
+            sensor_to_convert=self.default_to_convert
         )
 
 
@@ -167,24 +167,34 @@ class DimTime(models.Model):
 class SensorLogBatch(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     secret_api_token = models.UUIDField()
-    content = models.TextField(
-        default="1574608324;10;1;2;3|1574608354;10;1;2;3", blank=True)
+    content = models.TextField(default="1574608324;1;2;3", blank=True)
+    attempts = models.PositiveIntegerField(default=0)
 
     def do_energy_log_bulk_insert(self):
         sensor = self.sensor
         for log in self.content.split('|'):
+            print('Log:', log)
             energy_log = EnergyLog()
             if energy_log.parser(sensor, log):
                 energy_log.save()
 
-    def save(self, *args, **kwargs):
-        # super().save(*args, **kwargs)
+    def process_last_batch(self):
         sensor = self.sensor
         if (sensor.sensor_type == Sensor.Types.ENERGY_LOG):
-            doBulkInsert = threading.Thread(
-                target=self.do_energy_log_bulk_insert)
-            doBulkInsert.start()
+            batchs = SensorLogBatch.objects.filter(sensor=self.sensor, id__lte=self.id, attempts__lt=3)
+            for batch in batchs:
+                try:
+                    batch.do_energy_log_bulk_insert()
+                    batch.delete()
+                except Exception as e:
+                    batch.exception = str(e)
+                    batch.attempts = batch.attempts + 1
+                    batch.save()
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        doBulkInsert = threading.Thread(target=self.process_last_batch)
+        doBulkInsert.start()
 
 class EnergyLog(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
@@ -195,7 +205,7 @@ class EnergyLog(models.Model):
     watts2 = models.FloatField()
     watts3 = models.FloatField()
     watts_total = models.FloatField()
-    sensor_convection = models.FloatField()
+    sensor_to_convert = models.FloatField()
 
     @property
     def datetime(self):
@@ -206,6 +216,7 @@ class EnergyLog(models.Model):
 
     def save(self, *args, **kwargs):
         self.dim_time = DimTime.get_or_create(self.sensor, int(self.unix_time))
+        self.duration = self.calc_duration()
         try:
             super(EnergyLog, self).save()
         except IntegrityError as e:
@@ -215,23 +226,29 @@ class EnergyLog(models.Model):
                     sensor=self.sensor, unix_time=int(self.unix_time)).delete()
                 super(EnergyLog, self).save()
 
+    def calc_duration(self):
+        diff_duration = None
+        last_energy_log = EnergyLog.objects.filter(sensor = self.sensor, unix_time__lt=int(self.unix_time)).last()
+        if last_energy_log:
+            diff_duration = int(self.unix_time) - last_energy_log.unix_time
+        return diff_duration if ( diff_duration is not None and diff_duration < 20 ) else 20
+
     def parser(self, sensor, log):
         UNIX_TIME = 0
-        DURATION = 1
-        SENSOR_PHASE_1 = 2
-        SENSOR_PHASE_2 = 3
-        SENSOR_PHASE_3 = 4
+        SENSOR_PHASE_1 = 1
+        SENSOR_PHASE_2 = 2
+        SENSOR_PHASE_3 = 3
         FLAG_SEP_COLUMN = ";"
-        FLAG_QTD_COLUMN = 5
+        FLAG_QTD_COLUMN = 4       
         values = log.split(FLAG_SEP_COLUMN)
-        if (len(values) == FLAG_QTD_COLUMN):
-            self.sensor = sensor
-            self.unix_time = values[UNIX_TIME]
-            self.duration = values[DURATION]
-            self.watts1 = sensor.get_converted(values[SENSOR_PHASE_1])
-            self.watts2 = sensor.get_converted(values[SENSOR_PHASE_2])
-            self.watts3 = sensor.get_converted(values[SENSOR_PHASE_3])
-            self.watts_total = (self.watts1 + self.watts2 + self.watts3)
-            self.sensor_convection = sensor.default_convection
-            return True
-        return False
+        number_of_columns = len(values)
+        if (number_of_columns != FLAG_QTD_COLUMN):
+            raise Exception("Invalid number (${number_of_columns}) of columns Log: ${log}")
+        self.sensor = sensor
+        self.unix_time = values[UNIX_TIME]
+        self.watts1 = sensor.get_converted(values[SENSOR_PHASE_1])
+        self.watts2 = sensor.get_converted(values[SENSOR_PHASE_2])
+        self.watts3 = sensor.get_converted(values[SENSOR_PHASE_3])
+        self.watts_total = (self.watts1 + self.watts2 + self.watts3)
+        self.sensor_to_convert = sensor.default_to_convert
+        return True

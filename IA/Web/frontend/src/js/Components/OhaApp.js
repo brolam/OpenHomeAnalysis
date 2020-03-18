@@ -115,7 +115,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App(props) {
-  const appConsoleStatus = AppConsoleStatus(props.token, 'b5f697eb-9367-4f74-984d-9b094d80cf98')
+  const appConsoleStatus = AppConsoleStatus(props.token, '9a38547a-b0c3-4dbe-aad3-4493bf89e017')
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
