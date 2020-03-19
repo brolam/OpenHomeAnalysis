@@ -169,6 +169,7 @@ class SensorLogBatch(models.Model):
     secret_api_token = models.UUIDField()
     content = models.TextField(default="1574608324;1;2;3", blank=True)
     attempts = models.PositiveIntegerField(default=0)
+    #exception = models.TextField(default="", blank=True)
 
     def do_energy_log_bulk_insert(self):
         sensor = self.sensor

@@ -1,4 +1,4 @@
-//#define DEBUG 1
+#define DEBUG 1
 //#define ENV_PROD 1
 
 # if ENV_PROD
@@ -147,7 +147,7 @@ void sendLogs() {
     int httpResponseCode = http.POST(
                              "{\"secret_api_token\":\"" + String(SECRET_API_TOKEN) +
                              "\",\"content\":\"" + batchContent +
-                             "\",\"oha_sensor\":\"" + String(SENSOR_ID) + "\" }"
+                             "\",\"sensor\":\"" + String(SENSOR_ID) + "\" }"
                            );
     if (httpResponseCode == 201) {
 #ifdef DEBUG
@@ -174,7 +174,7 @@ String getReadLog() {
   Serial.print("READ");
   while (!Serial.available()) {
   }
-  return String(lastLogRegistered) + ";" + String(timeClient.getEpochTime() - lastLogRegistered ) + ";" + Serial.readString();
+  return String(lastLogRegistered) + ";" + Serial.readString();
 }
 
 bool isTimeToRegisterLog(int anyLess) {
