@@ -1,8 +1,13 @@
 /*
-  EnergyUseLoggerESP32 Config model - Favor copiar esse arquivo para Config.h e também configurar os parâmetros abaixo antes de instalar esse código no módulo ESP32. 
+  EnergyUseLoggerESP32 Config model - Favor copiar esse arquivo para Config_prod.h e também configurar os parâmetros abaixo antes de instalar esse código no módulo ESP32. 
                  Esse código e parte do projeto: https://github.com/brolam/OpenHomeAnalysis
   @author Breno Marques(https://github.com/brolam) em 12/12/2015.
   @version 1.00
 */
-const char* WIFI_SSID = "OHA_EUL_1"; //Informar o nome do ESP32, se possível, no formato OHA_EUL_[Número] para faciliar a localização na lista de redes WiFi.
-const char* WIFI_PASSWORD = "INFO_ESP32_PASSWORD"; //Informar a senha do ESP32.
+const char* ESP8266_NAME = "OHA_EUL_1"; 
+const char* ESP8266_PASSWORD = "123";
+const char* WIFI_SSID = "WIFI_SSID"; 
+const char* WIFI_PASSWORD = "WIFI_PASSWORD"; 
+const char* END_POINT_URL = "http://IP:PORT/api/sensorLogBatch/";
+const char* SENSOR_ID = "SENSOR_ID";
+const char* SECRET_API_TOKEN = "SECRET_API_TOKEN";
