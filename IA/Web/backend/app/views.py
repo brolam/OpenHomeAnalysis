@@ -1,17 +1,20 @@
 from django.contrib.auth.models import User
 from .models import Sensor, EnergyLog, EnergyLog, Cost, SensorLogBatch, DimTime
-from django.db.models import Sum
-from rest_framework import viewsets, serializers, status, permissions
+from rest_framework import viewsets, serializers, status
+from rest_framework.permissions import BasePermission
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
-from rest_framework.decorators import action, detail_route
+from rest_framework.decorators import action
 from django.http import HttpResponse
-from django.views import View
 from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, EnergyLogSerializer, CostSerializer, SeriesSerializer,  SummaryCostDaySerializer, SensorLogBatchSerializer
 import csv
 from datetime import timedelta, datetime
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = User.objects
     serializer_class = UserSerializer
 
@@ -21,11 +24,15 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CostViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Cost.objects
     serializer_class = CostSerializer
 
 
 class SensorViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Sensor.objects
     serializer_class = SensorSerializer
 
@@ -35,6 +42,7 @@ class SensorViewSet(viewsets.ModelViewSet):
 
     @action(detail=False)
     def simple_list(self, request):
+        print('Request: ', request)
         sensors = self.get_queryset()
         serializer = SensorListSerializer(sensors, many=True)
         return Response(serializer.data)
@@ -82,6 +90,8 @@ class SensorViewSet(viewsets.ModelViewSet):
 
 
 class SensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = EnergyLog.objects
     serializer_class = EnergyLogSerializer
 
@@ -91,6 +101,8 @@ class SensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SensorListViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Sensor.objects
     serializer_class = SensorListSerializer
 
@@ -100,7 +112,7 @@ class SensorListViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SensorLogBatchViewSet(viewsets.ModelViewSet):
-    class SensorPermissions(permissions.BasePermission):
+    class SensorPermissions(BasePermission):
         def has_permission(self, request, view):
             return True
 

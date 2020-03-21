@@ -1,6 +1,5 @@
 Django==2.1.14
 djangorestframework==3.9.4
-djangorestframework-jwt==1.11.0
 NumPy>=1.11.0
 SciPy>=0.17.0
 joblib>=0.11

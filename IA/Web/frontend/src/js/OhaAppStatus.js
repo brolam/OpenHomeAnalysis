@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getToken, removeToken } from './OhaLocalStore'
 import apiSensor from './OhaApiSensor'
-import apiAuth from './OhaApiAuth'
 
 export const UserLoginStatus = {};
 
@@ -20,38 +19,38 @@ export function AppConsoleStatus(token, sensorId) {
   const [sensorRecentLogsData, setSensorRecentLogsData] = useState([]);
   const [seconds, setSeconds] = useState(0);
 
-  function JsonOrLogoff(response, then) { 
-    if ( response.status >=400){
+  function JsonOrLogoff(response, then) {
+    if (response.status >= 400) {
       removeToken();
       return
     }
 
-    response.json().then((json) =>{
+    response.json().then((json) => {
       then(json);
-    }) 
+    })
   };
 
   setTimeout(() => setSeconds(seconds + 1), 15000);
 
   useEffect(() => {
-    if (  !UserLoginStatus.isLogin()){
+    if (!UserLoginStatus.isLogin()) {
       document.location.reload(true);
       return;
     }
 
-    apiSensor.getSensorList(token).then(res => JsonOrLogoff(res, (json) =>{
-        setSensorListData(json);
+    apiSensor.getSensorList(token).then(res => JsonOrLogoff(res, (json) => {
+      setSensorListData(json);
     }));
-    
-    apiSensor.getSensorSeriesPerHour(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) =>{
+
+    apiSensor.getSensorSeriesPerHour(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) => {
       setSensorSeriesData(json);
     }));
 
-    apiSensor.getSensorSummaryCostDay(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) =>{
+    apiSensor.getSensorSummaryCostDay(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) => {
       setSummaryCostDay(json);
     }));
 
-    apiSensor.getSensorRecentLogs(token, sensorId).then(res => JsonOrLogoff(res, (json) =>{
+    apiSensor.getSensorRecentLogs(token, sensorId).then(res => JsonOrLogoff(res, (json) => {
       setSensorRecentLogsData(json);
     }));
 

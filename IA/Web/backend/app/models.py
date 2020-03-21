@@ -169,7 +169,7 @@ class SensorLogBatch(models.Model):
     secret_api_token = models.UUIDField()
     content = models.TextField(default="1574608324;1;2;3", blank=True)
     attempts = models.PositiveIntegerField(default=0)
-    #exception = models.TextField(default="", blank=True)
+    exception = models.TextField(default="", blank=True)
 
     def do_energy_log_bulk_insert(self):
         sensor = self.sensor
@@ -182,7 +182,8 @@ class SensorLogBatch(models.Model):
     def process_last_batch(self):
         sensor = self.sensor
         if (sensor.sensor_type == Sensor.Types.ENERGY_LOG):
-            batchs = SensorLogBatch.objects.filter(sensor=self.sensor, id__lte=self.id, attempts__lt=3)
+            batchs = SensorLogBatch.objects.filter(
+                sensor=self.sensor, id__lte=self.id, attempts__lt=3)
             for batch in batchs:
                 try:
                     batch.do_energy_log_bulk_insert()
@@ -196,6 +197,7 @@ class SensorLogBatch(models.Model):
         super().save(*args, **kwargs)
         doBulkInsert = threading.Thread(target=self.process_last_batch)
         doBulkInsert.start()
+
 
 class EnergyLog(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
@@ -229,10 +231,11 @@ class EnergyLog(models.Model):
 
     def calc_duration(self):
         diff_duration = None
-        last_energy_log = EnergyLog.objects.filter(sensor = self.sensor, unix_time__lt=int(self.unix_time)).last()
+        last_energy_log = EnergyLog.objects.filter(
+            sensor=self.sensor, unix_time__lt=int(self.unix_time)).last()
         if last_energy_log:
             diff_duration = int(self.unix_time) - last_energy_log.unix_time
-        return diff_duration if ( diff_duration is not None and diff_duration < 20 ) else 20
+        return diff_duration if (diff_duration is not None and diff_duration < 20) else 20
 
     def parser(self, sensor, log):
         UNIX_TIME = 0
@@ -240,11 +243,12 @@ class EnergyLog(models.Model):
         SENSOR_PHASE_2 = 2
         SENSOR_PHASE_3 = 3
         FLAG_SEP_COLUMN = ";"
-        FLAG_QTD_COLUMN = 4       
+        FLAG_QTD_COLUMN = 4
         values = log.split(FLAG_SEP_COLUMN)
         number_of_columns = len(values)
         if (number_of_columns != FLAG_QTD_COLUMN):
-            raise Exception("Invalid number (${number_of_columns}) of columns Log: ${log}")
+            raise Exception(
+                "Invalid number (${number_of_columns}) of columns Log: ${log}")
         self.sensor = sensor
         self.unix_time = values[UNIX_TIME]
         self.watts1 = sensor.get_converted(values[SENSOR_PHASE_1])
