@@ -39,7 +39,7 @@ class Sensor(models.Model):
 
     def get_recent_logs(self, amount):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            return EnergyLog.objects.filter(sensor=self, dim_time__day=1).order_by('-unix_time')[:amount]
+            return EnergyLog.objects.filter(sensor=self).order_by('-unix_time')[:amount]
         return None
 
     def get_summary_cost_day(self, year, month, day):

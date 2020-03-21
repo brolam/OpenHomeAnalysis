@@ -1,3 +1,5 @@
+import Cookie from './util/Cookie'
+
 const url = `http://${window.location.host}/`; //"http://localhost:8000/"
 let apiAuth = {};
 const fetchOption = (method, body) => ({
@@ -5,7 +7,7 @@ const fetchOption = (method, body) => ({
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    'X-CSRFToken': '{{csrf_token}}'
+    'X-CSRFToken': `${Cookie.get('csrftoken')}`
   },
   body: body
 })

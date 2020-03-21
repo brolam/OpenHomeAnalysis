@@ -42,11 +42,11 @@ export function AppConsoleStatus(token, sensorId) {
       setSensorListData(json);
     }));
 
-    apiSensor.getSensorSeriesPerHour(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) => {
+    apiSensor.getSensorSeriesPerHour(token, sensorId, 2020, 3, 21).then(res => JsonOrLogoff(res, (json) => {
       setSensorSeriesData(json);
     }));
 
-    apiSensor.getSensorSummaryCostDay(token, sensorId, 2020, 2, 1).then(res => JsonOrLogoff(res, (json) => {
+    apiSensor.getSensorSummaryCostDay(token, sensorId, 2020, 3, 21).then(res => JsonOrLogoff(res, (json) => {
       setSummaryCostDay(json);
     }));
 
