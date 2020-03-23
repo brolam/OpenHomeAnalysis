@@ -88,6 +88,18 @@ class Sensor(models.Model):
             sensor_to_convert=self.default_to_convert
         )
 
+    def update_log_duration(self, year, month, day):
+        energy_logs = EnergyLog.objects.filter(dim_time__year=year, dim_time__month=month,
+                                               dim_time__day=day).order_by('unix_time')
+        previous_energy_log = None
+        for energy_log in energy_logs:
+            if (previous_energy_log is None):
+                previous_energy_log = energy_log.get_previous()
+            if (energy_log.get_duration(previous_energy_log) < energy_log.duration):
+                energy_log.set_duration(previous_energy_log)
+                energy_log.save()
+            previous_energy_log = energy_log
+
 
 class Cost(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
@@ -164,45 +176,68 @@ class DimTime(models.Model):
         return dim_time
 
 
+sensors_thread_queue = []
+
+
 class SensorLogBatch(models.Model):
+
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     secret_api_token = models.UUIDField()
     content = models.TextField(default="1574608324;1;2;3", blank=True)
     attempts = models.PositiveIntegerField(default=0)
     exception = models.TextField(default="", blank=True)
 
+    def get_unprocessed_by_sensor(self, sensor):
+        return SensorLogBatch.objects.filter(sensor=sensor, id__lte=self.id, attempts__lt=3).order_by('id')
+
     def do_energy_log_bulk_insert(self):
         sensor = self.sensor
+        previous_energy_log = None
         for log in self.content.split('|'):
-            print('Log:', log)
             energy_log = EnergyLog()
             if energy_log.parser(sensor, log):
+                if (previous_energy_log is None):
+                    previous_energy_log = energy_log.get_previous()
+                energy_log.set_duration(previous_energy_log)
                 energy_log.save()
+                previous_energy_log = energy_log
 
     def process_last_batch(self):
         sensor = self.sensor
-        if (sensor.sensor_type == Sensor.Types.ENERGY_LOG):
-            batchs = SensorLogBatch.objects.filter(
-                sensor=self.sensor, id__lte=self.id, attempts__lt=3)
+        try:
+            batchs = self.get_unprocessed_by_sensor(sensor)
             for batch in batchs:
                 try:
-                    batch.do_energy_log_bulk_insert()
+                    if (sensor.sensor_type == Sensor.Types.ENERGY_LOG):
+                        batch.do_energy_log_bulk_insert()
                     batch.delete()
                 except Exception as e:
                     batch.exception = str(e)
                     batch.attempts = batch.attempts + 1
                     batch.save()
+        finally:
+            sensors_thread_queue.remove(sensor.id)
+
+    def start_thread_process_last_batch(self):
+        sensor = self.sensor
+        if (sensor.id not in sensors_thread_queue):
+            doBulkInsert = threading.Thread(target=self.process_last_batch)
+            doBulkInsert.name = sensor.id
+            sensors_thread_queue.append(sensor.id)
+            doBulkInsert.start()
+        else:
+            print('not start_thread_process_last_batch')
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        doBulkInsert = threading.Thread(target=self.process_last_batch)
-        doBulkInsert.start()
+        self.start_thread_process_last_batch()
 
 
 class EnergyLog(models.Model):
     sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE)
     unix_time = models.BigIntegerField()
-    dim_time = models.ForeignKey(DimTime, on_delete=models.DO_NOTHING)
+    dim_time = models.ForeignKey(
+        DimTime, on_delete=models.DO_NOTHING, default=0)
     duration = models.FloatField()
     watts1 = models.FloatField()
     watts2 = models.FloatField()
@@ -212,14 +247,13 @@ class EnergyLog(models.Model):
 
     @property
     def datetime(self):
-        return self.sensor.unix_time_to_datetime(self.unix_time)
+        return str(self.sensor.unix_time_to_datetime(self.unix_time))
 
     class Meta:
         unique_together = ('sensor', 'unix_time')
 
     def save(self, *args, **kwargs):
         self.dim_time = DimTime.get_or_create(self.sensor, int(self.unix_time))
-        self.duration = self.calc_duration()
         try:
             super(EnergyLog, self).save()
         except IntegrityError as e:
@@ -229,13 +263,19 @@ class EnergyLog(models.Model):
                     sensor=self.sensor, unix_time=int(self.unix_time)).delete()
                 super(EnergyLog, self).save()
 
-    def calc_duration(self):
+    def get_duration(self, previous_energy_log):
         diff_duration = None
-        last_energy_log = EnergyLog.objects.filter(
-            sensor=self.sensor, unix_time__lt=int(self.unix_time)).last()
-        if last_energy_log:
-            diff_duration = int(self.unix_time) - last_energy_log.unix_time
-        return diff_duration if (diff_duration is not None and diff_duration < 20) else 20
+        previous_unix_time = int(previous_energy_log.unix_time)
+        if previous_energy_log:
+            diff_duration = int(self.unix_time) - previous_unix_time
+
+        return diff_duration if (diff_duration is not None and diff_duration > 0) else 20
+
+    def set_duration(self, previous_energy_log):
+        self.duration = self.get_duration(previous_energy_log)
+
+    def get_previous(self):
+        return EnergyLog.objects.filter(sensor=self.sensor, unix_time__lt=int(self.unix_time)).last()
 
     def parser(self, sensor, log):
         UNIX_TIME = 0

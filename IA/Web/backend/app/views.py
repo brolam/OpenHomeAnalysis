@@ -50,7 +50,7 @@ class SensorViewSet(viewsets.ModelViewSet):
     @action(detail=True)
     def recent_logs(self, request, pk=None):
         sensor = self.get_queryset().get(pk=pk)
-        amount = int(request.query_params.get('amount', 10))
+        amount = int(request.query_params.get('amount', 30))
         serializer = EnergyLogSerializer(
             sensor.get_recent_logs(amount), many=True)
         return Response(serializer.data)
