@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
 from django.db.models import F, Sum, Avg
+import statistics
 
 
 class Sensor(models.Model):
@@ -25,6 +26,7 @@ class Sensor(models.Model):
     name = models.CharField(max_length=50)
     time_zone = models.TextField(max_length=200, default="America/Recife")
     default_to_convert = models.FloatField(default=26.378)
+    log_duration_mode = models.FloatField(default=14.00)
     secret_api_token = models.UUIDField(default=uuid.uuid4)
 
     def get_converted(self, sensor_value):
@@ -39,7 +41,11 @@ class Sensor(models.Model):
 
     def get_recent_logs(self, amount):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            return EnergyLog.objects.filter(sensor=self).order_by('-unix_time')[:amount]
+            logs = EnergyLog.objects.filter(
+                sensor=self).order_by('-unix_time')[:amount]
+            for log in logs:
+                log.datetime = str(self.unix_time_to_datetime(log.unix_time))
+            return logs
         return None
 
     def get_summary_cost_day(self, year, month, day):
@@ -49,13 +55,17 @@ class Sensor(models.Model):
             cost = Avg('cost__value')
             values = DimTime.objects.filter(
                 sensor=self, year=year, month=month, day=day).aggregate(cost=cost, kwh=kwh)
-            return {'cost_total': values['kwh'] * values['cost']}
+            return {'cost_total': values['kwh'] * values['cost']} if values['kwh'] else {'cost_total': 0}
         return None
 
     def get_series_by_hour(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
+            """
             y = Sum(F('energylog__watts_total') *
                     F('energylog__duration') / 3600 / 1000)
+            """
+            y = Sum(F('energylog__duration') / 3600)
+
             return DimTime.objects.filter(sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y=y)
         return None
 
@@ -74,6 +84,16 @@ class Sensor(models.Model):
                 print("Saved:", row['unix_time'])
             print("import_csv finished")
 
+    def update_log_duration_mode(self):
+        last_durations = EnergyLog.objects.filter(sensor=self).order_by(
+            "-id").values_list('duration', flat=True)[0:100]
+        new_log_duration_mode = statistics.mode(last_durations)
+        if not (new_log_duration_mode > 0):
+            return
+        if (new_log_duration_mode != self.log_duration_mode):
+            self.log_duration_mode = new_log_duration_mode
+            self.save()
+
     def update_logs_from_default_to_convert(self):
         last_conv = F('sensor_to_convert')
         watts1 = F('watts1')
@@ -89,15 +109,16 @@ class Sensor(models.Model):
         )
 
     def update_log_duration(self, year, month, day):
-        energy_logs = EnergyLog.objects.filter(dim_time__year=year, dim_time__month=month,
-                                               dim_time__day=day).order_by('unix_time')
+        twice_duration_mode = self.log_duration_mode * 2
+
+        energy_logs = EnergyLog.objects.filter(sensor=self, dim_time__year=year, dim_time__month=month,
+                                               dim_time__day=day, duration__gt=twice_duration_mode).order_by('unix_time')
         previous_energy_log = None
         for energy_log in energy_logs:
             if (previous_energy_log is None):
                 previous_energy_log = energy_log.get_previous()
-            if (energy_log.get_duration(previous_energy_log) < energy_log.duration):
-                energy_log.set_duration(previous_energy_log)
-                energy_log.save()
+            energy_log.set_duration(previous_energy_log)
+            energy_log.save()
             previous_energy_log = energy_log
 
 
@@ -196,11 +217,12 @@ class SensorLogBatch(models.Model):
         for log in self.content.split('|'):
             energy_log = EnergyLog()
             if energy_log.parser(sensor, log):
-                if (previous_energy_log is None):
+                if not (previous_energy_log):
                     previous_energy_log = energy_log.get_previous()
                 energy_log.set_duration(previous_energy_log)
                 energy_log.save()
                 previous_energy_log = energy_log
+        sensor.update_log_duration_mode()
 
     def process_last_batch(self):
         sensor = self.sensor
@@ -245,10 +267,6 @@ class EnergyLog(models.Model):
     watts_total = models.FloatField()
     sensor_to_convert = models.FloatField()
 
-    @property
-    def datetime(self):
-        return str(self.sensor.unix_time_to_datetime(self.unix_time))
-
     class Meta:
         unique_together = ('sensor', 'unix_time')
 
@@ -264,12 +282,13 @@ class EnergyLog(models.Model):
                 super(EnergyLog, self).save()
 
     def get_duration(self, previous_energy_log):
-        diff_duration = None
-        previous_unix_time = int(previous_energy_log.unix_time)
+        diff_duration = 0
+        twice_duration_mode = self.sensor.log_duration_mode * 2
         if previous_energy_log:
+            previous_unix_time = int(previous_energy_log.unix_time)
             diff_duration = int(self.unix_time) - previous_unix_time
 
-        return diff_duration if (diff_duration is not None and diff_duration > 0) else 20
+        return diff_duration if (diff_duration > 0 and diff_duration <= twice_duration_mode) else twice_duration_mode / 2
 
     def set_duration(self, previous_energy_log):
         self.duration = self.get_duration(previous_energy_log)

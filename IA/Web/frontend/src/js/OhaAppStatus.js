@@ -33,6 +33,8 @@ export function AppConsoleStatus(token, sensorId) {
   setTimeout(() => setSeconds(seconds + 1), 15000);
 
   useEffect(() => {
+    const today = new Date();
+    const [todayYear, todayMonth, todayDay] = [today.getFullYear(), today.getMonth() + 1, today.getDate()]
     if (!UserLoginStatus.isLogin()) {
       document.location.reload(true);
       return;
@@ -42,11 +44,11 @@ export function AppConsoleStatus(token, sensorId) {
       setSensorListData(json);
     }));
 
-    apiSensor.getSensorSeriesPerHour(token, sensorId, 2020, 3, 21).then(res => JsonOrLogoff(res, (json) => {
+    apiSensor.getSensorSeriesPerHour(token, sensorId, todayYear, todayMonth, todayDay).then(res => JsonOrLogoff(res, (json) => {
       setSensorSeriesData(json);
     }));
 
-    apiSensor.getSensorSummaryCostDay(token, sensorId, 2020, 3, 21).then(res => JsonOrLogoff(res, (json) => {
+    apiSensor.getSensorSummaryCostDay(token, sensorId, todayYear, todayMonth, todayDay).then(res => JsonOrLogoff(res, (json) => {
       setSummaryCostDay(json);
     }));
 

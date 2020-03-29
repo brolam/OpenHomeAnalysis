@@ -25,7 +25,7 @@ SECRET_KEY = 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+"""
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -52,6 +52,7 @@ LOGGING = {
         },
     }
 }
+"""
 
 ALLOWED_HOSTS = ["*"]
 

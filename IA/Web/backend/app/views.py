@@ -3,7 +3,7 @@ from .models import Sensor, EnergyLog, EnergyLog, Cost, SensorLogBatch, DimTime
 from rest_framework import viewsets, serializers, status
 from rest_framework.permissions import BasePermission
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication, BasicAuthentication
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.http import HttpResponse
@@ -13,7 +13,8 @@ from datetime import timedelta, datetime
 
 
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication,
+                              SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = User.objects
     serializer_class = UserSerializer
@@ -24,14 +25,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class CostViewSet(viewsets.ModelViewSet):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication,
+                              SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Cost.objects
     serializer_class = CostSerializer
 
 
 class SensorViewSet(viewsets.ModelViewSet):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication,
+                              SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Sensor.objects
     serializer_class = SensorSerializer
@@ -70,14 +73,12 @@ class SensorViewSet(viewsets.ModelViewSet):
         serializer = SeriesSerializer(serie_by_hour, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def download_csv_logs(self, request, pk):
-        year = request.query_params.get('year')
-        month = request.query_params.get('month')
+    @action(detail=True, methods=['get'], url_path="download_csv_logs(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?")
+    def download_csv_logs(self, request, pk, year=None, month=None):
         sensor = self.get_queryset().get(pk=pk)
         energy_logs = sensor.get_logs(year, month)
-        field_names = ['id', 'unix_time', 'duration', 'voltage', 'watts1',
-                       'watts2', 'watts3', 'watts_total', 'sensor_convection']
+        field_names = ['id', 'unix_time', 'duration', 'watts1',
+                       'watts2', 'watts3', 'watts_total', 'sensor_to_convert']
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename={}.csv'.format(
             'energyLogs')
@@ -90,7 +91,8 @@ class SensorViewSet(viewsets.ModelViewSet):
 
 
 class SensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication,
+                              SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = EnergyLog.objects
     serializer_class = EnergyLogSerializer
@@ -101,7 +103,8 @@ class SensorLastLogViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class SensorListViewSet(viewsets.ReadOnlyModelViewSet):
-    authentication_classes = [TokenAuthentication]
+    authentication_classes = [TokenAuthentication,
+                              SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
     queryset = Sensor.objects
     serializer_class = SensorListSerializer
