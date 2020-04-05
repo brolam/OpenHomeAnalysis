@@ -8,7 +8,6 @@ import Sensor from '@material-ui/icons/SettingsRemote';
 import Bill from '@material-ui/icons/MonetizationOn';
 import Logs from '@material-ui/icons/Update';
 import LayersIcon from '@material-ui/icons/Layers';
-import HistoryIcon from '@material-ui/icons/History';
 
 export const mainListItems = (
   <div>
@@ -40,28 +39,27 @@ export const mainListItems = (
 );
 
 export function SensorListItems(props) {
+  const { sensorStatus, setSensorStatus } = props
+
+  const onSelectSensor = (sensorId) => {
+    const newSensorStatus = { data: sensorStatus.data, selectedId: sensorId };
+    setSensorStatus(newSensorStatus)
+  }
+
   return (
     <div>
       <ListSubheader inset>Sensors</ListSubheader>
-      <ListItem button>
-        <ListItemIcon>
-          <Sensor />
-        </ListItemIcon>
-        <ListItemText primary="Current month" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <HistoryIcon />
-        </ListItemIcon>
-        <ListItemText primary="Last month" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <HistoryIcon />
-        </ListItemIcon>
-        <ListItemText primary="Last Year" />
-      </ListItem>
-      )
-  </div>
+      {sensorStatus.data.map(sensor => (
+        <ListItem button key={sensor.id}
+          selected={sensor.id == sensorStatus.selectedId}
+          onClick={() => onSelectSensor(sensor.id)}
+        >
+          <ListItemIcon>
+            <Sensor />
+          </ListItemIcon>
+          <ListItemText primary={sensor.name} />
+        </ListItem>
+      ))}
+    </div>
   )
 };

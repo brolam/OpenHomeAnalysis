@@ -115,9 +115,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App(props) {
-  const appConsoleStatus = AppConsoleStatus(props.token, 'dcd06f26-5840-4056-bdab-0be9885cf731')
+  const appConsoleStatus = AppConsoleStatus(props.token)
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -165,7 +165,7 @@ export default function App(props) {
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
-        <List><SensorListItems {...props} /></List>
+        <List><SensorListItems {...props} {...appConsoleStatus} /></List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />

@@ -12,8 +12,8 @@ UserLoginStatus.getToken = function () {
   return getToken();
 }
 
-export function AppConsoleStatus(token, sensorId) {
-  const [sensorListData, setSensorListData] = useState([]);
+export function AppConsoleStatus(token) {
+  const [sensorStatus, setSensorStatus] = useState({ data: [], selectedId: "" });
   const [summaryCostDay, setSummaryCostDay] = useState({});
   const [sensorSeriesData, setSensorSeriesData] = useState([]);
   const [sensorRecentLogsData, setSensorRecentLogsData] = useState([]);
@@ -33,16 +33,23 @@ export function AppConsoleStatus(token, sensorId) {
   setTimeout(() => setSeconds(seconds + 1), 15000);
 
   useEffect(() => {
-    const today = new Date();
-    const [todayYear, todayMonth, todayDay] = [today.getFullYear(), today.getMonth() + 1, today.getDate()]
     if (!UserLoginStatus.isLogin()) {
       document.location.reload(true);
       return;
     }
 
     apiSensor.getSensorList(token).then(res => JsonOrLogoff(res, (json) => {
-      setSensorListData(json);
+      const selectedId = sensorStatus.selectedId == "" ? json[0].id : sensorStatus.selectedId
+      setSensorStatus({ data: json, selectedId: selectedId });
     }));
+
+  }, [token, seconds]);
+
+  useEffect(() => {
+    if (sensorStatus.selectedId == "") return;
+    const today = new Date();
+    const [todayYear, todayMonth, todayDay] = [today.getFullYear(), today.getMonth() + 1, today.getDate()]
+    const sensorId = sensorStatus.selectedId
 
     apiSensor.getSensorSeriesPerHour(token, sensorId, todayYear, todayMonth, todayDay).then(res => JsonOrLogoff(res, (json) => {
       setSensorSeriesData(json);
@@ -56,7 +63,13 @@ export function AppConsoleStatus(token, sensorId) {
       setSensorRecentLogsData(json);
     }));
 
-  }, [token, seconds]);
+  }, [token, seconds, sensorStatus.selectedId]);
 
-  return { sensorListData, summaryCostDay, sensorSeriesData, sensorRecentLogsData };
+  return {
+    sensorStatus,
+    setSensorStatus,
+    summaryCostDay,
+    sensorSeriesData,
+    sensorRecentLogsData
+  };
 }
