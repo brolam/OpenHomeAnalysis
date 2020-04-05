@@ -17,15 +17,25 @@ import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_env_value(env_variable, defaul_not_found):
+    try:
+        return os.environ[env_variable]
+    except KeyError:
+        return defaul_not_found
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
+SECRET_KEY = get_env_value(
+    'OHA_SECRET_KEY', 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-"""
+
+DEBUG = eval(get_env_value('ENV_OHA_DEBUG', 'False'))
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -51,8 +61,7 @@ LOGGING = {
             'level': 'DEBUG'
         },
     }
-}
-"""
+} if DEBUG else {}
 
 ALLOWED_HOSTS = ["*"]
 
