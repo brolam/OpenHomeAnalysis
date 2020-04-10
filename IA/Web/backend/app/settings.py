@@ -23,18 +23,19 @@ def get_env_value(env_variable, defaul_not_found):
     except KeyError:
         return defaul_not_found
 
+
+ENV_PROD = eval(get_env_value('ENV_OHA_PROD', 'False'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_env_value(
-    'OHA_SECRET_KEY', 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
+    'ENV_OHA_SECRET_KEY', 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
 )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = eval(get_env_value('ENV_OHA_DEBUG', 'False'))
+DEBUG = True
 
 LOGGING = {
     'version': 1,
@@ -49,7 +50,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'DEBUG' if ENV_PROD else 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
@@ -58,7 +59,7 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'propagate': False,
-            'level': 'DEBUG'
+            'level': 'DEBUG' if ENV_PROD else 'ERROR'
         },
     }
 } if DEBUG else {}
