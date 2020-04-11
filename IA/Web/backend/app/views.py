@@ -7,7 +7,7 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.http import HttpResponse
-from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, EnergyLogSerializer, CostSerializer, SeriesSerializer,  SummaryCostDaySerializer, SensorLogBatchSerializer
+from .serializers import UserSerializer, SensorListSerializer, SensorSerializer, EnergyLogSerializer, CostSerializer, SeriesSerializer,  SummaryCostSerializer, SensorLogBatchSerializer
 import csv
 from datetime import timedelta, datetime
 
@@ -58,12 +58,11 @@ class SensorViewSet(viewsets.ModelViewSet):
             sensor.get_recent_logs(amount), many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'], url_path="summary_cost_day(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?(?:/(?P<day>[0-9]+))?")
-    def summary_cost_day(self, request, pk=None, year=None, month=None, day=None):
+    @action(detail=True, methods=['get'], url_path="summary_cost(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?(?:/(?P<day>[0-9]+))?")
+    def summary_cost(self, request, pk=None, year=None, month=None, day=None):
         sensor = self.get_queryset().get(pk=pk)
-        summary_cost_day = sensor.get_summary_cost_day(year, month, day)
-        print('summary_cost_day', summary_cost_day)
-        serializer = SummaryCostDaySerializer(summary_cost_day)
+        summary_cost = sensor.get_summary_cost(year, month, day)
+        serializer = SummaryCostSerializer(summary_cost)
         return Response(serializer.data)
 
     @action(detail=True,  methods=['get'], url_path="series_per_hour(?:/(?P<year>[0-9]+))?(?:/(?P<month>[0-9]+))?(?:/(?P<day>[0-9]+))?")

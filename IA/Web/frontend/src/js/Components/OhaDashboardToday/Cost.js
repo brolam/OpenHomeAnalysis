@@ -3,6 +3,7 @@ import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Title from './Title';
+import CostIcon from '@material-ui/icons/MonetizationOn';
 
 function preventDefault(event) {
   event.preventDefault();
@@ -14,21 +15,23 @@ const useStyles = makeStyles({
   },
 });
 
-export default function Bill(props) {
+export default function Cost(props) {
   const classes = useStyles();
-  const { summaryCostDay } = props
+  const { summaryCost } = props
+  console.log('summaryCost', summaryCost)
   return (
     <React.Fragment>
-      <Title>Today cost</Title>
+      <Title>Today</Title>
       <Typography component="p" variant="h4">
-        ${summaryCostDay.cost_total}
+        <CostIcon /> {summaryCost.total_day}
       </Typography>
-      <Typography color="textSecondary" className={classes.depositContext}>
-        on 15 March, 2019
+      <Title>{summaryCost.title}</Title>
+      <Typography component="p" variant="h4">
+        <CostIcon /> {summaryCost.total_month}
       </Typography>
       <div>
         <Link color="primary" href="#" onClick={preventDefault}>
-          View balance
+          More
         </Link>
       </div>
     </React.Fragment>

@@ -14,7 +14,7 @@ UserLoginStatus.getToken = function () {
 
 export function AppConsoleStatus(token) {
   const [sensorStatus, setSensorStatus] = useState({ data: [], selectedId: "" });
-  const [summaryCostDay, setSummaryCostDay] = useState({});
+  const [summaryCost, setSummaryCost] = useState({});
   const [sensorSeriesData, setSensorSeriesData] = useState([]);
   const [sensorRecentLogsData, setSensorRecentLogsData] = useState([]);
   const [seconds, setSeconds] = useState(0);
@@ -55,8 +55,8 @@ export function AppConsoleStatus(token) {
       setSensorSeriesData(json);
     }));
 
-    apiSensor.getSensorSummaryCostDay(token, sensorId, todayYear, todayMonth, todayDay).then(res => JsonOrLogoff(res, (json) => {
-      setSummaryCostDay(json);
+    apiSensor.getSensorSummaryCost(token, sensorId, todayYear, todayMonth, todayDay).then(res => JsonOrLogoff(res, (json) => {
+      setSummaryCost(json);
     }));
 
     apiSensor.getSensorRecentLogs(token, sensorId).then(res => JsonOrLogoff(res, (json) => {
@@ -68,7 +68,7 @@ export function AppConsoleStatus(token) {
   return {
     sensorStatus,
     setSensorStatus,
-    summaryCostDay,
+    summaryCost,
     sensorSeriesData,
     sensorRecentLogsData
   };

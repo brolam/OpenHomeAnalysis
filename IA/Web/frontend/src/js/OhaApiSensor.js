@@ -22,8 +22,8 @@ function encodeJson(data) {
 
 apiSensor.getSensorList = (token) => fetch(`${url}sensor/simple_list/`, fetchOption('GET', token))
 
-apiSensor.getSensorSummaryCostDay = (token, sensorId, year, month, day) =>
-  fetch(`${url}sensor/${sensorId}/summary_cost_day/${year}/${month}/${day}`, fetchOption('GET', token)
+apiSensor.getSensorSummaryCost = (token, sensorId, year, month, day) =>
+  fetch(`${url}sensor/${sensorId}/summary_cost/${year}/${month}/${day}`, fetchOption('GET', token)
   )
 
 apiSensor.getSensorSeriesPerHour = (token, sensorId, year, month, day) =>

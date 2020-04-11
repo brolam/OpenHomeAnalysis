@@ -5,7 +5,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import Sensor from '@material-ui/icons/SettingsRemote';
-import Bill from '@material-ui/icons/MonetizationOn';
+import CostIcon from '@material-ui/icons/MonetizationOn';
 import Logs from '@material-ui/icons/Update';
 import LayersIcon from '@material-ui/icons/Layers';
 
@@ -19,9 +19,9 @@ export const mainListItems = (
     </ListItem>
     <ListItem button>
       <ListItemIcon>
-        <Bill />
+        <CostIcon />
       </ListItemIcon>
-      <ListItemText primary="Bill" />
+      <ListItemText primary="CostIcon" />
     </ListItem>
     <ListItem button>
       <ListItemIcon>

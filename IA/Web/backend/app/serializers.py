@@ -55,5 +55,8 @@ class SeriesSerializer(serializers.Serializer):
     y = serializers.DecimalField(max_digits=20, decimal_places=2)
 
 
-class SummaryCostDaySerializer(serializers.Serializer):
-    cost_total = serializers.DecimalField(max_digits=20, decimal_places=2)
+class SummaryCostSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    total_day = serializers.DecimalField(max_digits=20, decimal_places=2)
+    total_month = serializers.DecimalField(
+        max_digits=20, decimal_places=2)

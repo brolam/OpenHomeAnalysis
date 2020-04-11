@@ -8,7 +8,7 @@ import pytz
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, models
-from django.db.models import F, Sum, Avg
+from django.db.models import F, Sum, Avg, Max
 import statistics
 
 
@@ -48,24 +48,34 @@ class Sensor(models.Model):
             return logs
         return None
 
-    def get_summary_cost_day(self, year, month, day):
+    def get_summary_cost(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
+
+            title = Max('cost__title')
+            cost_id = Max('cost__id')
             kwh = Sum(F('energylog__watts_total') *
                       F('energylog__duration') / 3600 / 1000)
             cost = Avg('cost__value')
-            values = DimTime.objects.filter(
-                sensor=self, year=year, month=month, day=day).aggregate(cost=cost, kwh=kwh)
-            return {'cost_total': values['kwh'] * values['cost']} if values['kwh'] else {'cost_total': 0}
+
+            cost_day = DimTime.objects.filter(
+                sensor=self, year=year, month=month, day=day).aggregate(cost_id=cost_id, cost=cost, kwh=kwh)
+
+            cost_month = DimTime.objects.filter(
+                sensor=self, cost=cost_day['cost_id']).aggregate(title=title, cost=cost, kwh=kwh) if cost_day['cost_id'] else {'title': 'N/A', 'kwh': 0}
+
+            values = {
+                'title': cost_month['title'],
+                'total_day': (cost_day['kwh'] * cost_day['cost']) if cost_day['kwh'] else 0,
+                'total_month': (cost_month['kwh'] * cost_month['cost']) if cost_month['kwh'] else 0
+            }
+
+            return values
         return None
 
     def get_series_by_hour(self, year, month, day):
         if (self.sensor_type == self.Types.ENERGY_LOG):
-            """
             y = Sum(F('energylog__watts_total') *
                     F('energylog__duration') / 3600 / 1000)
-            """
-            y = Sum(F('energylog__duration') / 3600)
-
             return DimTime.objects.filter(sensor=self, year=year, month=month, day=day).values(x=F('hour')).annotate(y=y)
         return None
 
