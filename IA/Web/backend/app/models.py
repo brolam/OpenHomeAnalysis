@@ -34,10 +34,9 @@ class Sensor(models.Model):
         return self.default_to_convert * sensor_value
 
     def unix_time_to_datetime(self, unix_time):
-        unix_time_as_date = datetime.utcfromtimestamp(unix_time)
         sensor_time_zone = pytz.timezone(self.time_zone)
-        dt_as_tz = unix_time_as_date.astimezone(sensor_time_zone)
-        return dt_as_tz
+        dt_from_tz = datetime.fromtimestamp(unix_time, sensor_time_zone )
+        return dt_from_tz
 
     def get_recent_logs(self, amount):
         if (self.sensor_type == self.Types.ENERGY_LOG):
