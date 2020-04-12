@@ -1,5 +1,5 @@
 //#define DEBUG 1
-//#define ENV_PROD 1
+#define ENV_PROD 1
 
 # if ENV_PROD
 #include "Config_prod.h"
