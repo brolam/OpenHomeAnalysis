@@ -1,11 +1,13 @@
-const url = "http://localhost:8000/"
+import Cookie from './util/Cookie'
+
+const url = `http://${window.location.host}/`; //"http://localhost:8000/"
 let apiAuth = {};
 const fetchOption = (method, body) => ({
   method,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
-    'X-CSRFToken': '{{csrf_token}}'
+    'X-CSRFToken': `${Cookie.get('csrftoken')}`
   },
   body: body
 })
@@ -25,12 +27,5 @@ apiAuth.login = (userName, password) =>
     'POST',
     encodeJson({ username: userName, password: password }))
   ).then(res => res.json())
-
-apiAuth.tokenRefresh = (token) =>
-  fetch(`${url}token-auth-refresh/`, fetchOption(
-    'POST',
-    encodeJson({ token: token }))
-  )
-
 
 export default apiAuth;

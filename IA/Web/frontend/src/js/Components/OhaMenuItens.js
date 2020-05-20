@@ -5,10 +5,9 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import Sensor from '@material-ui/icons/SettingsRemote';
-import Bill from '@material-ui/icons/MonetizationOn';
+import CostIcon from '@material-ui/icons/MonetizationOn';
 import Logs from '@material-ui/icons/Update';
 import LayersIcon from '@material-ui/icons/Layers';
-import HistoryIcon from '@material-ui/icons/History';
 
 export const mainListItems = (
   <div>
@@ -20,9 +19,9 @@ export const mainListItems = (
     </ListItem>
     <ListItem button>
       <ListItemIcon>
-        <Bill />
+        <CostIcon />
       </ListItemIcon>
-      <ListItemText primary="Bill" />
+      <ListItemText primary="CostIcon" />
     </ListItem>
     <ListItem button>
       <ListItemIcon>
@@ -40,28 +39,27 @@ export const mainListItems = (
 );
 
 export function SensorListItems(props) {
+  const { sensorStatus, setSensorStatus } = props
+
+  const onSelectSensor = (sensorId) => {
+    const newSensorStatus = { data: sensorStatus.data, selectedId: sensorId };
+    setSensorStatus(newSensorStatus)
+  }
+
   return (
     <div>
       <ListSubheader inset>Sensors</ListSubheader>
-      <ListItem button>
-        <ListItemIcon>
-          <Sensor />
-        </ListItemIcon>
-        <ListItemText primary="Current month" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <HistoryIcon />
-        </ListItemIcon>
-        <ListItemText primary="Last month" />
-      </ListItem>
-      <ListItem button>
-        <ListItemIcon>
-          <HistoryIcon />
-        </ListItemIcon>
-        <ListItemText primary="Last Year" />
-      </ListItem>
-      )
-  </div>
+      {sensorStatus.data.map(sensor => (
+        <ListItem button key={sensor.id}
+          selected={sensor.id == sensorStatus.selectedId}
+          onClick={() => onSelectSensor(sensor.id)}
+        >
+          <ListItemIcon>
+            <Sensor />
+          </ListItemIcon>
+          <ListItemText primary={sensor.name} />
+        </ListItem>
+      ))}
+    </div>
   )
 };

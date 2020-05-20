@@ -1,5 +1,5 @@
-#define DEBUG 1
-//#define ENV_PROD 1
+//#define DEBUG 1
+#define ENV_PROD 1
 
 # if ENV_PROD
 #include "Config_prod.h"
@@ -131,7 +131,7 @@ void sendLogs() {
 
   struct GetSavedLogs savedLogs = getSavedLogs();
   String readLog = getReadLog();
-  String batchContent = readLog + (savedLogs.logs.length() > 0 ?  "|" + savedLogs.logs : ""); //"1576807563000;10.99;0;1201;1202;1203";
+  String batchContent = readLog + (savedLogs.logs.length() > 0 ?  "|" + savedLogs.logs : ""); //"1576807563000;1201;1202;1203";
   batchContent.replace("\n", "");
   batchContent.replace("\r", "");
   lastLogRegistered = timeClient.getEpochTime() ;

@@ -25,7 +25,7 @@ function Copyright() {
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+        Open Home Analysis
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -115,9 +115,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App(props) {
-  const appConsoleStatus = AppConsoleStatus(props.token, '9a38547a-b0c3-4dbe-aad3-4493bf89e017')
+  const appConsoleStatus = AppConsoleStatus(props.token)
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -165,7 +165,7 @@ export default function App(props) {
         <Divider />
         <List>{mainListItems}</List>
         <Divider />
-        <List><SensorListItems {...props} /></List>
+        <List><SensorListItems {...props} {...appConsoleStatus} /></List>
       </Drawer>
       <main className={classes.content}>
         <div className={classes.appBarSpacer} />

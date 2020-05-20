@@ -17,13 +17,24 @@ import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def get_env_value(env_variable, defaul_not_found):
+    try:
+        return os.environ[env_variable]
+    except KeyError:
+        return defaul_not_found
+
+
+ENV_PROD = eval(get_env_value('ENV_OHA_PROD', 'False'))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
+SECRET_KEY = get_env_value(
+    'ENV_OHA_SECRET_KEY', 'pt3cp)x=yvbx^g-a9dz_ulgf@lh#e*)!w&rca2!l7ilxr0qj(l'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
 LOGGING = {
@@ -39,7 +50,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'DEBUG' if ENV_PROD else 'ERROR',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
@@ -48,10 +59,10 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'propagate': False,
-            'level': 'DEBUG'
+            'level': 'DEBUG' if ENV_PROD else 'ERROR'
         },
     }
-}
+} if DEBUG else {}
 
 ALLOWED_HOSTS = ["*"]
 
@@ -83,6 +94,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app',
     'rest_framework',
+    'rest_framework.authtoken',
     'webpack_loader',
 ]
 
@@ -100,10 +112,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ),
 }
 

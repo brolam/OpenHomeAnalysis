@@ -9,7 +9,7 @@ export default function Chart(props) {
 
   return (
     <React.Fragment>
-      <Title>Today Wh</Title>
+      <Title>Today KWH</Title>
       <ResponsiveContainer >
         <LineChart
           data={sensorSeriesData}
