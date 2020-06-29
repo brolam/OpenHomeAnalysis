@@ -3,6 +3,7 @@ import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Title from './Title';
+import Box from '@material-ui/core/Box';
 import CostIcon from '@material-ui/icons/MonetizationOn';
 import KwhIcon from '@material-ui/icons/FlashOnOutlined';
 import HoursIcon from '@material-ui/icons/AccessTimeOutlined';
@@ -18,15 +19,11 @@ const useStyles = makeStyles(theme => ({
   depositContext: {
     flex: 1,
   },
-  itens: {
+  box: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingRight: theme.spacing(4),
     overflow: 'auto',
-  },
-  item: {
-    marginRight: '8'
   },
 }));
 
@@ -37,16 +34,33 @@ export default function Cost(props) {
   return (
     <React.Fragment className={classes.depositContext}>
       <Title>Today</Title>
-      <Typography component="p" variant="h6" className={classes.itens}>
-        <CostIcon className={classes.item} /> {summaryCost.cost_day}
-        <KwhIcon className={classes.item} /> {summaryCost.kwh_day}
-        <HoursIcon className={classes.item} /> {summaryCost.hours_day}
+      <Typography component="p" variant="h6">
+        <Box display="flex" flexWrap="wrap" alignContent="flex-start" p={0} m={0}>
+          <Box className={classes.box}>
+            <CostIcon /> {summaryCost.cost_day}
+          </Box>
+          <Box className={classes.box}>
+            <KwhIcon /> {summaryCost.kwh_day}
+          </Box>
+          <Box className={classes.box}>
+            <HoursIcon /> {summaryCost.hours_day}
+          </Box>
+        </Box>
       </Typography>
       <Title>{summaryCost.title}</Title>
-      <Typography component="p" variant="h6" className={classes.itens} >
-        <CostIcon className={classes.item} /> {summaryCost.cost_month}
-        <KwhIcon className={classes.item} /> {summaryCost.kwh_month}
-        <DaysIcon className={classes.item} /> {summaryCost.days_month}
+      <Typography component="p" variant="h6">
+        <Box display="flex" flexWrap="wrap" alignContent="flex-start" p={0} m={0}>
+          <Box className={classes.box}>
+            <CostIcon className={classes.box} /> {summaryCost.cost_month}
+          </Box>
+          <Box className={classes.box}>
+            <KwhIcon className={classes.box} /> {summaryCost.kwh_month}
+          </Box>
+          <Box className={classes.box}>
+            <DaysIcon className={classes.item} /> {summaryCost.days_month}
+          </Box>
+        </Box>
+
       </Typography>
       <div>
         <Link color="primary" href="#" onClick={preventDefault}>
