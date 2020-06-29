@@ -35,7 +35,7 @@ class Sensor(models.Model):
 
     def unix_time_to_datetime(self, unix_time):
         sensor_time_zone = pytz.timezone(self.time_zone)
-        dt_from_tz = datetime.fromtimestamp(unix_time, sensor_time_zone )
+        dt_from_tz = datetime.fromtimestamp(unix_time, sensor_time_zone)
         return dt_from_tz
 
     def get_recent_logs(self, amount):
@@ -52,20 +52,26 @@ class Sensor(models.Model):
 
             title = Max('cost__title')
             cost_id = Max('cost__id')
+            hours = Sum(F('energylog__duration') / 3600)
+            days = Sum(F('energylog__duration') / 3600 / 24)
             kwh = Sum(F('energylog__watts_total') *
                       F('energylog__duration') / 3600 / 1000)
             cost = Avg('cost__value')
 
             cost_day = DimTime.objects.filter(
-                sensor=self, year=year, month=month, day=day).aggregate(cost_id=cost_id, cost=cost, kwh=kwh)
+                sensor=self, year=year, month=month, day=day).aggregate(cost_id=cost_id, hours=hours, cost=cost, kwh=kwh)
 
             cost_month = DimTime.objects.filter(
-                sensor=self, cost=cost_day['cost_id']).aggregate(title=title, cost=cost, kwh=kwh) if cost_day['cost_id'] else {'title': 'N/A', 'kwh': 0}
+                sensor=self, cost=cost_day['cost_id']).aggregate(title=title, cost=cost, days=days, kwh=kwh) if cost_day['cost_id'] else {'title': 'N/A', 'days': 0, 'kwh': 0}
 
             values = {
                 'title': cost_month['title'],
-                'total_day': (cost_day['kwh'] * cost_day['cost']) if cost_day['kwh'] else 0,
-                'total_month': (cost_month['kwh'] * cost_month['cost']) if cost_month['kwh'] else 0
+                'hours_day': cost_day['hours'] if cost_day['hours'] else 0,
+                'cost_day': (cost_day['kwh'] * cost_day['cost']) if cost_day['kwh'] else 0,
+                'kwh_day': cost_day['kwh'] if cost_day['kwh'] else 0,
+                'cost_month': (cost_month['kwh'] * cost_month['cost']) if cost_month['kwh'] else 0,
+                'days_month': cost_month['days'] if cost_month['days'] else 0,
+                'kwh_month': cost_month['kwh'] if cost_month['kwh'] else 0
             }
 
             return values
