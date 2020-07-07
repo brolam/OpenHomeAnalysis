@@ -1,29 +1,26 @@
 import React from 'react';
-import Link from '@material-ui/core/Link';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Title from './Title';
-import Box from '@material-ui/core/Box';
 import CostIcon from '@material-ui/icons/MonetizationOn';
 import KwhIcon from '@material-ui/icons/FlashOnOutlined';
 import HoursIcon from '@material-ui/icons/AccessTimeOutlined';
 import DaysIcon from '@material-ui/icons/DateRangeOutlined';
-
-
-
-function preventDefault(event) {
-  event.preventDefault();
-}
+import Grid from '@material-ui/core/Grid';
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    flexGrow: 1,
+  },
   depositContext: {
     flex: 1,
   },
-  box: {
+  item: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     overflow: 'auto',
+    padding: theme.spacing(0.1)
   },
 }));
 
@@ -33,40 +30,18 @@ export default function Cost(props) {
   console.log('summaryCost', summaryCost)
   return (
     <React.Fragment className={classes.depositContext}>
-      <Title>Today</Title>
       <Typography component="p" variant="h6">
-        <Box display="flex" flexWrap="wrap" alignContent="flex-start" p={0} m={0}>
-          <Box className={classes.box}>
-            <CostIcon /> {summaryCost.cost_day}
-          </Box>
-          <Box className={classes.box}>
-            <KwhIcon /> {summaryCost.kwh_day}
-          </Box>
-          <Box className={classes.box}>
-            <HoursIcon /> {summaryCost.hours_day}
-          </Box>
-        </Box>
+        <Grid container spacing={12}>
+          <Grid item xs={6} className={classes.item}><Title>Today</Title></Grid>
+          <Grid item xs={6} className={classes.item}><Title>{summaryCost.title}</Title></Grid>
+          <Grid item xs={6} className={classes.item}><CostIcon />{summaryCost.cost_day}</Grid>
+          <Grid item xs={6} className={classes.item}><CostIcon />{summaryCost.cost_month}</Grid>
+          <Grid item xs={6} className={classes.item}><KwhIcon />{summaryCost.kwh_day}</Grid>
+          <Grid item xs={6} className={classes.item}><KwhIcon />{summaryCost.kwh_month}</Grid>
+          <Grid item xs={6} className={classes.item}><HoursIcon />{summaryCost.hours_day}</Grid>
+          <Grid item xs={6} className={classes.item}><DaysIcon />{summaryCost.days_month}</Grid>
+        </Grid>
       </Typography>
-      <Title>{summaryCost.title}</Title>
-      <Typography component="p" variant="h6">
-        <Box display="flex" flexWrap="wrap" alignContent="flex-start" p={0} m={0}>
-          <Box className={classes.box}>
-            <CostIcon className={classes.box} /> {summaryCost.cost_month}
-          </Box>
-          <Box className={classes.box}>
-            <KwhIcon className={classes.box} /> {summaryCost.kwh_month}
-          </Box>
-          <Box className={classes.box}>
-            <DaysIcon className={classes.item} /> {summaryCost.days_month}
-          </Box>
-        </Box>
-
-      </Typography>
-      <div>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          More
-        </Link>
-      </div>
     </React.Fragment>
   );
 }
